@@ -30,26 +30,68 @@ class AgentState(TypedDict):
     error: Optional[str]
 
 class ContactSearchTool(BaseTool):
-    """Tool to search for contact information"""
+    """Tool to search for contact information with fuzzy matching"""
     name: str = "contact_search"
-    description: str = "Search for contact information given a name"
+    description: str = "Search for contact information given a name (supports partial matches)"
     
     # Mock contact database - in real implementation, this would connect to actual contacts
     mock_contacts: ClassVar[Dict[str, str]] = {
         "jay": "+919321781905",
-        "vijay": "+919876543211", 
+        "jay sharma": "+919321781905",
+        "vijay": "+919876543211",
+        "vijay sharma": "+919876543211", 
         "mom": "+919876543212",
         "dad": "+919876543213",
         "john": "+919876543214",
         "alice": "+919876543215",
-        "boss": "+919876543216"
+        "boss": "+919876543216",
+        "shivam": "+919876543217",
+        "shivam patel": "+919876543217",
+        "shivam clg": "+919876543217",
+        "shivam college": "+919876543217",
+        "karthikeya": "+919876543218",
+        "gitanjali": "+919876543219",
+        "gitanjali mam": "+919876543219",
     }
     
+    def _fuzzy_match(self, search_name: str) -> Optional[str]:
+        """Find best matching contact using fuzzy logic"""
+        search_lower = search_name.lower().strip()
+        
+        # Remove common suffixes/prefixes
+        search_clean = search_lower
+        for suffix in [' clg', ' college', ' mam', ' sir', ' bro', ' sis']:
+            search_clean = search_clean.replace(suffix, '')
+        
+        # 1. Exact match
+        if search_lower in self.mock_contacts:
+            return self.mock_contacts[search_lower]
+        
+        # 2. Check if search term is contained in any contact name
+        for contact_name, phone in self.mock_contacts.items():
+            if search_lower in contact_name or contact_name in search_lower:
+                return phone
+        
+        # 3. Check cleaned version
+        if search_clean != search_lower:
+            for contact_name, phone in self.mock_contacts.items():
+                if search_clean in contact_name or contact_name in search_clean:
+                    return phone
+        
+        # 4. Check first name only (split by space)
+        search_first = search_clean.split()[0] if search_clean else search_clean
+        for contact_name, phone in self.mock_contacts.items():
+            contact_first = contact_name.split()[0]
+            if search_first == contact_first:
+                return phone
+        
+        return None
+    
     def _run(self, contact_name: str) -> str:
-        """Search for contact by name"""
-        name_lower = contact_name.lower().strip()
-        if name_lower in self.mock_contacts:
-            return self.mock_contacts[name_lower]
+        """Search for contact by name with fuzzy matching"""
+        phone = self._fuzzy_match(contact_name)
+        if phone:
+            return phone
         return f"Contact '{contact_name}' not found"
 
 class WhatsAppURLTool(BaseTool):

@@ -111,6 +111,52 @@ export default function CrewAIPage() {
 
     if (cleanMessage) {
       addToHistory('SwarAI', cleanMessage, result);
+
+      // Create speech-friendly version of the message
+      let speechText = cleanMessage;
+
+      // Remove URLs (they sound terrible when spoken)
+      speechText = speechText.replace(/https?:\/\/[^\s]+/g, '');
+
+      // Remove technical patterns
+      speechText = speechText.replace(/wa\.me\/[^\s]+/g, '');
+      speechText = speechText.replace(/\+\d{10,}/g, ''); // Remove phone numbers
+
+      // Remove "Click the link to send:" type instructions
+      speechText = speechText.replace(/Click the link to send:/gi, '');
+      speechText = speechText.replace(/Click here to/gi, '');
+      speechText = speechText.replace(/Open the link/gi, '');
+
+      // For WhatsApp messages, simplify to just the confirmation
+      if (result.agent_used === 'whatsapp' && speechText.toLowerCase().includes('whatsapp')) {
+        // Extract just the essential part
+        const recipientMatch = speechText.match(/ready for (\w+)/i);
+        if (recipientMatch) {
+          speechText = `WhatsApp message ready for ${recipientMatch[1]}. Opening WhatsApp now.`;
+        } else {
+          speechText = 'WhatsApp message is ready. Opening WhatsApp now.';
+        }
+      }
+
+      // For file operations, keep it concise
+      if (result.agent_used === 'filesearch' && speechText.toLowerCase().includes('successfully opened')) {
+        const fileMatch = speechText.match(/Successfully opened: ([^�]+)/i);
+        if (fileMatch) {
+          speechText = `Opened ${fileMatch[1]}`;
+        }
+      }
+
+      // Clean up extra whitespace
+      speechText = speechText.replace(/\s+/g, ' ').trim();
+
+      // Only speak if there's meaningful content left
+      if (speechText && speechText.length > 3) {
+        // Limit length to avoid very long speeches
+        const finalSpeech = speechText.length > 200
+          ? speechText.substring(0, 200) + '...'
+          : speechText;
+        speak(finalSpeech);
+      }
     }
 
     // Handle WhatsApp actions naturally (backend already spoke)
