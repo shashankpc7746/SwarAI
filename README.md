@@ -1,16 +1,36 @@
-﻿# 🤖 SwarAI - Multi-Agent AI Task Automation Assistant
+﻿<div align="center">
 
-<div align="center">
+# 🤖 SwarAI
+### Multi-Agent AI Task Automation Assistant
 
-![SwarAI Logo](https://img.shields.io/badge/SwarAI-AI%20Assistant-blue?style=for-the-badge&logo=robot)
-[![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
+<p align="center">
+  <img src="https://img.shields.io/badge/SwarAI-AI%20Assistant-6366f1?style=for-the-badge&logo=robot&logoColor=white" alt="SwarAI" />
+</p>
 
-**A sophisticated multi-agent AI system powered by CrewAI, LangChain, and Groq LLM**
+<p align="center">
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" /></a>
+  <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" /></a>
+  <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js-15.5-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="License" /></a>
+</p>
 
-[Features](#-features) • [Quick Start](#-quick-start) • [Installation](#-installation) • [Usage](#-usage) • [API](#-api-reference) • [Contributing](#-contributing)
+<p align="center">
+  <img src="https://img.shields.io/badge/CrewAI-0.86+-FF6B6B?style=flat-square&logo=ai&logoColor=white" alt="CrewAI" />
+  <img src="https://img.shields.io/badge/LangChain-1.2+-1C3C3C?style=flat-square&logo=chainlink&logoColor=white" alt="LangChain" />
+  <img src="https://img.shields.io/badge/Groq-LLM-F55036?style=flat-square&logo=ai&logoColor=white" alt="Groq" />
+  <img src="https://img.shields.io/badge/MongoDB-Optional-47A248?style=flat-square&logo=mongodb&logoColor=white" alt="MongoDB" />
+</p>
+
+<h4>A sophisticated multi-agent AI system powered by CrewAI, LangChain, and Groq LLM</h4>
+
+<p align="center">
+  <a href="#-features">Features</a> •
+  <a href="#-quick-start">Quick Start</a> •
+  <a href="#-installation">Installation</a> •
+  <a href="#-usage">Usage</a> •
+  <a href="#-api-reference">API</a> •
+  <a href="#-contributing">Contributing</a>
+</p>
 
 </div>
 
