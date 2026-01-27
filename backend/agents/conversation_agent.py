@@ -1,5 +1,5 @@
-"""
-Conversational Agent for AI Task Automation Assistant (Vaani)
+﻿"""
+Conversational Agent for AI Task Automation Assistant (SwarAI)
 Provides natural, friendly interactions with personality and context awareness
 """
 
@@ -24,7 +24,7 @@ class ConversationState(TypedDict):
     error: Optional[str]
 
 class ConversationAgent:
-    """LangGraph-powered Conversational Agent with Vaani personality"""
+    """LangGraph-powered Conversational Agent with SwarAI personality"""
     
     def __init__(self):
         # Initialize LLM
@@ -58,7 +58,7 @@ class ConversationAgent:
                 if 'context' not in state:
                     state['context'] = {}
                 
-                system_prompt = """You are Vaani, an advanced AI assistant with natural conversation abilities and real task execution capabilities.
+                system_prompt = """You are SwarAI, an advanced AI assistant with natural conversation abilities and real task execution capabilities.
                 
                 Your core personality:
                 - Intelligent and knowledgeable on many topics
@@ -122,7 +122,7 @@ class ConversationAgent:
                 
                 # For greetings, provide a warm response with demonstration
                 if intent == 'greeting':
-                    system_prompt = """You are Vaani, an intelligent AI assistant. 
+                    system_prompt = """You are SwarAI, an intelligent AI assistant. 
                     Respond to the greeting warmly and introduce yourself briefly.
                     Mention that you can have conversations, answer questions, help with WhatsApp messages, file searches, and other tasks.
                     Keep it conversational and welcoming (2-3 sentences max)."""
@@ -136,7 +136,7 @@ class ConversationAgent:
                     return state
                 
                 elif intent == 'introduction' or 'file search' in user_input.lower() or 'capability' in user_input.lower():
-                    system_prompt = """You are Vaani, an advanced AI task automation assistant with real capabilities.
+                    system_prompt = """You are SwarAI, an advanced AI task automation assistant with real capabilities.
                     
                     When asked about file search or capabilities, demonstrate your abilities by:
                     1. Explaining your file search capabilities
@@ -183,7 +183,7 @@ class ConversationAgent:
                     return state
                 
                 elif intent in ['knowledge', 'discussion', 'clarification']:
-                    system_prompt = f"""You are Vaani, an intelligent AI assistant with broad knowledge and conversational abilities.
+                    system_prompt = f"""You are SwarAI, an intelligent AI assistant with broad knowledge and conversational abilities.
                     
                     The user asked: "{user_input}"
                     
@@ -207,7 +207,7 @@ class ConversationAgent:
                     return state
                 
                 elif intent == 'help':
-                    system_prompt = """You are Vaani, an intelligent AI assistant. Provide helpful guidance on what you can do:
+                    system_prompt = """You are SwarAI, an intelligent AI assistant. Provide helpful guidance on what you can do:
                     
                     🗣️ **Conversation**: I can discuss any topic, answer questions, and have natural conversations
                     📱 **WhatsApp**: "Send WhatsApp to [name]: [message]" - Send messages instantly
@@ -227,7 +227,7 @@ class ConversationAgent:
                     return state
                 
                 elif intent == 'gratitude':
-                    system_prompt = """You are Vaani. Respond warmly to the user's gratitude.
+                    system_prompt = """You are SwarAI. Respond warmly to the user's gratitude.
                     Be humble and offer continued assistance. Keep it brief and friendly."""
                     
                     messages = [
@@ -239,7 +239,7 @@ class ConversationAgent:
                     return state
                 
                 elif intent == 'farewell':
-                    system_prompt = """You are Vaani. Say goodbye warmly and mention you're always here to help.
+                    system_prompt = """You are SwarAI. Say goodbye warmly and mention you're always here to help.
                     Be friendly and leave the door open for future interactions."""
                     
                     messages = [
@@ -252,7 +252,7 @@ class ConversationAgent:
                 
                 # Catch-all handler for any other intents
                 else:
-                    system_prompt = f"""You are Vaani, an advanced conversational AI assistant with real capabilities.
+                    system_prompt = f"""You are SwarAI, an advanced conversational AI assistant with real capabilities.
                     
                     You are not just a simple chatbot - you are an intelligent AI that can:
                     1. Answer questions on any topic using your knowledge
@@ -360,7 +360,7 @@ class ConversationAgent:
         except Exception as e:
             return {
                 "success": False,
-                "message": f"Hi! I'm Vaani, your AI assistant. I had a small hiccup there - could you please try again?",
+                "message": f"Hi! I'm SwarAI, your AI assistant. I had a small hiccup there - could you please try again?",
                 "intent": "error",
                 "context": {},
                 "conversation_context": self.context,
@@ -390,7 +390,7 @@ class ConversationAgent:
             r'^\s*(who are you|what can you do|help|what are your capabilities)\s*\??\s*$',  # Help/intro
             r'^\s*(thank you|thanks|appreciate)\s*$',  # Gratitude
             r'^\s*(bye|goodbye|see you|exit|quit)\s*$',  # Farewells
-            r'^\s*vaani\s*$',  # Just saying the name
+            r'^\s*SwarAI\s*$',  # Just saying the name
         ]
         
         return any(re.search(pattern, user_input_lower) for pattern in conversational_patterns)

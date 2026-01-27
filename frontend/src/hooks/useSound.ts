@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useCallback } from 'react';
 import useSoundHook from 'use-sound';
@@ -57,7 +57,7 @@ export function useSound() {
     }
   }, [playBeep]);
   
-  // Web Speech API TTS for Vaani to actually speak
+  // Web Speech API TTS for SwarAI to actually speak
   const speak = useCallback((text: string, options: {
     rate?: number;
     pitch?: number;
@@ -93,8 +93,8 @@ export function useSound() {
       }
 
       // Add event listeners for debugging
-      utterance.onstart = () => console.log('🔊 Vaani started speaking:', text.substring(0, 50) + '...');
-      utterance.onend = () => console.log('🔊 Vaani finished speaking');
+      utterance.onstart = () => console.log('🔊 SwarAI started speaking:', text.substring(0, 50) + '...');
+      utterance.onend = () => console.log('🔊 SwarAI finished speaking');
       utterance.onerror = (event) => console.error('🔊 Speech error:', event.error);
       
       // Speak the text
@@ -110,7 +110,7 @@ export function useSound() {
   const stopSpeaking = useCallback(() => {
     try {
       window.speechSynthesis.cancel();
-      console.log('🔊 Stopped Vaani speech');
+      console.log('🔊 Stopped SwarAI speech');
     } catch (error) {
       console.error('Error stopping speech:', error);
     }

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -31,7 +31,7 @@ export default function CrewAIPage() {
   const [isManuallyClosing, setIsManuallyClosing] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<Array<{
     timestamp: Date;
-    type: 'user' | 'vaani';
+    type: 'user' | 'SwarAI';
     message: string;
     result?: any;
   }>>([]);
@@ -75,7 +75,7 @@ export default function CrewAIPage() {
   }, [lastResult, isProcessing, isManuallyClosing]);
 
   // Add conversation entry to history
-  const addToHistory = (type: 'user' | 'vaani', message: string, result?: any) => {
+  const addToHistory = (type: 'user' | 'SwarAI', message: string, result?: any) => {
     setConversationHistory(prev => [...prev, {
       timestamp: new Date(),
       type,
@@ -102,7 +102,7 @@ export default function CrewAIPage() {
       addToHistory('user', userCommand);
     }
     
-    // Add Vaani's response to history
+    // Add SwarAI's response to history
     const cleanMessage = result.message
       ?.replace(/[📱📁🔄✅❌🔍💬📄🎤💡]/g, '') // Remove emojis
       ?.replace(/\n/g, ' ') // Replace newlines with spaces
@@ -110,7 +110,7 @@ export default function CrewAIPage() {
       ?.trim();
     
     if (cleanMessage) {
-      addToHistory('vaani', cleanMessage, result);
+      addToHistory('SwarAI', cleanMessage, result);
     }
     
     // Handle WhatsApp actions naturally (backend already spoke)
@@ -134,7 +134,7 @@ export default function CrewAIPage() {
       setTimeout(() => {
         console.log('🚀 Executing WhatsApp opening after 1.5s delay...');
         shareToWhatsApp();
-      }, 1500); // Brief delay to let Vaani finish speaking
+      }, 1500); // Brief delay to let SwarAI finish speaking
     } else {
       console.log('⚠️ No genuine WhatsApp action detected. Result type:', result.intent, 'Agent:', result.agent_used);
     }
@@ -540,7 +540,7 @@ export default function CrewAIPage() {
                 {conversationHistory.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <Bot className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                    <p>No conversations yet. Start talking to Vaani!</p>
+                    <p>No conversations yet. Start talking to SwarAI!</p>
                   </div>
                 ) : (
                   conversationHistory.map((entry, index) => (
@@ -557,7 +557,7 @@ export default function CrewAIPage() {
                             <Bot className="w-4 h-4" />
                           )}
                           <span className="text-xs opacity-75">
-                            {entry.type === 'user' ? 'You' : 'Vaani'}
+                            {entry.type === 'user' ? 'You' : 'SwarAI'}
                           </span>
                           <span className="text-xs opacity-50">
                             {entry.timestamp.toLocaleTimeString()}

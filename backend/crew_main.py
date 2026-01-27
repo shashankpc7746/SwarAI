@@ -1,4 +1,4 @@
-"""
+﻿"""
 CrewAI Multi-Agent Backend Server
 Enhanced with Real Functionality: Voice Recognition, File Access, and Agent Coordination
 """
@@ -487,7 +487,7 @@ async def process_command(request: CommandRequest) -> CommandResponse:
                     await conversation_memory.add_conversation_entry(
                         user_id=user_id,
                         user_message=command,
-                        vaani_response=result["message"],
+                        SwarAI_response=result["message"],
                         metadata={
                             "agent_used": result["agent_used"],
                             "success": result["success"],
@@ -849,7 +849,7 @@ async def get_agents():
                 "examples": ["Send WhatsApp to Mom: I'm coming home", "Share report.pdf with dad on whatsapp"]
             },
             "conversation": {
-                "name": "Vaani (Conversational AI)",
+                "name": "SwarAI (Conversational AI)",
                 "description": "Natural conversation and assistance with enhanced NLP",
                 "capabilities": ["Greetings", "Help guidance", "Natural chat", "Task clarification"],
                 "examples": ["Hello", "What can you do?", "Help me", "Thank you"]

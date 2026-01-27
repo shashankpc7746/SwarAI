@@ -1,4 +1,4 @@
-"""
+﻿"""
 FastAPI Backend for AI Task Automation Assistant
 Main server handling voice/text commands and agent coordination
 """
@@ -57,14 +57,14 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     """Initialize application with enhanced features"""
-    logger.info("🚀 Starting Enhanced AI Task Automation Assistant (Vaani)...")
+    logger.info("🚀 Starting Enhanced AI Task Automation Assistant (SwarAI)...")
     logger.info("✨ Features: Conversational AI, FileSearch, Multi-Agent Coordination")
     
     # Validate configuration
     if not config.validate_config():
         logger.warning("⚠️  Configuration validation failed. Some features may not work.")
     
-    logger.info("✅ Vaani AI Assistant started successfully!")
+    logger.info("✅ SwarAI AI Assistant started successfully!")
     logger.info("🤖 Available agents: WhatsApp, FileSearch, Conversation")
     logger.info("🎯 Enhanced NLP and multi-agent workflows ready!")
 
@@ -118,7 +118,7 @@ async def root():
     return HealthResponse(
         status="healthy",
         timestamp=datetime.now().isoformat(),
-        version="2.0.0 - Enhanced with Vaani AI",
+        version="2.0.0 - Enhanced with SwarAI AI",
         agents_available=agent_manager.get_available_agents()
     )
 
@@ -128,7 +128,7 @@ async def health_check():
     return HealthResponse(
         status="healthy",
         timestamp=datetime.now().isoformat(),
-        version="2.0.0 - Enhanced with Vaani AI",
+        version="2.0.0 - Enhanced with SwarAI AI",
         agents_available=agent_manager.get_available_agents()
     )
 
@@ -221,7 +221,7 @@ async def process_voice(audio_file: UploadFile = File(...)):
 @app.post("/text-to-speech", response_model=TTSResponse)
 async def text_to_speech(request: TTSRequest):
     """
-    Convert text to speech using Vaani's enhanced TTS system
+    Convert text to speech using SwarAI's enhanced TTS system
     Provides audio feedback for responses
     """
     try:
@@ -303,7 +303,7 @@ async def get_agents():
                 "examples": ["Add task buy groceries", "List my tasks", "Remind me to call mom tomorrow"]
             },
             "conversation": {
-                "name": "Vaani (Conversational AI)",
+                "name": "SwarAI (Conversational AI)",
                 "description": "Natural conversation and assistance",
                 "capabilities": ["Greetings", "Help guidance", "Natural chat", "Task clarification"],
                 "examples": ["Hello", "What can you do?", "Help me", "Thank you"]

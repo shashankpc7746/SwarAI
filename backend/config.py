@@ -1,4 +1,4 @@
-"""
+﻿"""
 Configuration module for AI Task Automation Assistant
 Handles environment variables and application settings
 """
@@ -36,13 +36,13 @@ class Config:
     
     # MongoDB Configuration
     MONGODB_URL: str = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
-    MONGODB_DATABASE: str = os.getenv("MONGODB_DATABASE", "vaani_assistant")
+    MONGODB_DATABASE: str = os.getenv("MONGODB_DATABASE", "SwarAI_assistant")
     
     # Enhanced TTS Configuration (Free Services)
     TTS_ENGINE: str = os.getenv("TTS_ENGINE", "edge")  # edge, coqui, pyttsx3, gtts, festival
-    VAANI_VOICE: str = os.getenv("VAANI_VOICE", "en-US-AriaNeural")  # Edge TTS voice
-    VAANI_VOICE_SPEED: float = float(os.getenv("VAANI_VOICE_SPEED", "1.0"))
-    VAANI_VOICE_PITCH: str = os.getenv("VAANI_VOICE_PITCH", "+0Hz")
+    SwarAI_VOICE: str = os.getenv("SwarAI_VOICE", "en-US-AriaNeural")  # Edge TTS voice
+    SwarAI_VOICE_SPEED: float = float(os.getenv("SwarAI_VOICE_SPEED", "1.0"))
+    SwarAI_VOICE_PITCH: str = os.getenv("SwarAI_VOICE_PITCH", "+0Hz")
     COQUI_MODEL: str = os.getenv("COQUI_MODEL", "tts_models/en/ljspeech/tacotron2-DDC")
     PYTTSX3_RATE: int = int(os.getenv("PYTTSX3_RATE", "180"))
     PYTTSX3_VOLUME: float = float(os.getenv("PYTTSX3_VOLUME", "0.9"))

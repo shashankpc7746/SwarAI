@@ -1,4 +1,4 @@
-"""
+﻿"""
 Production-Level Conversational Text-to-Speech System
 Using the best free TTS engines with natural voice synthesis
 """
@@ -70,8 +70,8 @@ class ConversationalTTS:
         self.is_speaking = False
         self._init_engines()
         
-        # Vaani personality voice settings
-        self.vaani_personality = {
+        # SwarAI personality voice settings
+        self.SwarAI_personality = {
             "tone": "friendly",
             "pace": "moderate",
             "expressiveness": "high",
@@ -239,7 +239,7 @@ class ConversationalTTS:
     async def _speak_edge(self, text: str, voice: Optional[str] = None) -> bool:
         """Microsoft Edge TTS - Premium quality"""
         try:
-            voice_name = voice or self.config.VAANI_VOICE or "en-US-AriaNeural"
+            voice_name = voice or self.config.SwarAI_VOICE or "en-US-AriaNeural"
             
             # Create Edge TTS communicate object
             communicate = edge_tts.Communicate(text, voice_name)
@@ -372,8 +372,8 @@ class ConversationalTTS:
     def set_voice_settings(self, **kwargs):
         """Update voice settings"""
         for key, value in kwargs.items():
-            if hasattr(self.config, f"VAANI_{key.upper()}"):
-                setattr(self.config, f"VAANI_{key.upper()}", value)
+            if hasattr(self.config, f"SwarAI_{key.upper()}"):
+                setattr(self.config, f"SwarAI_{key.upper()}", value)
 
 # Global TTS instance
 conversational_tts = ConversationalTTS()

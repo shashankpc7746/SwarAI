@@ -1,6 +1,6 @@
-"""
+﻿"""
 MongoDB-based Conversation Memory Service
-Persistent conversation history and context management for Vaani AI
+Persistent conversation history and context management for SwarAI AI
 """
 
 import asyncio
@@ -95,7 +95,7 @@ class ConversationMemory:
         self, 
         user_id: str, 
         user_message: str, 
-        vaani_response: str,
+        SwarAI_response: str,
         metadata: Optional[Dict[str, Any]] = None
     ) -> str:
         """Add conversation entry with full context"""
@@ -109,7 +109,7 @@ class ConversationMemory:
             "session_id": self._get_session_id(user_id),
             "timestamp": timestamp,
             "user_message": user_message,
-            "vaani_response": vaani_response,
+            "SwarAI_response": SwarAI_response,
             "metadata": metadata or {},
             "interaction_type": metadata.get("type", "conversation") if metadata else "conversation",
             "agent_used": metadata.get("agent_used", "conversation") if metadata else "conversation",

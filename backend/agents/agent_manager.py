@@ -1,4 +1,4 @@
-"""
+﻿"""
 Multi-Agent Coordinator (MCP) for AI Task Automation Assistant
 Handles routing commands to appropriate agents using LangGraph
 """
@@ -358,7 +358,7 @@ IMPORTANT:
                 # Use LLM for complex intent detection
                 print(f"[DEBUG] Using LLM for intent detection...")
                 
-                system_prompt = """You are Vaani, an advanced AI assistant with natural language understanding.
+                system_prompt = """You are SwarAI, an advanced AI assistant with natural language understanding.
                 Analyze the user input and classify it into the most appropriate category:
                 
                 AVAILABLE AGENTS:
@@ -413,7 +413,7 @@ IMPORTANT:
                 3. If clear WhatsApp/messaging intent only -> whatsapp  
                 4. If clear file operation intent only -> filesearch
                 5. If conversational/greeting -> conversation
-                6. If unclear -> conversation (Vaani will ask for clarification)
+                6. If unclear -> conversation (SwarAI will ask for clarification)
                 
                 Examples:
                 - "Send report.pdf to boss on WhatsApp" -> multi_agent
@@ -527,7 +527,7 @@ IMPORTANT:
                 state['error'] = f"Error routing to agent: {str(e)}"
                 state['agent_response'] = {
                     "success": False,
-                    "message": f"Hi! I'm Vaani. I encountered a small issue: {str(e)}. Please try again!",
+                    "message": f"Hi! I'm SwarAI. I encountered a small issue: {str(e)}. Please try again!",
                     "error": str(e)
                 }
                 return state
@@ -672,7 +672,7 @@ IMPORTANT:
         except Exception as e:
             return {
                 "success": False,
-                "message": f"Hi! I'm Vaani. I had trouble understanding that multi-agent request. Error: {str(e)}",
+                "message": f"Hi! I'm SwarAI. I had trouble understanding that multi-agent request. Error: {str(e)}",
                 "workflow": "multi_agent_error",
                 "error": str(e)
             }
@@ -681,7 +681,7 @@ IMPORTANT:
         """Execute generic multi-agent workflow when pattern isn't clear"""
         try:
             # Use LLM to understand what the user wants and execute it
-            system_prompt = """You are Vaani, an AI assistant that executes tasks directly.
+            system_prompt = """You are SwarAI, an AI assistant that executes tasks directly.
             
             The user gave a command that involves multiple actions. Analyze it and execute the appropriate workflow:
             
@@ -763,7 +763,7 @@ IMPORTANT:
         except Exception as e:
             return {
                 "success": False,
-                "message": f"Hi! I'm Vaani. I had trouble with that request. Could you try rephrasing it? Error: {str(e)}",
+                "message": f"Hi! I'm SwarAI. I had trouble with that request. Could you try rephrasing it? Error: {str(e)}",
                 "workflow": "generic_error",
                 "error": str(e)
             }
@@ -818,7 +818,7 @@ IMPORTANT:
         except Exception as e:
             return {
                 "success": False,
-                "message": f"Hi! I'm Vaani. I had trouble with that file sharing request. Error: {str(e)}",
+                "message": f"Hi! I'm SwarAI. I had trouble with that file sharing request. Error: {str(e)}",
                 "workflow": "file_to_whatsapp",
                 "error": str(e)
             }

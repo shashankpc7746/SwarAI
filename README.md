@@ -1,403 +1,798 @@
-# 🤖 Vaani - Enhanced Multi-Agent AI Assistant
+﻿# 🤖 SwarAI - Multi-Agent AI Task Automation Assistant
 
-A sophisticated conversational AI assistant powered by **CrewAI**, **Groq LLM**, and **LangGraph** with advanced voice recognition, intelligent file management, and seamless WhatsApp integration.
+<div align="center">
 
-## 🌟 Project Overview
+![SwarAI Logo](https://img.shields.io/badge/SwarAI-AI%20Assistant-blue?style=for-the-badge&logo=robot)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
-**Vaani** (named after the Sanskrit word for "voice") is a state-of-the-art multi-agent AI system that combines natural language processing, voice recognition, file system operations, and cross-platform communication into a unified, intelligent assistant.
+**A sophisticated multi-agent AI system powered by CrewAI, LangChain, and Groq LLM**
 
-### 🎯 Core Features
+[Features](#-features) • [Quick Start](#-quick-start) • [Installation](#-installation) • [Usage](#-usage) • [API](#-api-reference) • [Contributing](#-contributing)
 
-- **🗣️ Conversational AI**: Natural language understanding with Vaani personality
-- **📱 WhatsApp Integration**: Voice/text message automation with contact management
-- **📁 Intelligent File Search**: Cross-platform file operations with fuzzy matching
-- **🔄 Multi-Agent Orchestration**: Complex workflow coordination using CrewAI
-- **🎤 Enhanced Voice Recognition**: Multi-engine speech processing (Google + Whisper)
-- **🌐 Modern Web Interface**: Next.js frontend with real-time WebSocket communication
-- **📊 Streamlit Dashboard**: Alternative interface for system monitoring
-
-## 🏗️ Architecture Deep Dive
-
-### Backend Architecture (Python)
-
-```
-┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
-│    FastAPI Server   │    │   Agent Manager     │    │  CrewAI Orchestra   │
-│  - REST API         │◄──►│  - Intent Detection │◄──►│  - Multi-Agent      │
-│  - WebSocket        │    │  - Agent Routing    │    │  - Workflow Coord   │
-│  - CORS Config      │    │  - LangGraph Flow   │    │  - Task Execution   │
-└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
-         │                            │                            │
-         │                            ▼                            ▼
-┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
-│  Enhanced Speech    │    │  Specialized Agents │    │   LLM Integration   │
-│  - Multi-Engine STT │    │  - WhatsApp Agent   │    │   - Groq LLM Only   │
-│  - Cross-Platform   │    │  - FileSearch Agent │    │   - LangChain       │
-│  - TTS Systems      │    │  - Conversation AI  │    │   - Context Memory  │
-└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
-```
-
-### Frontend Architecture (Next.js)
-
-```
-┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
-│     UI Layer        │    │    Hooks Layer      │    │   Service Layer     │
-│  - Voice Interface  │◄──►│  - useVoiceRec      │◄──►│  - Backend API      │
-│  - Agent Cards      │    │  - useCrewAI        │    │  - WebSocket Conn   │
-│  - Result Display   │    │  - useSound         │    │  - Error Handling   │
-└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
-```
-
-## 📋 Technical Specifications
-
-### Backend Components
-
-#### 1. **Agent Manager (`agents/agent_manager.py`)**
-- **Multi-Agent Coordinator (MCP)** using LangGraph
-- **Intent Detection** with Groq LLM and rule-based patterns
-- **Dynamic Agent Routing** based on command complexity
-- **Multi-Agent Workflows** for complex tasks (file + WhatsApp)
-- **Error Recovery** and graceful fallbacks
-
-#### 2. **Specialized Agents**
-
-**WhatsApp Agent (`agents/whatsapp_agent.py`)**
-- Natural language command parsing
-- Contact database with fuzzy matching
-- WhatsApp URL generation (wa.me format)
-- LangGraph workflow for stateful processing
-- Multiple command patterns support
-
-**FileSearch Agent (`agents/filesearch_agent.py`)**
-- Cross-platform file system access (Windows/macOS/Linux)
-- Fuzzy matching algorithm with scoring
-- Recursive directory searching with performance optimization
-- File operations: search, open, prepare for sharing
-- Real file system integration with proper permissions
-
-**Conversation Agent (`agents/conversation_agent.py`)**
-- Vaani personality implementation
-- Context-aware dialogue management
-- Natural conversation flow with memory
-- Intent classification and response generation
-- Emotional intelligence and user guidance
-
-#### 3. **CrewAI Integration (`crew_config.py`)**
-- **Groq LLM Exclusive**: No OpenAI dependencies
-- Multi-agent orchestration with specialized roles
-- Task coordination and workflow management
-- Error handling and fallback systems
-- Complex workflow execution (file-to-WhatsApp sharing)
-
-#### 4. **Enhanced Speech Processing (`utils/enhanced_speech_processor.py`)**
-- **Multi-Engine Recognition**: Google Speech + Whisper AI
-- **Cross-Platform Audio**: pygame, gtts, pydub support
-- **Language Support**: en-US, en-IN, en-GB, en-AU
-- **Noise Reduction** and ambient adjustment
-- **Fallback Systems** for audio failures
-
-### Frontend Components
-
-#### 1. **Main Interface (`src/app/page.tsx`)**
-- Modern React with TypeScript
-- Framer Motion animations
-- Voice recognition integration
-- Real-time status indicators
-- Conversation history management
-- WhatsApp popup handling
-
-#### 2. **Hooks (`src/hooks/`)**
-- `useCrewAI.ts`: CrewAI backend integration with WebSocket
-- `useVoiceRecognition.ts`: Browser speech recognition
-- `useBackendApi.ts`: RESTful API communication
-- `useSound.ts`: Audio feedback and TTS
-
-#### 3. **Components (`src/components/`)**
-- `AgentCard.tsx`: Interactive agent selection
-- `VoiceVisualization.tsx`: Audio wave animations
-- `ResultDisplay.tsx`: Response formatting
-- `StatusIndicator.tsx`: System health monitoring
-
-## 🚀 Quick Start Guide
-
-### Prerequisites
-- **Python 3.11+** (recommended)
-- **Node.js 18+** and npm
-- **Groq API Key** ([Get it here](https://console.groq.com/))
-
-### Installation
-
-1. **Clone and Setup**
-```bash
-git clone <repository-url>
-cd "Major Project BE"
-```
-
-2. **Automated Setup**
-```bash
-# Run the enhanced setup script
-setup_enhanced_vaani.bat
-```
-
-3. **Configure Environment**
-```bash
-# Edit backend/.env with your Groq API key
-GROQ_API_KEY=your_actual_groq_api_key_here
-GROQ_MODEL=llama-3.1-70b-versatile
-```
-
-4. **Start Services**
-```bash
-# Terminal 1: Backend
-start_vaani_backend.bat
-
-# Terminal 2: Frontend
-cd frontend && npm run dev
-```
-
-5. **Access Application**
-- **Next.js UI**: http://localhost:3000
-- **Streamlit Dashboard**: http://localhost:8501
-- **API Documentation**: http://localhost:8000/docs
-
-## 💬 Command Examples
-
-### Natural Conversation
-```
-🗣️ "Hello Vaani!"
-🗣️ "What can you do?"
-🗣️ "Help me with my tasks"
-🗣️ "Thank you for your help"
-```
-
-### WhatsApp Messaging
-```
-🗣️ "Send WhatsApp to Mom: I'm coming home"
-🗣️ "Tell dad I'll be late for dinner"
-🗣️ "Message jay about the meeting tomorrow"
-🗣️ "WhatsApp vijay: Can we reschedule?"
-```
-
-### File Operations
-```
-🗣️ "Find my photos"
-🗣️ "Search for report.pdf"
-🗣️ "Open ownership document"
-🗣️ "Show me Excel files"
-```
-
-### Multi-Agent Workflows
-```
-🗣️ "Send my report to boss on WhatsApp"
-🗣️ "Find presentation.pptx and share with team"
-🗣️ "Search for ownership document and send to jay"
-```
-
-## 🔧 Configuration Details
-
-### Backend Configuration (`backend/.env`)
-```env
-# AI Configuration
-GROQ_API_KEY=your_groq_api_key_here
-GROQ_MODEL=llama-3.1-70b-versatile
-
-# Server Configuration
-FASTAPI_HOST=0.0.0.0
-FASTAPI_PORT=8000
-
-# Speech Configuration
-SPEECH_TIMEOUT=7
-SPEECH_PHRASE_TIME_LIMIT=15
-
-# Agent Configuration
-AGENT_TEMPERATURE=0.1
-MAX_RESPONSE_TOKENS=1000
-```
-
-### Frontend Configuration (`frontend/package.json`)
-- **Framework**: Next.js 15.5.0 with Turbopack
-- **UI**: Tailwind CSS with Framer Motion
-- **State**: Zustand for state management
-- **Communication**: WebSocket + REST API
-- **Audio**: Web Speech API integration
-
-## 📊 Performance Metrics
-
-### Response Times
-- **Conversation**: < 1 second
-- **File Search**: < 2 seconds  
-- **WhatsApp**: < 1 second
-- **Multi-Agent**: < 3 seconds
-
-### Reliability Features
-- **Error Recovery**: Graceful handling of all failure scenarios
-- **Fallback Systems**: Multiple backup approaches for critical functions
-- **User Guidance**: Clear, helpful error messages
-- **Logging**: Comprehensive system monitoring
-
-## 🛠️ Development Guide
-
-### Adding New Agents
-
-1. **Create Agent File**
-```python
-# backend/agents/new_agent.py
-class NewAgent:
-    def __init__(self):
-        self.llm = ChatGroq(...)
-        self.workflow = self._build_workflow()
-    
-    def _build_workflow(self) -> StateGraph:
-        # Implement LangGraph workflow
-        pass
-    
-    def process_command(self, user_input: str) -> Dict[str, Any]:
-        # Process user command
-        pass
-```
-
-2. **Register Agent**
-```python
-# backend/agents/agent_manager.py
-self.agents = {
-    "whatsapp": whatsapp_agent,
-    "conversation": conversation_agent,
-    "filesearch": filesearch_agent,
-    "new_agent": new_agent  # Add here
-}
-```
-
-3. **Update Frontend**
-```typescript
-// frontend/src/app/page.tsx
-const agents = [
-  // ... existing agents
-  {
-    id: 'new_agent',
-    name: 'New Agent',
-    description: 'Agent description',
-    icon: Icon,
-    color: 'from-color-to-color'
-  }
-];
-```
-
-### Extending Workflows
-
-```python
-# In agent_manager.py
-def _handle_multi_agent_workflow(self, user_input: str) -> Dict[str, Any]:
-    # Add new workflow logic
-    if workflow_type == "new_workflow":
-        return self._execute_new_workflow(parameters)
-```
-
-## 📁 Project Structure
-
-```
-Major Project BE/
-├── backend/                    # Python FastAPI Backend
-│   ├── agents/                # AI Agents
-│   │   ├── agent_manager.py   # Multi-Agent Coordinator
-│   │   ├── whatsapp_agent.py  # WhatsApp Integration
-│   │   ├── filesearch_agent.py# File System Operations
-│   │   └── conversation_agent.py# Conversational AI
-│   ├── utils/                 # Utilities
-│   │   └── enhanced_speech_processor.py# Audio Processing
-│   ├── config.py              # Configuration Management
-│   ├── crew_config.py         # CrewAI Setup
-│   ├── crew_main.py          # Enhanced CrewAI Server
-│   ├── main.py               # Primary FastAPI Server
-│   ├── streamlit_app.py      # Streamlit Interface
-│   └── requirements.txt      # Python Dependencies
-├── frontend/                  # Next.js Frontend
-│   ├── src/
-│   │   ├── app/              # App Router Pages
-│   │   ├── components/       # UI Components
-│   │   └── hooks/            # React Hooks
-│   ├── package.json          # Node Dependencies
-│   └── tailwind.config.ts    # Styling Configuration
-├── test_files/               # Sample Files for Testing
-├── setup_enhanced_vaani.bat  # Automated Setup Script
-├── start_vaani_backend.bat   # Backend Launcher
-└── README_Enhanced_Vaani.md  # Detailed Documentation
-```
-
-## 🔮 Future Enhancements
-
-### Phase 2: Advanced Capabilities
-- **📞 Call Agent**: Voice call automation
-- **📧 Email Agent**: Smart email composition
-- **📅 Calendar Agent**: Advanced scheduling
-- **🌐 Web Agent**: Intelligent web search
-
-### Phase 3: AI Enhancement
-- **🧠 Memory System**: Long-term conversation memory
-- **🎯 Personalization**: Learning user preferences
-- **🔮 Predictive**: Anticipating user needs
-- **🌍 Multi-Language**: Global language support
-
-## 📝 API Reference
-
-### Key Endpoints
-
-- **POST /process-command**: Execute AI commands
-- **POST /text-to-speech**: Convert text to speech
-- **GET /agents**: List available agents
-- **GET /health**: System health check
-- **WebSocket /ws**: Real-time communication
-
-### Request/Response Format
-
-```typescript
-// Command Request
-interface CommandRequest {
-  command: string;
-  user_id?: string;
-}
-
-// Command Response
-interface CommandResponse {
-  success: boolean;
-  message: string;
-  intent: string;
-  agent_used: string;
-  timestamp: string;
-  requires_popup?: boolean;
-  whatsapp_url?: string;
-  file_info?: any;
-}
-```
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
-5. Open Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- **CrewAI** for multi-agent orchestration
-- **Groq** for lightning-fast LLM inference
-- **LangChain** for AI application framework
-- **Next.js** for modern React development
-- **FastAPI** for high-performance API backend
+</div>
 
 ---
 
-## 🎉 Experience the Future of AI Assistance!
+## 📖 Table of Contents
 
-**Vaani** represents the next generation of AI assistants - natural, intelligent, and incredibly capable. Experience the magic of conversational AI with powerful task automation!
+- [Overview](#-overview)
+- [Features](#-features)
+- [Architecture](#-architecture)
+- [Quick Start](#-quick-start)
+- [Installation](#-installation)
+- [Configuration](#-configuration)
+- [Usage](#-usage)
+- [AI Agents](#-ai-agents)
+- [API Reference](#-api-reference)
+- [Development](#-development)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-```bash
-# Start your AI journey today!
-setup_enhanced_vaani.bat
+---
+
+## 🌟 Overview
+
+**SwarAI** is an advanced multi-agent AI task automation assistant that combines natural language processing, voice recognition, file management, and cross-platform communication into a unified, intelligent system.
+
+### Key Highlights
+
+- 🤖 **13 Specialized AI Agents** for different tasks
+- 🎤 **Voice Recognition** with multiple engines (Google Speech, Whisper AI)
+- 🗣️ **Text-to-Speech** with multiple TTS engines (Edge TTS, gTTS, Coqui)
+- 📱 **WhatsApp Integration** for automated messaging
+- 📁 **Intelligent File Search** with fuzzy matching
+- 🔄 **Multi-Agent Orchestration** using CrewAI
+- 🌐 **Modern Web Interface** built with Next.js
+- 🚀 **FastAPI Backend** with WebSocket support
+- 💾 **Conversation Memory** with MongoDB (optional)
+
+---
+
+## ✨ Features
+
+### 🎯 Core Capabilities
+
+#### 1. **Conversational AI**
+- Natural language understanding with context awareness
+- Personality-driven responses
+- Multi-turn conversation support
+- Intent classification and routing
+- Emotional intelligence
+
+#### 2. **Voice Recognition & TTS**
+- **Speech-to-Text**: Google Speech Recognition, Whisper AI
+- **Text-to-Speech**: Microsoft Edge TTS, Google TTS, Coqui TTS, pyttsx3
+- Multi-language support (English variants)
+- Noise reduction and ambient adjustment
+- Real-time voice processing
+
+#### 3. **WhatsApp Automation**
+- Send messages via voice or text commands
+- Contact management with fuzzy search
+- WhatsApp URL generation (wa.me format)
+- Natural language command parsing
+- Multiple command pattern support
+
+#### 4. **File Management**
+- Cross-platform file search (Windows, macOS, Linux)
+- Fuzzy matching algorithm
+- Recursive directory searching
+- File operations: search, open, share
+- Performance-optimized scanning
+
+#### 5. **System Control**
+- Volume control (Windows with pycaw)
+- Brightness adjustment
+- Battery status monitoring
+- System information retrieval
+- Application launching
+
+#### 6. **Multi-Agent Orchestration**
+- CrewAI-powered agent coordination
+- Complex workflow execution
+- Task delegation and routing
+- Error recovery and fallbacks
+- Parallel task processing
+
+---
+
+## 🏗️ Architecture
+
+### System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Frontend (Next.js)                       │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
+│  │ Voice UI     │  │ Agent Cards  │  │ Results      │      │
+│  └──────────────┘  └──────────────┘  └──────────────┘      │
+└────────────────────────┬────────────────────────────────────┘
+                         │ HTTP/WebSocket
+┌────────────────────────┴────────────────────────────────────┐
+│                   Backend (FastAPI)                          │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │              Agent Manager (MCP)                      │   │
+│  │  - Intent Detection  - Agent Routing  - Workflows    │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                         │                                    │
+│  ┌──────────────────────┴──────────────────────────────┐   │
+│  │              Specialized Agents                      │   │
+│  │  WhatsApp │ FileSearch │ Conversation │ System      │   │
+│  │  Email │ Calendar │ Payment │ WebSearch │ ...       │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                         │                                    │
+│  ┌──────────────────────┴──────────────────────────────┐   │
+│  │           CrewAI Orchestration Layer                 │   │
+│  │  - Multi-Agent Coordination                          │   │
+│  │  - Task Delegation                                   │   │
+│  │  - Workflow Management                               │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                         │                                    │
+│  ┌──────────────────────┴──────────────────────────────┐   │
+│  │              LLM Integration (Groq)                  │   │
+│  │  LangChain │ LangGraph │ Groq LLM │ Context Memory  │   │
+│  └──────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-**Made with ❤️ for the future of human-AI interaction**
+### Technology Stack
+
+#### Backend
+- **Framework**: FastAPI 0.115+
+- **AI/ML**: 
+  - CrewAI 0.86+ (Multi-agent orchestration)
+  - LangChain 1.2+ (AI framework)
+  - LangGraph 1.0+ (Stateful workflows)
+  - Groq LLM (Language model)
+- **Speech**: 
+  - SpeechRecognition 3.10+
+  - gTTS 2.5+
+  - pydub 0.25+
+  - pygame 2.5+
+- **Database**: 
+  - MongoDB (via pymongo/motor)
+- **Server**: Uvicorn (ASGI)
+
+#### Frontend
+- **Framework**: Next.js 15.5
+- **UI**: React 19, TailwindCSS 4
+- **State**: Zustand
+- **Queries**: TanStack Query
+- **Components**: Radix UI, Framer Motion
+- **Icons**: Lucide React
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.10 or higher
+- Node.js 18+ and npm
+- Groq API Key ([Get one free](https://console.groq.com/))
+- MongoDB (optional, for conversation memory)
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/shashankpc7746/SwarAI.git
+cd SwarAI
+```
+
+### 2. Backend Setup
+
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# Linux/Mac:
+source venv/bin/activate
+
+# Install dependencies
+cd backend
+pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Edit .env and add your GROQ_API_KEY
+```
+
+### 3. Frontend Setup
+
+```bash
+cd frontend
+npm install --legacy-peer-deps
+```
+
+### 4. Run the Application
+
+**Terminal 1 - Backend:**
+```bash
+cd backend
+python main.py
+```
+
+**Terminal 2 - Frontend:**
+```bash
+cd frontend
+npm run dev
+```
+
+### 5. Access the Application
+
+- **Frontend UI**: http://localhost:3000
+- **API Documentation**: http://localhost:8000/docs
+- **Health Check**: http://localhost:8000/health
+
+---
+
+## 📦 Installation
+
+### Detailed Backend Installation
+
+1. **Create and activate virtual environment:**
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate  # Windows
+   source venv/bin/activate  # Linux/Mac
+   ```
+
+2. **Install Python dependencies:**
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   ```
+
+3. **Set up environment variables:**
+   ```bash
+   cp .env.example .env
+   ```
+
+4. **Edit `.env` file:**
+   ```env
+   # Required
+   GROQ_API_KEY=your_groq_api_key_here
+   GROQ_MODEL=llama-3.1-70b-versatile
+
+   # Optional
+   MONGODB_URL=mongodb://localhost:27017
+   MONGODB_DATABASE=swarai_assistant
+   TTS_ENGINE=edge  # edge, gtts, coqui, pyttsx3
+   ENABLE_VOICE_FEEDBACK=true
+   ```
+
+### Detailed Frontend Installation
+
+1. **Install Node.js dependencies:**
+   ```bash
+   cd frontend
+   npm install --legacy-peer-deps
+   ```
+
+2. **Configure environment (optional):**
+   ```bash
+   # Create .env.local if needed
+   echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
+   ```
+
+### Optional Dependencies
+
+For full system control features:
+
+```bash
+# Windows volume control
+pip install pycaw comtypes
+
+# System monitoring
+pip install psutil
+
+# Brightness control
+pip install screen-brightness-control
+```
+
+---
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+#### Core Configuration
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `GROQ_API_KEY` | Groq API key for LLM | - | ✅ Yes |
+| `GROQ_MODEL` | Groq model to use | `llama-3.1-70b-versatile` | No |
+| `FASTAPI_HOST` | Backend host | `0.0.0.0` | No |
+| `FASTAPI_PORT` | Backend port | `8000` | No |
+
+#### Voice & Speech
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `TTS_ENGINE` | TTS engine (edge/gtts/coqui/pyttsx3) | `edge` |
+| `SWARAI_VOICE` | Voice for TTS | `en-US-AriaNeural` |
+| `ENABLE_VOICE_FEEDBACK` | Enable voice responses | `true` |
+| `SPEECH_TIMEOUT` | Speech recognition timeout (seconds) | `7` |
+| `SPEECH_PHRASE_TIME_LIMIT` | Max phrase duration (seconds) | `15` |
+
+#### Database
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `MONGODB_URL` | MongoDB connection string | `mongodb://localhost:27017` |
+| `MONGODB_DATABASE` | Database name | `swarai_assistant` |
+| `CONVERSATION_MEMORY_LIMIT` | Max conversation history | `50` |
+
+#### Agent Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `AGENT_TEMPERATURE` | LLM temperature | `0.1` |
+| `MAX_RESPONSE_TOKENS` | Max tokens in response | `1000` |
+
+---
+
+## 💻 Usage
+
+### Voice Commands
+
+#### WhatsApp
+```
+"Send WhatsApp to Jay: Hello, how are you?"
+"Message Mom: I'll be late for dinner"
+"WhatsApp Vijay: Can we reschedule the meeting?"
+```
+
+#### File Search
+```
+"Find my presentation"
+"Search for report.pdf"
+"Open the latest invoice"
+"Find photos from last week"
+```
+
+#### System Control
+```
+"Set volume to 50%"
+"Increase brightness"
+"Check battery status"
+"What's my system info?"
+```
+
+#### Conversation
+```
+"Hello SwarAI!"
+"What can you do?"
+"Help me with my tasks"
+"Tell me a joke"
+```
+
+### API Usage
+
+#### Process Command
+
+```bash
+curl -X POST http://localhost:8000/process-command \
+  -H "Content-Type: application/json" \
+  -d '{"command": "Send WhatsApp to Jay: Hello!"}'
+```
+
+#### Text-to-Speech
+
+```bash
+curl -X POST http://localhost:8000/tts \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Hello from SwarAI!"}'
+```
+
+#### WebSocket Connection
+
+```javascript
+const ws = new WebSocket('ws://localhost:8000/ws');
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Received:', data);
+};
+
+ws.send(JSON.stringify({
+  type: 'command',
+  data: { command: 'Hello SwarAI!' }
+}));
+```
+
+---
+
+## 🤖 AI Agents
+
+### Available Agents
+
+| Agent | Description | Capabilities |
+|-------|-------------|--------------|
+| **WhatsApp** | Message automation | Send messages, contact search, URL generation |
+| **FileSearch** | File management | Search files, open files, fuzzy matching |
+| **Conversation** | Natural dialogue | Context-aware chat, personality, memory |
+| **System Control** | System operations | Volume, brightness, battery, system info |
+| **Email** | Email automation | Compose, send emails (Gmail integration) |
+| **Calendar** | Calendar management | Create events, reminders (Google Calendar) |
+| **Payment** | Payment processing | PayPal, Google Pay, UPI integration |
+| **WebSearch** | Web searching | Google, Bing, DuckDuckGo, YouTube |
+| **Phone** | Phone operations | Make calls, SMS (platform-dependent) |
+| **App Launcher** | Application control | Launch apps, manage windows |
+| **Screenshot** | Screen capture | Take screenshots, save images |
+| **Task** | Task management | Create, manage tasks and reminders |
+| **Multi-Task** | Workflow orchestration | Complex multi-step operations |
+
+### Agent Architecture
+
+Each agent follows a consistent pattern:
+
+```python
+class Agent:
+    def __init__(self):
+        self.llm = ChatGroq(...)  # Groq LLM
+        self.tools = [...]        # Agent-specific tools
+        
+    def process_command(self, user_input: str) -> Dict:
+        # 1. Parse command
+        # 2. Execute action
+        # 3. Return result
+        pass
+```
+
+---
+
+## 📚 API Reference
+
+### REST Endpoints
+
+#### `POST /process-command`
+Process a text or voice command.
+
+**Request:**
+```json
+{
+  "command": "Send WhatsApp to Jay: Hello!",
+  "use_voice": false
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "WhatsApp message ready for Jay!",
+  "agent": "whatsapp",
+  "data": {
+    "whatsapp_url": "https://wa.me/919321781905?text=Hello!"
+  }
+}
+```
+
+#### `POST /tts`
+Convert text to speech.
+
+**Request:**
+```json
+{
+  "text": "Hello from SwarAI!",
+  "engine": "edge"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "audio_file": "path/to/audio.mp3"
+}
+```
+
+#### `GET /health`
+Check API health status.
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "version": "2.0.0",
+  "agents_loaded": 13,
+  "llm_available": true
+}
+```
+
+#### `GET /agents`
+List all available agents.
+
+**Response:**
+```json
+{
+  "agents": [
+    {
+      "name": "WhatsApp Agent",
+      "status": "active",
+      "capabilities": ["send_message", "contact_search"]
+    },
+    ...
+  ]
+}
+```
+
+### WebSocket Events
+
+#### Client → Server
+
+```json
+{
+  "type": "command",
+  "data": {
+    "command": "Hello SwarAI!"
+  }
+}
+```
+
+#### Server → Client
+
+```json
+{
+  "type": "response",
+  "data": {
+    "message": "Hello! How can I help you?",
+    "agent": "conversation"
+  }
+}
+```
+
+---
+
+## 🛠️ Development
+
+### Project Structure
+
+```
+SwarAI/
+├── backend/
+│   ├── agents/                 # AI Agents
+│   │   ├── __init__.py
+│   │   ├── agent_manager.py    # Main coordinator
+│   │   ├── whatsapp_agent.py
+│   │   ├── filesearch_agent.py
+│   │   ├── conversation_agent.py
+│   │   └── ...
+│   ├── utils/                  # Utilities
+│   │   ├── enhanced_speech_processor.py
+│   │   ├── conversational_tts.py
+│   │   ├── conversation_memory.py
+│   │   └── ...
+│   ├── config.py               # Configuration
+│   ├── main.py                 # FastAPI server
+│   ├── crew_main.py            # CrewAI server
+│   ├── crew_config.py          # CrewAI configuration
+│   ├── requirements.txt        # Python dependencies
+│   └── .env.example            # Environment template
+├── frontend/
+│   ├── src/
+│   │   ├── app/                # Next.js app
+│   │   ├── components/         # React components
+│   │   └── hooks/              # Custom hooks
+│   ├── package.json
+│   └── next.config.ts
+├── .gitignore
+└── README.md
+```
+
+### Running Tests
+
+```bash
+# Backend tests
+cd backend
+pytest
+
+# Frontend tests
+cd frontend
+npm test
+```
+
+### Code Style
+
+```bash
+# Python (Black, isort)
+cd backend
+black .
+isort .
+
+# TypeScript (ESLint, Prettier)
+cd frontend
+npm run lint
+npm run format
+```
+
+### Adding a New Agent
+
+1. Create agent file in `backend/agents/`:
+```python
+from langchain.tools import BaseTool
+from langchain_groq import ChatGroq
+
+class MyAgent:
+    def __init__(self):
+        self.llm = ChatGroq(...)
+        
+    def process_command(self, user_input: str):
+        # Implementation
+        pass
+```
+
+2. Register in `agent_manager.py`:
+```python
+from agents.my_agent import MyAgent
+
+self.my_agent = MyAgent()
+```
+
+3. Add routing logic in `process_command()`.
+
+---
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+#### 1. **ModuleNotFoundError: No module named 'streamlit'**
+
+**Solution:**
+```bash
+pip install streamlit pycaw comtypes psutil screen-brightness-control
+```
+
+#### 2. **MongoDB Connection Failed**
+
+**Solution:**
+The app works without MongoDB (uses in-memory storage). To fix:
+```bash
+# Install MongoDB locally or use MongoDB Atlas
+# Update MONGODB_URL in .env
+```
+
+#### 3. **Voice Recognition Not Working**
+
+**Solution:**
+```bash
+# Install audio dependencies
+pip install pyaudio  # May need system libraries
+
+# Windows: Download PyAudio wheel
+# Linux: sudo apt-get install portaudio19-dev python3-pyaudio
+# Mac: brew install portaudio
+```
+
+#### 4. **Frontend Won't Start**
+
+**Solution:**
+```bash
+cd frontend
+rm -rf node_modules package-lock.json
+npm install --legacy-peer-deps
+npm run dev
+```
+
+#### 5. **GROQ_API_KEY Error**
+
+**Solution:**
+1. Get API key from https://console.groq.com/
+2. Add to `backend/.env`:
+   ```env
+   GROQ_API_KEY=your_actual_key_here
+   ```
+
+### Debug Mode
+
+Enable debug logging:
+
+```env
+# .env
+LOG_LEVEL=DEBUG
+DEBUG_MODE=true
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how you can help:
+
+### Ways to Contribute
+
+1. **Report Bugs**: Open an issue with details
+2. **Suggest Features**: Share your ideas
+3. **Submit Pull Requests**: Fix bugs or add features
+4. **Improve Documentation**: Help others understand
+5. **Share Feedback**: Tell us what works and what doesn't
+
+### Development Workflow
+
+1. **Fork the repository**
+2. **Create a feature branch**:
+   ```bash
+   git checkout -b feature/amazing-feature
+   ```
+3. **Make your changes**
+4. **Test thoroughly**
+5. **Commit with clear messages**:
+   ```bash
+   git commit -m "Add amazing feature"
+   ```
+6. **Push to your fork**:
+   ```bash
+   git push origin feature/amazing-feature
+   ```
+7. **Open a Pull Request**
+
+### Code Guidelines
+
+- Follow PEP 8 for Python
+- Use TypeScript for frontend
+- Write clear commit messages
+- Add tests for new features
+- Update documentation
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- **CrewAI** - Multi-agent orchestration framework
+- **LangChain** - AI application framework
+- **Groq** - Fast LLM inference
+- **FastAPI** - Modern Python web framework
+- **Next.js** - React framework
+- **All contributors** - Thank you!
+
+---
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/shashankpc7746/SwarAI/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/shashankpc7746/SwarAI/discussions)
+- **Email**: [Your Email]
+
+---
+
+## 🗺️ Roadmap
+
+### Planned Features
+
+- [ ] Mobile app (React Native)
+- [ ] Voice cloning
+- [ ] Custom agent creation UI
+- [ ] Plugin system
+- [ ] Cloud deployment guides
+- [ ] Docker support
+- [ ] Kubernetes manifests
+- [ ] Advanced analytics
+- [ ] Multi-language support
+- [ ] Integration marketplace
+
+---
+
+<div align="center">
+
+**Made with ❤️ by the SwarAI Team**
+
+⭐ Star us on GitHub if you find this helpful!
+
+[⬆ Back to Top](#-swarai---multi-agent-ai-task-automation-assistant)
+
+</div>

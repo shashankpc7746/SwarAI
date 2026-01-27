@@ -1,4 +1,4 @@
-"""
+﻿"""
 Enhanced Speech Processing Utilities for AI Task Automation Assistant
 Ultra-optimized version to prevent app crashes with proper lazy loading
 """
@@ -269,7 +269,7 @@ class EnhancedSpeechProcessor:
                 audio_ready = self._ensure_audio_ready()
                 
                 if not audio_ready:
-                    print(f"🔊 Vaani says: '{text}' (Audio playback not available)")
+                    print(f"🔊 SwarAI says: '{text}' (Audio playback not available)")
                     return True
                 
                 # Create and play TTS
@@ -290,11 +290,11 @@ class EnhancedSpeechProcessor:
                     
                     return True
             else:
-                print(f"🔊 Vaani says: '{text}'")
+                print(f"🔊 SwarAI says: '{text}'")
                 return True
                 
         except Exception as e:
-            print(f"🔊 Vaani says: '{text}' (TTS error: {str(e)})")
+            print(f"🔊 SwarAI says: '{text}' (TTS error: {str(e)})")
             return True
     
     def test_microphone_enhanced(self) -> Tuple[bool, str]:
