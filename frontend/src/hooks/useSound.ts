@@ -8,29 +8,29 @@ type SoundType = 'start' | 'success' | 'error' | 'processing' | 'notification';
 export function useSound() {
   // In a real implementation, you would load actual sound files
   // For now, we'll use Web Audio API for simple beeps
-  
+
   const playBeep = useCallback((frequency: number, duration: number = 200) => {
     try {
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
-      
+
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
-      
+
       oscillator.frequency.value = frequency;
       oscillator.type = 'sine';
-      
+
       gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
-      
+
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + duration / 1000);
     } catch (error) {
       console.warn('Audio playback failed:', error);
     }
   }, []);
-  
+
   const playSound = useCallback((type: SoundType) => {
     switch (type) {
       case 'start':
@@ -56,7 +56,7 @@ export function useSound() {
         playBeep(440, 100);
     }
   }, [playBeep]);
-  
+
   // Web Speech API TTS for SwarAI to actually speak
   const speak = useCallback((text: string, options: {
     rate?: number;
@@ -75,19 +75,19 @@ export function useSound() {
       window.speechSynthesis.cancel();
 
       const utterance = new SpeechSynthesisUtterance(text);
-      
+
       // Configure voice settings
       utterance.rate = options.rate || 0.9; // Slightly slower for clarity
       utterance.pitch = options.pitch || 1.0;
       utterance.volume = options.volume || 0.8;
-      
+
       // Try to use a good English voice
       const voices = window.speechSynthesis.getVoices();
-      const englishVoice = voices.find(voice => 
-        voice.lang.startsWith('en-') && 
+      const englishVoice = voices.find(voice =>
+        voice.lang.startsWith('en-') &&
         (voice.name.includes('Female') || voice.name.includes('Samantha') || voice.name.includes('Karen'))
       ) || voices.find(voice => voice.lang.startsWith('en-'));
-      
+
       if (englishVoice) {
         utterance.voice = englishVoice;
       }
@@ -95,12 +95,17 @@ export function useSound() {
       // Add event listeners for debugging
       utterance.onstart = () => console.log('🔊 SwarAI started speaking:', text.substring(0, 50) + '...');
       utterance.onend = () => console.log('🔊 SwarAI finished speaking');
-      utterance.onerror = (event) => console.error('🔊 Speech error:', event.error);
-      
+      utterance.onerror = (event) => {
+        // Only log critical errors, ignore interruptions
+        if (event.error !== 'interrupted' && event.error !== 'canceled') {
+          console.error('🔊 Speech error:', event.error);
+        }
+      };
+
       // Speak the text
       window.speechSynthesis.speak(utterance);
       return true;
-      
+
     } catch (error) {
       console.error('TTS error:', error);
       return false;
@@ -122,14 +127,14 @@ export function useSound() {
       const response = await fetch('http://localhost:8000/text-to-speech', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           text,
           language,
           voice_speed: 1.0
         }),
         cache: 'no-cache'
       });
-      
+
       if (response.ok) {
         const result = await response.json();
         console.log('🔊 Backend TTS result:', result);
@@ -138,10 +143,10 @@ export function useSound() {
     } catch (error) {
       console.warn('Backend TTS failed:', error);
     }
-    
+
     return null;
   }, []);
-  
+
   return {
     playSound,
     speak,        // New Web Speech API TTS

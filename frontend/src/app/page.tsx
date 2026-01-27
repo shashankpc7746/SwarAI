@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Mic, 
-  Bot, 
-  MessageCircle, 
-  FileText, 
-  Calendar, 
-  Zap, 
+import {
+  Mic,
+  Bot,
+  MessageCircle,
+  FileText,
+  Calendar,
+  Zap,
   Sparkles,
   Settings,
   Wifi,
@@ -36,7 +36,7 @@ export default function CrewAIPage() {
     result?: any;
   }>>([]);
   const [showHistory, setShowHistory] = useState(false);
-  
+
   const {
     backendStatus,
     isProcessing,
@@ -46,10 +46,10 @@ export default function CrewAIPage() {
     checkStatus,
     clearResult
   } = useCrewAI();
-  
+
   const { playSound, speak, stopSpeaking } = useSound();
   const { isListening: voiceListening, startVoiceRecognition } = useVoiceRecognition();
-  
+
   useEffect(() => {
     checkStatus();
     const interval = setInterval(checkStatus, 10000);
@@ -60,11 +60,11 @@ export default function CrewAIPage() {
   useEffect(() => {
     if (lastResult && !isProcessing && !isManuallyClosing) {
       console.log('🔄 Processing result naturally:', lastResult);
-      
+
       // Handle result naturally without intrusive popups
       handleNaturalResult(lastResult);
     }
-    
+
     // Reset manual closing flag after processing
     if (isManuallyClosing) {
       const timer = setTimeout(() => {
@@ -87,7 +87,7 @@ export default function CrewAIPage() {
   // Handle results with natural conversation flow
   const handleNaturalResult = async (result: any, userCommand?: string) => {
     if (!result) return;
-    
+
     console.log('🗣️ Natural conversation handling:', result);
     console.log('🔍 Checking WhatsApp conditions:');
     console.log('- result.success:', result.success);
@@ -96,23 +96,23 @@ export default function CrewAIPage() {
     console.log('- result.message contains whatsapp:', result.message?.toLowerCase().includes('whatsapp'));
     console.log('- result.whatsapp_url:', result.whatsapp_url);
     console.log('- result.results?.whatsapp_url:', result.results?.whatsapp_url);
-    
+
     // Add user command to history if provided
     if (userCommand) {
       addToHistory('user', userCommand);
     }
-    
+
     // Add SwarAI's response to history
     const cleanMessage = result.message
       ?.replace(/[📱📁🔄✅❌🔍💬📄🎤💡]/g, '') // Remove emojis
       ?.replace(/\n/g, ' ') // Replace newlines with spaces
       ?.replace(/\s+/g, ' ') // Normalize whitespace
       ?.trim();
-    
+
     if (cleanMessage) {
       addToHistory('SwarAI', cleanMessage, result);
     }
-    
+
     // Handle WhatsApp actions naturally (backend already spoke)
     const isRealWhatsAppAction = result.success && (
       (result.agent_used?.toLowerCase().includes('whatsapp') && result.agent_used !== 'conversation') ||
@@ -127,7 +127,7 @@ export default function CrewAIPage() {
         result.message.includes('ready to send')
       ))
     );
-    
+
     if (isRealWhatsAppAction) {
       console.log('📱 Genuine WhatsApp action detected! Setting up automatic opening...');
       // Direct WhatsApp opening without popup interruption
@@ -138,31 +138,31 @@ export default function CrewAIPage() {
     } else {
       console.log('⚠️ No genuine WhatsApp action detected. Result type:', result.intent, 'Agent:', result.agent_used);
     }
-    
+
     // For file operations and other tasks, just add to history
     // Backend TTS already handles speaking
-    
+
     console.log(`📝 Added to conversation history: "${cleanMessage}"`);
   };
 
   const handleVoiceStart = async () => {
     if (backendStatus !== 'online') return;
-    
+
     // Stop any current speech and play start sound
     stopSpeaking();
     playSound('start');
-    
+
     // Use real voice recognition
     startVoiceRecognition(
       async (transcript: string) => {
         console.log('🎤 Voice transcript received:', transcript);
         addToHistory('user', transcript);
-        
+
         // Immediate acknowledgment - brief and natural
         speak("Got it!");
-        
+
         playSound('processing');
-        
+
         // Process the voice command immediately
         console.log('✅ Processing natural command:', transcript);
         await executeCommand(transcript);
@@ -176,11 +176,11 @@ export default function CrewAIPage() {
 
   const handleAgentSelect = async (agentType: string, command: string) => {
     setCurrentAgent(agentType);
-    
+
     // Add to history and acknowledge
     addToHistory('user', command);
     speak("I'll help you with that right away.");
-    
+
     const result = await executeWorkflow(agentType, { command });
     if (result) {
       handleNaturalResult(result, command);
@@ -189,11 +189,11 @@ export default function CrewAIPage() {
 
   const shareToWhatsApp = async () => {
     if (!lastResult) return;
-    
+
     console.log('📱 Attempting to open WhatsApp link from result:', lastResult);
-    
+
     let whatsappUrl = null;
-    
+
     // Priority 1: Check direct whatsapp_url field
     if (lastResult.whatsapp_url) {
       whatsappUrl = lastResult.whatsapp_url;
@@ -217,7 +217,7 @@ export default function CrewAIPage() {
         console.log('✅ Extracted WhatsApp URL from message:', whatsappUrl);
       }
     }
-    
+
     // If we found a WhatsApp URL, open it directly
     if (whatsappUrl) {
       console.log('🚀 Opening WhatsApp URL:', whatsappUrl);
@@ -225,11 +225,11 @@ export default function CrewAIPage() {
       window.open(whatsappUrl, '_blank');
       return;
     }
-    
+
     // Fallback: Try to construct URL from phone and text patterns
     const phoneMatch = lastResult.message?.match(/wa\.me\/([+]?[0-9]+)/);
     const textMatch = lastResult.message?.match(/text=([^&\s]+)/);
-    
+
     if (phoneMatch && textMatch) {
       const phoneNumber = phoneMatch[1];
       const messageText = decodeURIComponent(textMatch[1]);
@@ -241,7 +241,7 @@ export default function CrewAIPage() {
       window.open(whatsappUrl, '_blank');
       return;
     }
-    
+
     // Last resort: Ask backend to extract/generate link - but only if we have a clear WhatsApp message
     if (lastResult.message && (
       lastResult.message.toLowerCase().includes('wa.me') ||
@@ -259,7 +259,7 @@ export default function CrewAIPage() {
             command: `Extract WhatsApp link from: ${lastResult.message.substring(0, 200)}` // Limit length
           })
         });
-        
+
         if (response.ok) {
           const linkResult = await response.json();
           if (linkResult.success && linkResult.results?.whatsapp_url) {
@@ -275,7 +275,7 @@ export default function CrewAIPage() {
     } else {
       console.log('❌ No WhatsApp-related content found in message - skipping backend fallback');
     }
-    
+
     setShowWhatsAppPopup(false);
   };
 
@@ -317,29 +317,33 @@ export default function CrewAIPage() {
   return (
     <div className="min-h-screen p-4 md:p-8">
       {/* Header */}
-      <motion.header 
+      <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="flex justify-between items-center mb-8"
       >
         <div className="flex items-center space-x-4">
           <motion.div
-            whileHover={{ rotate: 360 }}
-            transition={{ duration: 0.5 }}
-            className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center"
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.3 }}
+            className="w-16 h-16 rounded-2xl flex items-center justify-center overflow-hidden bg-white/10 backdrop-blur-sm p-1"
           >
-            <Bot className="w-8 h-8 text-white" />
+            <img
+              src="/swarai_logo.png"
+              alt="SwarAI Logo"
+              className="w-full h-full object-contain rounded-xl"
+            />
           </motion.div>
           <div>
-            <h1 className="text-3xl font-bold text-white">CrewAI Assistant</h1>
+            <h1 className="text-3xl font-bold text-white">SwarAI</h1>
             <p className="text-gray-300">Multi-Agent AI System</p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-4">
-          <StatusIndicator 
-            status={backendStatus} 
-            label="Backend" 
+          <StatusIndicator
+            status={backendStatus}
+            label="Backend"
           />
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -362,9 +366,9 @@ export default function CrewAIPage() {
           </motion.button>
         </div>
       </motion.header>
-      
+
       {/* Main Voice Interface */}
-      <motion.section 
+      <motion.section
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         className="text-center mb-12"
@@ -378,11 +382,11 @@ export default function CrewAIPage() {
             disabled={backendStatus !== 'online' || voiceListening || isProcessing}
             className={`
               relative w-48 h-48 rounded-full transition-all duration-300 transform
-              ${voiceListening 
-                ? 'bg-red-500 shadow-2xl scale-110 animate-pulse' 
+              ${voiceListening
+                ? 'bg-red-500 shadow-2xl scale-110 animate-pulse'
                 : isProcessing
-                ? 'bg-yellow-500 shadow-xl animate-bounce'
-                : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-xl hover:shadow-2xl hover:scale-105'
+                  ? 'bg-yellow-500 shadow-xl animate-bounce'
+                  : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-xl hover:shadow-2xl hover:scale-105'
               }
               disabled:opacity-50 disabled:cursor-not-allowed
               glass-strong voice-ripple ${voiceListening ? 'active' : ''}
@@ -433,10 +437,10 @@ export default function CrewAIPage() {
                 )}
               </AnimatePresence>
             </div>
-            
+
             {/* Ripple effect */}
             {(voiceListening || isProcessing) && (
-              <motion.div 
+              <motion.div
                 className="absolute inset-0 rounded-full border-4 border-white"
                 animate={{
                   scale: [1, 1.2, 1],
@@ -450,12 +454,12 @@ export default function CrewAIPage() {
               />
             )}
           </motion.button>
-          
+
           {/* Voice Visualization */}
           <VoiceVisualization isActive={voiceListening} />
         </motion.div>
-        
-        <motion.p 
+
+        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
@@ -463,7 +467,7 @@ export default function CrewAIPage() {
         >
           Speak naturally or choose an agent below
         </motion.p>
-        
+
         {backendStatus !== 'online' && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -471,11 +475,11 @@ export default function CrewAIPage() {
             className="inline-flex items-center px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400"
           >
             <WifiOff className="w-5 h-5 mr-2" />
-            Backend Offline - Please start the CrewAI server
+            Backend Offline - Please start the SwarAI backend server
           </motion.div>
         )}
       </motion.section>
-      
+
       {/* Agent Cards */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
@@ -497,7 +501,7 @@ export default function CrewAIPage() {
           ))}
         </div>
       </motion.section>
-      
+
       {/* History Modal */}
       <AnimatePresence>
         {showHistory && (
@@ -534,7 +538,7 @@ export default function CrewAIPage() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-                    
+
               {/* Conversation History */}
               <div className="overflow-y-auto max-h-96 space-y-4">
                 {conversationHistory.length === 0 ? (
@@ -545,11 +549,10 @@ export default function CrewAIPage() {
                 ) : (
                   conversationHistory.map((entry, index) => (
                     <div key={index} className={`flex ${entry.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
-                        entry.type === 'user' 
-                          ? 'bg-blue-500 text-white' 
-                          : 'bg-gray-100 text-gray-900'
-                      }`}>
+                      <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${entry.type === 'user'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-gray-100 text-gray-900'
+                        }`}>
                         <div className="flex items-center space-x-2 mb-1">
                           {entry.type === 'user' ? (
                             <div className="w-4 h-4 bg-white/20 rounded-full" />
@@ -574,7 +577,7 @@ export default function CrewAIPage() {
                   ))
                 )}
               </div>
-                    
+
               {/* Actions */}
               <div className="mt-6 flex justify-end space-x-3">
                 <button
@@ -597,7 +600,7 @@ export default function CrewAIPage() {
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       {/* WhatsApp Popup */}
       <AnimatePresence>
         {showWhatsAppPopup && lastResult && (
@@ -633,33 +636,33 @@ export default function CrewAIPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              
+
               <div className="text-center">
                 <div className="mx-auto flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
                   <MessageCircle className="w-8 h-8 text-green-600" />
                 </div>
-                
+
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   WhatsApp Message Ready!
                 </h3>
-                
+
                 {lastResult.agent_used && (
                   <div className="mb-3 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full inline-block">
                     🤖 {lastResult.agent_used} Agent
                   </div>
                 )}
-                
+
                 <p className="text-sm text-gray-600 mb-6 leading-relaxed">
                   Your WhatsApp message has been processed successfully. Click below to open WhatsApp and send your message.
                 </p>
-                
+
                 {lastResult.message && (
                   <div className="mb-6 p-3 bg-gray-50 rounded-lg text-left">
                     <p className="text-xs text-gray-500 mb-1">Message Details:</p>
                     <p className="text-sm text-gray-700 line-clamp-3">{lastResult.message}</p>
                   </div>
                 )}
-                
+
                 <div className="flex space-x-3">
                   <button
                     onClick={(e) => {
