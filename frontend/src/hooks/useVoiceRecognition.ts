@@ -19,21 +19,38 @@ export default function useVoiceRecognition() {
 
     // Enhanced settings for better recognition
     recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.interimResults = true; // Changed to true to see interim results
     recognition.lang = 'en-US';
     recognition.maxAlternatives = 3;
 
     recognition.onstart = () => {
-      console.log('Voice recognition started');
+      console.log('🎤 Voice recognition started - Speak now!');
       setIsListening(true);
       onAudioFeedback('🎤 Listening... Please speak now!');
     };
 
     recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      console.log('Voice recognition result:', transcript);
-      onAudioFeedback('✅ Got it! Processing your command...');
-      onResult(transcript);
+      console.log('🎤 Raw recognition event:', event);
+      console.log('🎤 Results length:', event.results.length);
+
+      // Get the final result
+      const last = event.results.length - 1;
+      const transcript = event.results[last][0].transcript;
+      const confidence = event.results[last][0].confidence;
+      const isFinal = event.results[last].isFinal;
+
+      console.log('🎤 Transcript:', transcript);
+      console.log('🎤 Confidence:', confidence);
+      console.log('🎤 Is Final:', isFinal);
+
+      // Only process final results
+      if (isFinal) {
+        console.log('✅ Final transcript:', transcript);
+        onAudioFeedback('✅ Got it! Processing your command...');
+        onResult(transcript);
+      } else {
+        console.log('⏳ Interim result:', transcript);
+      }
     };
 
     recognition.onerror = (event: any) => {
