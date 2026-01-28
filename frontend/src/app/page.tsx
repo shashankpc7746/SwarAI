@@ -151,9 +151,24 @@ export default function CrewAIPage() {
 
       // Only speak if there's meaningful content left
       if (speechText && speechText.length > 3) {
-        // Limit length to avoid very long speeches
-        const finalSpeech = speechText.length > 200
-          ? speechText.substring(0, 200) + '...'
+        // Smart length limiting based on content type
+        let maxLength = 500; // Default: allow longer speeches
+
+        // For technical/action confirmations, keep it short
+        if (result.agent_used === 'whatsapp' ||
+          result.agent_used === 'filesearch' ||
+          result.agent_used === 'email' ||
+          result.agent_used === 'payment') {
+          maxLength = 100; // Brief confirmations
+        }
+        // For conversations and information, allow full speech
+        else if (result.agent_used === 'conversation' ||
+          result.agent_used === 'websearch') {
+          maxLength = 1000; // Full responses for learning/conversation
+        }
+
+        const finalSpeech = speechText.length > maxLength
+          ? speechText.substring(0, maxLength) + '...'
           : speechText;
         speak(finalSpeech);
       }
