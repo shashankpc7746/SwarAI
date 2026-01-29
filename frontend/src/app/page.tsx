@@ -118,6 +118,12 @@ export default function CrewAIPage() {
       // Remove URLs (they sound terrible when spoken)
       speechText = speechText.replace(/https?:\/\/[^\s]+/g, '');
 
+      // Remove file paths (C:\Users\... or /home/... etc.)
+      speechText = speechText.replace(/[A-Z]:\\[^\s]+/g, ''); // Windows paths
+      speechText = speechText.replace(/\/[^\s]+\/[^\s]+/g, ''); // Unix paths  
+      speechText = speechText.replace(/Path: [^\s]+/gi, ''); // "Path: ..." patterns
+      speechText = speechText.replace(/� [^\s]+/g, ''); // Remove � symbols with paths
+
       // Remove technical patterns
       speechText = speechText.replace(/wa\.me\/[^\s]+/g, '');
       speechText = speechText.replace(/\+\d{10,}/g, ''); // Remove phone numbers
