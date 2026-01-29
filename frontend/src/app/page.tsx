@@ -138,11 +138,21 @@ export default function CrewAIPage() {
         }
       }
 
-      // For file operations, keep it concise
-      if (result.agent_used === 'filesearch' && speechText.toLowerCase().includes('successfully opened')) {
-        const fileMatch = speechText.match(/Successfully opened: ([^�]+)/i);
-        if (fileMatch) {
-          speechText = `Opened ${fileMatch[1]}`;
+      // For file operations, keep it concise and remove paths
+      if (result.agent_used === 'filesearch') {
+        // Handle successful file opening
+        if (speechText.toLowerCase().includes('successfully opened')) {
+          const fileMatch = speechText.match(/Successfully opened: ([^�\s]+)/i);
+          if (fileMatch) {
+            // Extract just the filename without path
+            const fileName = fileMatch[1].split('\\').pop()?.split('/').pop() || fileMatch[1];
+            speechText = `Opened ${fileName}`;
+          }
+        }
+        // Handle file not found errors - remove paths
+        else if (speechText.toLowerCase().includes('no files found') ||
+          speechText.toLowerCase().includes('not found')) {
+          speechText = 'File not found. Please try a different search.';
         }
       }
 
@@ -219,8 +229,11 @@ export default function CrewAIPage() {
         console.log('🎤 Voice transcript received:', transcript);
         addToHistory('user', transcript);
 
-        // Immediate acknowledgment - brief and natural
-        speak("Got it!");
+        // Skip "Got it!" for greetings - let the actual response speak
+        const isGreeting = /^(hi|hello|hey|good morning|good afternoon|good evening|greetings)/i.test(transcript.trim());
+        if (!isGreeting) {
+          speak("Got it!");
+        }
 
         playSound('processing');
 
