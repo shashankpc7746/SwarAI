@@ -131,6 +131,17 @@ class EmailAgent:
                         "context": user_input
                     }
                 
+                # Clean up recipient - remove any command words
+                recipient = parsed.get('recipient', '')
+                # Remove common command words that might be in the recipient
+                command_words = ['draft', 'send', 'email', 'compose', 'write', 'mail', 'a', 'an', 'to']
+                for word in command_words:
+                    recipient = re.sub(r'\b' + word + r'\b', '', recipient, flags=re.IGNORECASE)
+                recipient = recipient.strip()
+                parsed['recipient'] = recipient
+                
+                print(f"[DEBUG] Parsed email - Recipient: {recipient}, Subject: {parsed.get('subject')}, Use AI: {parsed.get('use_ai')}")
+                
                 state['parsed_command'] = parsed
                 state['error'] = None
                 
@@ -148,8 +159,11 @@ class EmailAgent:
                 
                 parsed = state['parsed_command']
                 
-                # Check if AI content generation is requested
-                if parsed.get('use_ai', False) or not parsed.get('body', '').strip():
+                # Always use AI if body is empty OR if explicitly requested
+                should_use_ai = parsed.get('use_ai', False) or not parsed.get('body', '').strip()
+                
+                # Check if AI content generation is needed
+                if should_use_ai:
                     # Generate email body using Groq AI
                     recipient = parsed.get('recipient', '')
                     subject = parsed.get('subject', '')
@@ -251,6 +265,17 @@ class EmailAgent:
     
     def _extract_recipient(self, text: str) -> str:
         """Extract email recipient from text"""
+        # Mock email contacts database (in production, this would be from a real contacts API)
+        email_contacts = {
+            "vijay sharma": "vijaysharma@gmail.com",
+            "vijay": "vijaysharma@gmail.com",
+            "jay": "jay@email.com",
+            "gitanjali": "gitanjali@college.edu",
+            "gitanjali mam": "gitanjali@college.edu",
+            "shivam": "shivam@email.com",
+            "shivam clg": "shivam@email.com",
+        }
+        
         # Look for email patterns (handle spaces in email addresses)
         # First, try to find emails with potential spaces: "7819 Vijay sharma@gmail.com" -> "7819Vijaysharma@gmail.com"
         email_with_spaces = r'([\w\d\s]+@[\w\d.-]+\.[A-Za-z]{2,})'
@@ -267,10 +292,26 @@ class EmailAgent:
             return match.group(0)
         
         # Look for "to [name]" pattern
-        to_pattern = r'(?:to|email)\s+([A-Za-z\s]+?)(?:\s+about|\s+regarding|\s+his|\s+her|$)'
+        to_pattern = r'(?:to|email)\s+([A-Za-z\s]+?)(?:\s+about|\s+regarding|\s+for|\s+his|\s+her|$)'
         match = re.search(to_pattern, text.lower())
         if match:
-            return match.group(1).strip()
+            name = match.group(1).strip()
+            
+            # Try fuzzy matching with contacts
+            name_lower = name.lower()
+            
+            # Exact match
+            if name_lower in email_contacts:
+                return email_contacts[name_lower]
+            
+            # Fuzzy match - check if any contact name is in the query
+            for contact_name, email in email_contacts.items():
+                if contact_name in name_lower or name_lower in contact_name:
+                    print(f"[DEBUG] Fuzzy matched '{name}' to '{contact_name}' -> {email}")
+                    return email
+            
+            # No match found, return the name (user can add email manually)
+            return name
         
         return ""
     
