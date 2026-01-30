@@ -190,11 +190,38 @@ class WhatsAppAgent:
                     print(f"[DEBUG] Pattern 5 match: {recipient} -> {message}")
                 
                 if recipient and message:
+                    # Clean the message - remove quotes and filler words
+                    message_clean = message.strip()
+                    
+                    # Remove surrounding quotes
+                    if (message_clean.startswith('"') and message_clean.endswith('"')) or \
+                       (message_clean.startswith("'") and message_clean.endswith("'")):
+                        message_clean = message_clean[1:-1]
+                    
+                    # Remove filler words
+                    filler_patterns = [
+                        r'^saying\s+',
+                        r'^that\s+',
+                        r'^to say\s+',
+                        r'^tell them\s+',
+                        r'^tell him\s+',
+                        r'^tell her\s+',
+                    ]
+                    
+                    for pattern in filler_patterns:
+                        message_clean = re.sub(pattern, '', message_clean, flags=re.IGNORECASE)
+                    
+                    # Remove quotes within message
+                    message_clean = message_clean.replace('"', '').replace("'", '')
+                    
+                    # Clean whitespace
+                    message_clean = ' '.join(message_clean.split())
+                    
                     state['parsed_command'] = {
                         "recipient": recipient.strip(),
-                        "message": message.strip()
+                        "message": message_clean
                     }
-                    print(f"[DEBUG] Regex parsing success: {recipient} -> {message}")
+                    print(f"[DEBUG] Regex parsing success: {recipient} -> {message_clean}")
                     return state
                 
                 print(f"[DEBUG] Regex parsing failed, trying LLM parsing...")
@@ -252,12 +279,39 @@ class WhatsAppAgent:
                     state['error'] = f"Could not extract recipient and message. Please try formats like: 'WhatsApp to [name] [message]' or 'Send WhatsApp to [name]: [message]'"
                     return state
                 
+                # Clean the message - remove quotes and filler words
+                message_clean = message.strip()
+                
+                # Remove surrounding quotes (single or double)
+                if (message_clean.startswith('"') and message_clean.endswith('"')) or \
+                   (message_clean.startswith("'") and message_clean.endswith("'")):
+                    message_clean = message_clean[1:-1]
+                
+                # Remove filler words at the start
+                filler_patterns = [
+                    r'^saying\s+',
+                    r'^that\s+',
+                    r'^to say\s+',
+                    r'^tell them\s+',
+                    r'^tell him\s+',
+                    r'^tell her\s+',
+                ]
+                
+                for pattern in filler_patterns:
+                    message_clean = re.sub(pattern, '', message_clean, flags=re.IGNORECASE)
+                
+                # Remove any remaining quotes within the message
+                message_clean = message_clean.replace('"', '').replace("'", '')
+                
+                # Clean up extra whitespace
+                message_clean = ' '.join(message_clean.split())
+                
                 state['parsed_command'] = {
                     "recipient": recipient,
-                    "message": message
+                    "message": message_clean
                 }
                 
-                print(f"[DEBUG] LLM parsing success: {recipient} -> {message}")
+                print(f"[DEBUG] LLM parsing success: {recipient} -> {message_clean}")
                 return state
                 
             except Exception as e:
