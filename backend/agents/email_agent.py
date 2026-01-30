@@ -91,16 +91,19 @@ class EmailAgent:
                 
                 # Use LLM to extract email components
                 system_msg = SystemMessage(content="""You are an email parsing assistant. Extract the following from the user's command:
-                - recipient: email address or name (extract actual email if provided)
+                - recipient: ONLY the person's name or email address (DO NOT include command words like 'draft', 'email', 'to', etc.)
                 - subject: email subject (if mentioned)
                 - body: email body/message content (if provided)
                 - use_ai: true if user wants AI to write/enhance the email (keywords: "ai", "groq", "generate", "write for me", "compose", "draft")
                 - context: any additional context for AI to use when generating content
                 
+                IMPORTANT: For recipient, extract ONLY the name or email, nothing else!
+                
                 Examples:
-                - "send email to jay@email.com subject meeting" -> recipient: jay@email.com, subject: meeting, body: "", use_ai: false
-                - "email jay about internship, use AI to write it" -> recipient: jay, subject: internship, use_ai: true
-                - "compose email to hr@company.com about application, groq should write details" -> use_ai: true
+                - "send email to jay@email.com subject meeting" -> recipient: "jay@email.com", subject: "meeting", body: "", use_ai: false
+                - "draft email to Vijay Sharma about internship" -> recipient: "Vijay Sharma", subject: "internship", use_ai: true
+                - "compose email to hr@company.com about application" -> recipient: "hr@company.com", subject: "application", use_ai: true
+                - "email Jay regarding project" -> recipient: "Jay", subject: "project", use_ai: true
                 
                 Return ONLY a JSON object with these fields. If not mentioned, use empty string for text fields and false for use_ai.""")
                 
@@ -122,16 +125,43 @@ class EmailAgent:
                         "context": user_input
                     }
                 
-                # Clean up recipient - remove any command words
+                # Clean up recipient - remove any command words (even if concatenated)
                 recipient = parsed.get('recipient', '')
-                # Remove common command words that might be in the recipient
-                command_words = ['draft', 'send', 'email', 'compose', 'write', 'mail', 'a', 'an', 'to']
+                
+                # First, try to extract just the name/email from common patterns
+                # Pattern: "draftanemailtoVijaySharma" -> "VijaySharma"
+                # Pattern: "sendmailtoJay" -> "Jay"
+                
+                # Remove all variations of command phrases (case insensitive)
+                command_patterns = [
+                    r'draft\s*a?\s*n?\s*e?mail\s*to\s*',
+                    r'send\s*a?\s*n?\s*e?mail\s*to\s*',
+                    r'compose\s*a?\s*n?\s*e?mail\s*to\s*',
+                    r'write\s*a?\s*n?\s*e?mail\s*to\s*',
+                    r'email\s*to\s*',
+                    r'mail\s*to\s*',
+                    r'draft\s*',
+                    r'send\s*',
+                    r'compose\s*',
+                    r'write\s*',
+                    r'to\s*',
+                ]
+                
+                for pattern in command_patterns:
+                    recipient = re.sub(pattern, '', recipient, flags=re.IGNORECASE)
+                
+                # Also remove individual command words
+                command_words = ['draft', 'send', 'email', 'compose', 'write', 'mail', 'a', 'an', 'to', 'the']
                 for word in command_words:
                     recipient = re.sub(r'\b' + word + r'\b', '', recipient, flags=re.IGNORECASE)
+                
+                # Clean up extra spaces
+                recipient = ' '.join(recipient.split())
                 recipient = recipient.strip()
+                
                 parsed['recipient'] = recipient
                 
-                print(f"[DEBUG] Parsed email - Recipient: {recipient}, Subject: {parsed.get('subject')}, Use AI: {parsed.get('use_ai')}")
+                print(f"[DEBUG] Parsed email - Recipient: '{recipient}', Subject: '{parsed.get('subject')}', Use AI: {parsed.get('use_ai')}")
                 
                 state['parsed_command'] = parsed
                 state['error'] = None
