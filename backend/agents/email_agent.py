@@ -196,6 +196,35 @@ class EmailAgent:
                     parsed['body'] = response.content.strip()
                     parsed['ai_generated'] = True
                     
+                    # Also improve subject grammar
+                    subject = parsed.get('subject', '')
+                    if subject:
+                        subject_prompt = SystemMessage(content="""Improve the grammar and capitalization of this email subject line.
+                        
+                        Rules:
+                        - Capitalize first letter and important words
+                        - Fix grammar mistakes
+                        - Keep it concise
+                        - Don't add extra words
+                        
+                        Examples:
+                        - "application for ai internship" -> "Application for AI Internship"
+                        - "meeting tomorrow" -> "Meeting Tomorrow"
+                        - "project update" -> "Project Update"
+                        
+                        Return ONLY the corrected subject line.""")
+                        
+                        subject_response = self.llm.invoke([subject_prompt, HumanMessage(content=f"Correct this subject: {subject}")])
+                        corrected_subject = subject_response.content.strip()
+                        
+                        # Remove quotes if LLM added them
+                        if (corrected_subject.startswith('"') and corrected_subject.endswith('"')) or \
+                           (corrected_subject.startswith("'") and corrected_subject.endswith("'")):
+                            corrected_subject = corrected_subject[1:-1]
+                        
+                        parsed['subject'] = corrected_subject
+                        print(f"[DEBUG] Subject corrected: '{subject}' -> '{corrected_subject}'")
+                    
                     state['parsed_command'] = parsed
                 
             except Exception as e:
@@ -225,11 +254,15 @@ class EmailAgent:
                 response_parts = [f"✅ Email client opened for {recipient}"]
                 if subject:
                     response_parts.append(f"📧 Subject: {subject}")
-                if ai_generated:
+                if ai_generated and body:
                     response_parts.append(f"🤖 AI-generated email content ready!")
-                    response_parts.append(f"📝 Preview: {body[:100]}..." if len(body) > 100 else f"📝 Content: {body}")
+                    # Show full preview (limited to 300 chars for readability)
+                    if len(body) > 300:
+                        response_parts.append(f"📝 Preview: {body[:300]}...")
+                    else:
+                        response_parts.append(f"📝 Preview: {body}")
                 elif body:
-                    response_parts.append(f"📝 Message included")
+                    response_parts.append(f"📝 Message: {body}")
                 
                 state['email_url'] = f"mailto:{recipient}"
                 state['response_message'] = "\n".join(response_parts)
