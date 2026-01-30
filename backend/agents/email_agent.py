@@ -37,39 +37,30 @@ class EmailComposerTool(BaseTool):
     description: str = "Open default email client with pre-filled email details"
     
     def _run(self, recipient: str, subject: str = "", body: str = "", cc: str = None) -> str:
-        """Open email client with mailto URL"""
+        """Open Gmail compose in browser instead of desktop client"""
         try:
-            # Build mailto URL
-            mailto_parts = [f"mailto:{recipient}"]
+            # Build Gmail compose URL instead of mailto
+            gmail_base = "https://mail.google.com/mail/?view=cm&fs=1"
             params = []
             
+            if recipient:
+                params.append(f"to={urllib.parse.quote(recipient)}")
             if subject:
-                params.append(f"subject={urllib.parse.quote(subject)}")
+                params.append(f"su={urllib.parse.quote(subject)}")
             if body:
                 params.append(f"body={urllib.parse.quote(body)}")
             if cc:
                 params.append(f"cc={urllib.parse.quote(cc)}")
             
-            if params:
-                mailto_parts.append("?" + "&".join(params))
+            gmail_url = gmail_base + "&" + "&".join(params) if params else gmail_base
             
-            mailto_url = "".join(mailto_parts)
+            # Open in default browser
+            webbrowser.open(gmail_url)
             
-            # Open in default email client
-            system = platform.system()
-            
-            if system == "Windows":
-                # Windows: use start command
-                subprocess.Popen(['cmd', '/c', 'start', mailto_url], shell=True)
-            elif system == "Darwin":  # macOS
-                subprocess.Popen(['open', mailto_url])
-            else:  # Linux
-                subprocess.Popen(['xdg-open', mailto_url])
-            
-            return f"Email client opened with recipient: {recipient}"
+            return f"Gmail compose opened in browser for: {recipient}"
             
         except Exception as e:
-            return f"Error opening email client: {str(e)}"
+            return f"Error opening Gmail: {str(e)}"
 
 class EmailAgent:
     """LangGraph-powered Email Agent"""
@@ -247,11 +238,11 @@ class EmailAgent:
                 body = parsed.get('body', '')
                 ai_generated = parsed.get('ai_generated', False)
                 
-                # Open email client
+                # Open Gmail in browser
                 result = self.email_tool._run(recipient, subject, body)
                 
                 # Build response message
-                response_parts = [f"✅ Email client opened for {recipient}"]
+                response_parts = [f"✅ Gmail compose opened in browser for {recipient}"]
                 if subject:
                     response_parts.append(f"📧 Subject: {subject}")
                 if ai_generated and body:
@@ -264,7 +255,9 @@ class EmailAgent:
                 elif body:
                     response_parts.append(f"📝 Message: {body}")
                 
-                state['email_url'] = f"mailto:{recipient}"
+                # Build Gmail URL for reference
+                gmail_url = f"https://mail.google.com/mail/?view=cm&fs=1&to={urllib.parse.quote(recipient)}"
+                state['email_url'] = gmail_url
                 state['response_message'] = "\n".join(response_parts)
                 state['error'] = None
                 
