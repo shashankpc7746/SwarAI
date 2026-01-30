@@ -50,6 +50,21 @@ export default function CrewAIPage() {
   const { playSound, speak, stopSpeaking } = useSound();
   const { isListening: voiceListening, startVoiceRecognition } = useVoiceRecognition();
 
+  // Stop speech on page refresh or unmount
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      stopSpeaking();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Cleanup on unmount
+    return () => {
+      stopSpeaking();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [stopSpeaking]);
+
   useEffect(() => {
     checkStatus();
     const interval = setInterval(checkStatus, 10000);

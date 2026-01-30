@@ -135,48 +135,26 @@ class ConversationAgent:
                     state['response'] = response.content.strip()
                     return state
                 
-                elif intent == 'introduction' or 'file search' in user_input.lower() or 'capability' in user_input.lower():
-                    system_prompt = """You are SwarAI, an advanced AI task automation assistant with real capabilities.
+                elif intent == 'introduction' or 'who are you' in user_input.lower():
+                    system_prompt = """You are SwarAI, an intelligent AI assistant.
                     
-                    When asked about file search or capabilities, demonstrate your abilities by:
-                    1. Explaining your file search capabilities
-                    2. Actually performing a sample file search to show it works
-                    3. Mentioning other capabilities like WhatsApp integration
+                    When asked who you are or about your capabilities, give a BRIEF, friendly introduction.
                     
-                    Your actual capabilities:
-                    - Advanced file search across Windows, Mac, Linux systems
-                    - Real-time WhatsApp message automation
-                    - Multi-agent task coordination
-                    - Voice-powered hands-free operation
-                    - Natural language understanding and conversation
-                    - File sharing workflows
+                    Rules:
+                    - Keep it SHORT (2-3 sentences maximum)
+                    - Mention you can help with conversations, WhatsApp, and file searches
+                    - Be warm and welcoming
+                    - Don't list every single feature
+                    - End with asking how you can help
                     
-                    Be enthusiastic and demonstrate with a real example. End with asking how you can assist them.
-                    IMPORTANT: You have access to filesearch_agent - use it to demonstrate!"""
+                    Example good response:
+                    "I'm SwarAI, your intelligent AI assistant! I can help you with conversations, send WhatsApp messages, search for files, and much more. What would you like to do today?"
                     
-                    # Actually demonstrate file search capability
-                    try:
-                        import sys
-                        import os
-                        # Add the current directory to path for imports
-                        current_dir = os.path.dirname(os.path.abspath(__file__))
-                        if current_dir not in sys.path:
-                            sys.path.append(current_dir)
-                        
-                        from filesearch_agent import filesearch_agent
-                        demo_result = filesearch_agent.process_command("search for project files")
-                        if demo_result.get('success') and demo_result.get('search_results'):
-                            file_count = len(demo_result['search_results'])
-                            demo_text = f"\n\n🔍 **Live Demo**: I just searched your system and found {file_count} project-related files! This shows my real file search capabilities in action."
-                        else:
-                            demo_text = "\n\n🔍 **Live Demo**: I just attempted a file search on your system to demonstrate my capabilities!"
-                    except Exception as e:
-                        demo_text = "\n\n🔍 **Ready to Search**: My file search system is active and ready to help you find any files!"
+                    Keep it conversational and brief!"""
                     
-                    # Include demo in the response
                     messages = [
                         SystemMessage(content=system_prompt),
-                        HumanMessage(content=f"User asked: {user_input}\n\nInclude this demo result: {demo_text}")
+                        HumanMessage(content=user_input)
                     ]
                     response = self.llm.invoke(messages)
                     state['response'] = response.content.strip()
