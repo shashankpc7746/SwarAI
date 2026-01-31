@@ -269,25 +269,13 @@ export default function CrewAIPage() {
     );
   };
 
-  const handleAgentSelect = async (agentId: string) => {
-    setCurrentAgent(agentId);
+  const handleExampleClick = async (command: string) => {
+    // Add to history (no speech - let backend handle it)
+    addToHistory('user', command);
 
-    // Find the agent
-    const agent = agents.find(a => a.id === agentId);
-    if (!agent) return;
-
-    // Pick a random example command or use default
-    const exampleCommand = agent.examples && agent.examples.length > 0
-      ? agent.examples[Math.floor(Math.random() * agent.examples.length)]
-      : agent.command;
-
-    // Add to history and acknowledge
-    addToHistory('user', exampleCommand);
-    speak("Let me help you with that!");
-
-    // Execute the command naturally (not as workflow)
-    console.log('✅ Executing agent example:', exampleCommand);
-    await executeCommand(exampleCommand);
+    // Execute the command naturally
+    console.log('✅ Executing example command:', command);
+    await executeCommand(command);
   };
 
   const shareToWhatsApp = async () => {
@@ -618,7 +606,7 @@ export default function CrewAIPage() {
               agent={agent}
               isActive={currentAgent === agent.id}
               isDisabled={backendStatus !== 'online'}
-              onClick={() => handleAgentSelect(agent.id)}
+              onExampleClick={handleExampleClick}
               delay={index * 0.1}
             />
           ))}
