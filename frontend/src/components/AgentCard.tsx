@@ -1,7 +1,8 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
+import { useState } from 'react';
 
 interface Agent {
   id: string;
@@ -10,6 +11,7 @@ interface Agent {
   icon: LucideIcon;
   color: string;
   command: string;
+  examples?: string[];
 }
 
 interface AgentCardProps {
@@ -20,33 +22,35 @@ interface AgentCardProps {
   delay?: number;
 }
 
-export function AgentCard({ 
-  agent, 
-  isActive, 
-  isDisabled, 
-  onClick, 
-  delay = 0 
+export function AgentCard({
+  agent,
+  isActive,
+  isDisabled,
+  onClick,
+  delay = 0
 }: AgentCardProps) {
   const Icon = agent.icon;
-  
+  const [showExamples, setShowExamples] = useState(false);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
-      whileHover={{ 
+      whileHover={{
         y: isDisabled ? 0 : -8,
         scale: isDisabled ? 1 : 1.02
       }}
       whileTap={{ scale: isDisabled ? 1 : 0.98 }}
-      className={`relative group cursor-pointer h-full ${
-        isDisabled ? 'opacity-50 cursor-not-allowed' : ''
-      }`}
+      className={`relative group cursor-pointer h-full ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
+      onMouseEnter={() => !isDisabled && setShowExamples(true)}
+      onMouseLeave={() => setShowExamples(false)}
       onClick={isDisabled ? undefined : onClick}
     >
       {/* Background gradient */}
       <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${agent.color} opacity-20 group-hover:opacity-30 transition-opacity duration-300`} />
-      
+
       {/* Glass effect */}
       <div className="relative h-full p-6 rounded-2xl border border-white/20 glass backdrop-blur-lg group-hover:border-white/30 transition-all duration-300">
         {/* Active indicator */}
@@ -59,7 +63,7 @@ export function AgentCard({
             <div className="absolute inset-0 bg-green-400 rounded-full animate-ping" />
           </motion.div>
         )}
-        
+
         {/* Icon container */}
         <div className="relative mb-4">
           <motion.div
@@ -69,7 +73,7 @@ export function AgentCard({
           >
             <Icon className="w-8 h-8 text-white" />
           </motion.div>
-          
+
           {/* Floating particles */}
           <motion.div
             animate={{
@@ -97,7 +101,7 @@ export function AgentCard({
             className="absolute -bottom-1 -left-1 w-1.5 h-1.5 bg-white/40 rounded-full"
           />
         </div>
-        
+
         {/* Content */}
         <div className="text-center">
           <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-100 transition-colors">
@@ -106,18 +110,44 @@ export function AgentCard({
           <p className="text-gray-300 text-sm leading-relaxed mb-4">
             {agent.description}
           </p>
-          
+
+          {/* Examples on hover */}
+          <AnimatePresence>
+            {showExamples && agent.examples && agent.examples.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-4 overflow-hidden"
+              >
+                <div className="text-xs text-gray-400 mb-2">Try saying:</div>
+                <div className="space-y-1">
+                  {agent.examples.map((example, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="text-xs text-blue-300 bg-white/5 rounded px-2 py-1"
+                    >
+                      "{example}"
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Action button */}
           <motion.div
             whileHover={{ scale: isDisabled ? 1 : 1.05 }}
-            className={`inline-flex items-center px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm font-medium group-hover:bg-white/20 group-hover:border-white/30 transition-all duration-300 ${
-              isDisabled ? '' : 'cursor-pointer'
-            }`}
+            className={`inline-flex items-center px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white text-sm font-medium group-hover:bg-white/20 group-hover:border-white/30 transition-all duration-300 ${isDisabled ? '' : 'cursor-pointer'
+              }`}
           >
             {agent.command}
           </motion.div>
         </div>
-        
+
         {/* Hover glow effect */}
         <motion.div
           className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${agent.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none`}

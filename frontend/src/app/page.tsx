@@ -269,17 +269,25 @@ export default function CrewAIPage() {
     );
   };
 
-  const handleAgentSelect = async (agentType: string, command: string) => {
-    setCurrentAgent(agentType);
+  const handleAgentSelect = async (agentId: string) => {
+    setCurrentAgent(agentId);
+
+    // Find the agent
+    const agent = agents.find(a => a.id === agentId);
+    if (!agent) return;
+
+    // Pick a random example command or use default
+    const exampleCommand = agent.examples && agent.examples.length > 0
+      ? agent.examples[Math.floor(Math.random() * agent.examples.length)]
+      : agent.command;
 
     // Add to history and acknowledge
-    addToHistory('user', command);
-    speak("I'll help you with that right away.");
+    addToHistory('user', exampleCommand);
+    speak("Let me help you with that!");
 
-    const result = await executeWorkflow(agentType, { command });
-    if (result) {
-      handleNaturalResult(result, command);
-    }
+    // Execute the command naturally (not as workflow)
+    console.log('✅ Executing agent example:', exampleCommand);
+    await executeCommand(exampleCommand);
   };
 
   const shareToWhatsApp = async () => {
@@ -381,7 +389,12 @@ export default function CrewAIPage() {
       description: 'Send messages and create shareable links',
       icon: MessageCircle,
       color: 'from-green-500 to-emerald-600',
-      command: 'Send WhatsApp message'
+      command: 'Try me!',
+      examples: [
+        'Send WhatsApp to Mom saying hello',
+        'Message Jay about the meeting',
+        'WhatsApp Sarah good morning'
+      ]
     },
     {
       id: 'file_management',
@@ -389,23 +402,38 @@ export default function CrewAIPage() {
       description: 'Search, open, and organize your files',
       icon: FileText,
       color: 'from-blue-500 to-cyan-600',
-      command: 'Find and manage files'
+      command: 'Try me!',
+      examples: [
+        'Open the latest PDF',
+        'Find my project files',
+        'Search for resume'
+      ]
     },
     {
-      id: 'calendar',
-      name: 'Calendar Agent',
-      description: 'Schedule events and set reminders',
+      id: 'email',
+      name: 'Email Agent',
+      description: 'Draft and send professional emails',
       icon: Calendar,
       color: 'from-purple-500 to-violet-600',
-      command: 'Schedule appointment'
+      command: 'Try me!',
+      examples: [
+        'Draft email to boss about meeting',
+        'Compose email to HR',
+        'Email Jay regarding project update'
+      ]
     },
     {
-      id: 'research',
-      name: 'Research Agent',
-      description: 'Find information and conduct research',
+      id: 'conversation',
+      name: 'Chat Agent',
+      description: 'Have natural conversations and get answers',
       icon: Sparkles,
       color: 'from-orange-500 to-red-600',
-      command: 'Research information'
+      command: 'Try me!',
+      examples: [
+        'Who are you?',
+        'Tell me about AI',
+        'What can you do?'
+      ]
     }
   ];
 
@@ -590,7 +618,7 @@ export default function CrewAIPage() {
               agent={agent}
               isActive={currentAgent === agent.id}
               isDisabled={backendStatus !== 'online'}
-              onClick={() => handleAgentSelect(agent.id, agent.command)}
+              onClick={() => handleAgentSelect(agent.id)}
               delay={index * 0.1}
             />
           ))}
