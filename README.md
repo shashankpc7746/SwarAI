@@ -29,6 +29,7 @@
   <a href="#-installation">Installation</a> •
   <a href="#-usage">Usage</a> •
   <a href="#-api-reference">API</a> •
+  <a href="#-recent-improvements--new-features">What's New</a> •
   <a href="#-contributing">Contributing</a>
 </p>
 
@@ -50,6 +51,8 @@
 - [Development](#-development)
 - [Troubleshooting](#-troubleshooting)
 - [Contributing](#-contributing)
+- [Recent Improvements](#-recent-improvements--new-features)
+- [Roadmap](#-roadmap)
 - [License](#-license)
 
 ---
@@ -804,6 +807,196 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] Advanced analytics
 - [ ] Multi-language support
 - [ ] Integration marketplace
+
+---
+
+## 🎉 Recent Improvements & New Features
+
+### Version 2.4 - UX Improvements
+
+#### 🔊 Speech Control on Page Refresh
+**Problem:** Speech would continue playing in background after page refresh.
+
+**Solution:** Added cleanup handlers to stop speech immediately on:
+- Page refresh
+- Navigation away
+- Tab close
+- Component unmount
+
+**Result:** Clean, professional user experience with controllable audio.
+
+#### 📝 Concise Introduction Responses
+**Problem:** Introduction responses were too long (45+ seconds).
+
+**Solution:** Shortened to 2-3 sentences maximum with key capabilities only.
+
+**Result:** Quick, clear introductions (~10 seconds) without overwhelming users.
+
+---
+
+### Version 2.3 - AI Grammar Correction
+
+#### ✨ AI-Powered WhatsApp Message Grammar
+Automatically improves grammar in all WhatsApp messages:
+
+**Features:**
+- Capitalizes first letter of sentences
+- Adds proper punctuation (. ? !)
+- Fixes grammar mistakes naturally
+- Preserves conversational tone
+- Smart context-aware punctuation
+
+**Examples:**
+```
+"how are you" → "How are you?"
+"i am coming home" → "I am coming home."
+"meeting at 5" → "Meeting at 5."
+"gonna be late" → "Gonna be late."
+```
+
+**Workflow Integration:**
+```
+Parse Command → AI Grammar Correction → Search Contact → Generate URL → Send
+```
+
+---
+
+### Version 2.2 - Smart Features
+
+#### 📁 Smart "Latest File" Detection
+When you specify only a file type (without filename), SwarAI opens the most recent file of that type from Downloads.
+
+**Examples:**
+```bash
+"open pdf" → Opens newest PDF from Downloads
+"open word" → Opens latest .docx from Downloads
+"open excel" → Opens latest .xlsx from Downloads
+"open powerpoint" → Opens latest .pptx from Downloads
+```
+
+**Specific file search still works:**
+```bash
+"open NPTEL certificates" → Finds and opens specific file
+```
+
+---
+
+### Version 2.1 - Enhanced Speech Quality
+
+#### 🗣️ File Path Filtering
+**Problem:** SwarAI was reading file paths in speech.
+
+**Solution:** Intelligent removal of:
+- Windows paths: `C:\Users\...`
+- Unix paths: `/home/user/...`
+- Path patterns: `Path: ...`
+- Special symbols with paths
+
+**Result:**
+```
+Before: "Successfully opened: NPTEL.pdf Path: C:\Users\Shashank Gupta\Downloads\NPTEL.pdf"
+After: "Opened NPTEL.pdf"
+```
+
+#### 👋 Natural Greeting Flow
+**Problem:** Redundant "Got it!" before greeting responses.
+
+**Solution:** Skip acknowledgment for greetings (hi, hello, hey, good morning, etc.)
+
+**Result:**
+```
+Before: "Got it!" → pause → "Hello, I'm SwarAI..."
+After: "Hello, I'm SwarAI, nice to meet you..."
+```
+
+---
+
+### Version 2.0 - Major UX Improvements
+
+#### 🔍 Fuzzy Contact Name Matching
+**Problem:** Required exact contact names, failing for variations.
+
+**Solution:** Intelligent fuzzy matching that handles:
+- Partial names: "Shivam" → Finds "Shivam Patel"
+- Common suffixes: "clg", "college", "mam", "sir", "bro", "sis"
+- First name only: "Jay" → Finds "Jay Sharma"
+- Substring matching
+
+**Examples:**
+```
+✅ "Shivam clg" → Finds "Shivam Patel"
+✅ "Gitanjali mam" → Finds "Gitanjali"
+✅ "Jay" → Finds "Jay Sharma"
+```
+
+#### 🎤 Intelligent Speech Filtering
+**Problem:** SwarAI was reading URLs and technical content.
+
+**Solution:** Smart filtering that removes:
+- URLs: `https://wa.me/...`
+- Phone numbers: `+919876543219`
+- Technical instructions: "Click the link to send"
+- Keeps full text in chat for visual reference
+
+**Result:**
+```
+Before: "WhatsApp message ready for Gitanjali! Click the link to send: https://wa.me/+919876543219?text=..."
+After: "WhatsApp message ready for Gitanjali. Opening WhatsApp now."
+```
+
+#### 📏 Context-Aware Speech Length
+**Problem:** Speech cut off at 200 characters regardless of content.
+
+**Solution:** Smart length limits based on content type:
+
+| Agent Type | Max Length | Purpose |
+|------------|-----------|---------|
+| Conversation | 1000 chars | Full responses |
+| WebSearch | 1000 chars | Complete information |
+| WhatsApp | 100 chars | Brief confirmations |
+| FileSearch | 100 chars | Quick feedback |
+| Email | 100 chars | Action confirmations |
+| Payment | 100 chars | Transaction confirmations |
+| Default | 500 chars | Balanced |
+
+**Result:** Full educational content and conversations, brief action confirmations.
+
+---
+
+### 🎯 Complete Filtering & Enhancement Pipeline
+
+The speech system now applies intelligent filtering:
+
+1. **Remove Emojis** - Clean visual symbols
+2. **Remove URLs** - No "https colon slash slash"
+3. **Remove File Paths** - No directory structures
+4. **Remove Technical Patterns** - No wa.me links, phone numbers
+5. **Remove Instructions** - No "Click here" messages
+6. **Agent-Specific Simplification** - Context-aware brevity
+7. **Context-Aware Length Limiting** - Appropriate for content type
+
+---
+
+### 🧪 Test the New Features
+
+#### WhatsApp with Fuzzy Matching:
+```
+"send WhatsApp to Shivam clg that AI is working"
+"message Gitanjali mam hello"
+"WhatsApp Jay that meeting at 5"
+```
+
+#### Smart File Opening:
+```
+"open pdf" → Opens latest PDF
+"open NPTEL certificates" → Opens specific file
+```
+
+#### Natural Conversations:
+```
+"hello" → Direct greeting (no "Got it!")
+"give me details about Harappan civilization" → Full response
+```
 
 ---
 
