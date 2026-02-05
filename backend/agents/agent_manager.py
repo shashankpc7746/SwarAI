@@ -198,7 +198,7 @@ IMPORTANT:
                 file_keywords = ["find", "search", "open", "file", "document", "folder", "pdf", "doc", "excel", "photo", "video", "music", "ownership", "report", "presentation"]
                 whatsapp_keywords = ["whatsapp", "message", "send to", "text", "tell", "let know", "inform", "send whatsapp", "whatsapp to", "message to", "share"]
                 email_keywords = ["email", "send email", "compose email", "draft email", "mail to"]
-                calendar_keywords = ["calendar", "schedule", "meeting", "appointment", "event", "remind me at"]
+                calendar_keywords = ["calendar", "schedule", "schedule meeting", "create event", "add event", "appointment", "set reminder at", "remind me at"]
                 phone_keywords = ["call", "phone", "dial", "ring", "make a call"]
                 payment_keywords = ["pay", "payment", "send money", "transfer", "paypal", "googlepay", "paytm", "phonepe"]
                 app_keywords = ["open", "launch", "start", "run", "chrome", "browser", "notepad", "calculator"]
@@ -285,8 +285,23 @@ IMPORTANT:
                     print(f"[DEBUG] Routed to: phone")
                     return state
                 
-                # Calendar commands
-                elif has_calendar_intent:
+                # WhatsApp commands (MOVED UP - higher priority than calendar)
+                # This prevents "message" keyword from triggering calendar
+                elif is_whatsapp_command or (has_whatsapp_intent and not has_file_operation and not is_capability_question):
+                    state['detected_intent'] = "whatsapp"
+                    state['agent_name'] = "whatsapp"
+                    print(f"[DEBUG] Routed to: whatsapp")
+                    return state
+                
+                # Multi-agent commands (file + communication)
+                elif is_multi_agent_command or (has_file_operation and has_whatsapp_intent):
+                    state['detected_intent'] = "multi_agent"
+                    state['agent_name'] = "multi_agent"
+                    print(f"[DEBUG] Routed to: multi_agent (file + whatsapp)")
+                    return state
+                
+                # Calendar commands (moved down to avoid conflicts with WhatsApp)
+                elif has_calendar_intent and not has_whatsapp_intent:
                     state['detected_intent'] = "calendar"
                     state['agent_name'] = "calendar"
                     print(f"[DEBUG] Routed to: calendar")
@@ -318,20 +333,6 @@ IMPORTANT:
                     state['detected_intent'] = "app_launcher"
                     state['agent_name'] = "app_launcher"
                     print(f"[DEBUG] Routed to: app_launcher")
-                    return state
-                
-                # Multi-agent commands first
-                elif is_multi_agent_command or (has_file_operation and has_whatsapp_intent):
-                    state['detected_intent'] = "multi_agent"
-                    state['agent_name'] = "multi_agent"
-                    print(f"[DEBUG] Routed to: multi_agent (file + whatsapp)")
-                    return state
-                
-                # WhatsApp commands override conversational detection
-                elif is_whatsapp_command or (has_whatsapp_intent and not has_file_operation and not is_capability_question):
-                    state['detected_intent'] = "whatsapp"
-                    state['agent_name'] = "whatsapp"
-                    print(f"[DEBUG] Routed to: whatsapp")
                     return state
                 
                 # File operations (actual operations, not capability questions)
