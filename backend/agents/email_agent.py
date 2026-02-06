@@ -125,43 +125,41 @@ class EmailAgent:
                         "context": user_input
                     }
                 
-                # Clean up recipient - remove any command words (even if concatenated)
-                recipient = parsed.get('recipient', '')
+                # Clean up recipient - remove any command words more reliably
+                recipient = parsed.get('recipient', '').strip()
                 
-                # First, try to extract just the name/email from common patterns
-                # Pattern: "draftanemailtoVijaySharma" -> "VijaySharma"
-                # Pattern: "sendmailtoJay" -> "Jay"
-                
-                # Remove all variations of command phrases (case insensitive)
-                command_patterns = [
-                    r'draft\s*a?\s*n?\s*e?mail\s*to\s*',
-                    r'send\s*a?\s*n?\s*e?mail\s*to\s*',
-                    r'compose\s*a?\s*n?\s*e?mail\s*to\s*',
-                    r'write\s*a?\s*n?\s*e?mail\s*to\s*',
-                    r'email\s*to\s*',
-                    r'mail\s*to\s*',
-                    r'draft\s*',
-                    r'send\s*',
-                    r'compose\s*',
-                    r'write\s*',
-                    r'to\s*',
-                ]
-                
-                for pattern in command_patterns:
-                    recipient = re.sub(pattern, '', recipient, flags=re.IGNORECASE)
-                
-                # Also remove individual command words
-                command_words = ['draft', 'send', 'email', 'compose', 'write', 'mail', 'a', 'an', 'to', 'the']
-                for word in command_words:
-                    recipient = re.sub(r'\b' + word + r'\b', '', recipient, flags=re.IGNORECASE)
-                
-                # Clean up extra spaces
-                recipient = ' '.join(recipient.split())
-                recipient = recipient.strip()
+                # If recipient seems to have command words, clean it
+                if recipient:
+                    # Remove common command prefixes (case insensitive)
+                    # Pattern: "draftanemailtoVijaySharma" -> "VijaySharma"
+                    import re
+                    
+                    # First pass: Remove concatenated command phrases
+                    recipient = re.sub(r'^(?:draft|send|compose|write)?(?:an?)?(?:e?mail)?(?:to)?', '', recipient, flags=re.IGNORECASE)
+                    
+                    # Second pass: Remove word-by-word if still contaminated
+                    command_words = ['draft', 'send', 'email', 'compose', 'write', 'mail', 'an', 'to', 'the']
+                    recipient_clean = recipient
+                    for word in command_words:
+                        # Only remove if it's a separate word or at start
+                        recipient_clean = re.sub(r'^\s*' + re.escape(word) + r'\s+', '', recipient_clean, flags=re.IGNORECASE)
+                        recipient_clean = re.sub(r'\s+' + re.escape(word) + r'\s+', ' ', recipient_clean, flags=re.IGNORECASE)
+                    
+                    recipient = recipient_clean.strip()
+                    
+                    # If we cleaned too much (empty or just one char), try fallback extraction
+                    if not recipient or len(recipient) < 2:
+                        # Try to extract from original input
+                        recipient = self._extract_recipient(user_input)
                 
                 parsed['recipient'] = recipient
                 
-                print(f"[DEBUG] Parsed email - Recipient: '{recipient}', Subject: '{parsed.get('subject')}', Use AI: {parsed.get('use_ai')}")
+                print(f"[EMAIL] Parsed command:")
+                print(f"  - Original input: '{user_input}'")
+                print(f"  - Recipient: '{recipient}'")
+                print(f"  - Subject: '{parsed.get('subject', '')}'")
+                print(f"  - Use AI: {parsed.get('use_ai', False)}")
+                print(f"  - Body preview: '{parsed.get('body', '')[:100]}...' ({len(parsed.get('body', ''))} chars)")
                 
                 state['parsed_command'] = parsed
                 state['error'] = None
@@ -183,6 +181,8 @@ class EmailAgent:
                 # Always use AI if body is empty OR if explicitly requested
                 should_use_ai = parsed.get('use_ai', False) or not parsed.get('body', '').strip()
                 
+                print(f"[EMAIL] Should use AI: {should_use_ai} (use_ai={parsed.get('use_ai')}, has_body={bool(parsed.get('body', '').strip())})")
+                
                 # Check if AI content generation is needed
                 if should_use_ai:
                     # Generate email body using Groq AI
@@ -190,13 +190,15 @@ class EmailAgent:
                     subject = parsed.get('subject', '')
                     context = parsed.get('context', state['user_input'])
                     
+                    print(f"[EMAIL] Generating AI content for: {recipient}, subject: {subject}")
+                    
                     # Create prompt for AI to generate email
                     system_msg = SystemMessage(content="""You are a professional email writing assistant. 
                     Generate clear, professional, and concise email content based on the user's requirements.
                     
                     Guidelines:
                     - Keep it professional but friendly
-                    - Be concise and to the point
+                    - Be concise and to the point (200-400 words max)
                     - Use proper email etiquette (greetings, closing, etc.)
                     - Format with proper paragraphs
                     - Don't include subject line in body (it's separate)
@@ -211,48 +213,64 @@ class EmailAgent:
                     
                     Write a professional email body that addresses this subject and context.""")
                     
-                    response = self.llm.invoke([system_msg, human_msg])
+                    try:
+                        response = self.llm.invoke([system_msg, human_msg])
+                        generated_body = response.content.strip()
+                        
+                        # Update body with AI-generated content
+                        parsed['body'] = generated_body
+                        parsed['ai_generated'] = True
+                        
+                        print(f"[EMAIL] AI generated {len(generated_body)} chars of content")
+                        
+                    except Exception as e:
+                        print(f"[EMAIL] AI body generation failed: {str(e)}")
+                        # Continue with empty/existing body
+                        parsed['ai_generated'] = False
                     
-                    # Update body with AI-generated content
-                    parsed['body'] = response.content.strip()
-                    parsed['ai_generated'] = True
-                    
-                    # Also improve subject grammar
-                    subject = parsed.get('subject', '')
-                    if subject:
-                        subject_prompt = SystemMessage(content="""Improve the grammar and capitalization of this email subject line.
-                        
-                        Rules:
-                        - Capitalize first letter and important words
-                        - Fix grammar mistakes
-                        - Keep it concise
-                        - Don't add extra words
-                        
-                        Examples:
-                        - "application for ai internship" -> "Application for AI Internship"
-                        - "meeting tomorrow" -> "Meeting Tomorrow"
-                        - "project update" -> "Project Update"
-                        
-                        Return ONLY the corrected subject line.""")
-                        
-                        subject_response = self.llm.invoke([subject_prompt, HumanMessage(content=f"Correct this subject: {subject}")])
-                        corrected_subject = subject_response.content.strip()
-                        
-                        # Remove quotes if LLM added them
-                        if (corrected_subject.startswith('"') and corrected_subject.endswith('"')) or \
-                           (corrected_subject.startswith("'") and corrected_subject.endswith("'")):
-                            corrected_subject = corrected_subject[1:-1]
-                        
-                        parsed['subject'] = corrected_subject
-                        print(f"[DEBUG] Subject corrected: '{subject}' -> '{corrected_subject}'")
+                    # Also improve subject grammar if present
+                    subject = parsed.get('subject', '').strip()
+                    if subject and len(subject) > 0:
+                        try:
+                            subject_prompt = SystemMessage(content="""Improve the grammar and capitalization of this email subject line.
+                            
+                            Rules:
+                            - Capitalize first letter and important words
+                            - Fix grammar mistakes
+                            - Keep it concise
+                            - Don't add extra words
+                            
+                            Examples:
+                            - "application for ai internship" -> "Application for AI Internship"
+                            - "meeting tomorrow" -> "Meeting Tomorrow"
+                            - "project update" -> "Project Update"
+                            
+                            Return ONLY the corrected subject line.""")
+                            
+                            subject_response = self.llm.invoke([subject_prompt, HumanMessage(content=f"Correct this subject: {subject}")])
+                            corrected_subject = subject_response.content.strip()
+                            
+                            # Remove quotes if LLM added them
+                            if (corrected_subject.startswith('"') and corrected_subject.endswith('"')) or \
+                               (corrected_subject.startswith("'") and corrected_subject.endswith("'")):
+                                corrected_subject = corrected_subject[1:-1]
+                            
+                            parsed['subject'] = corrected_subject
+                            print(f"[EMAIL] Subject corrected: '{subject}' -> '{corrected_subject}'")
+                            
+                        except Exception as e:
+                            print(f"[EMAIL] Subject correction failed: {str(e)}")
+                            # Keep original subject
                     
                     state['parsed_command'] = parsed
+                else:
+                    print(f"[EMAIL] Skipping AI generation (body already provided)")
                 
             except Exception as e:
-                # If AI generation fails, continue with whatever body we have
-                print(f"[DEBUG] Email AI generation failed: {str(e)}")
-                parsed['ai_generated'] = False
-                state['parsed_command'] = parsed
+                # If AI generation fails completely, continue with whatever we have
+                print(f"[EMAIL] Email content generation error: {str(e)}")
+                if 'parsed_command' in state:
+                    state['parsed_command']['ai_generated'] = False
                 
             return state
         
@@ -263,37 +281,74 @@ class EmailAgent:
                     return state
                 
                 parsed = state['parsed_command']
-                recipient = parsed.get('recipient', '')
-                subject = parsed.get('subject', '')
-                body = parsed.get('body', '')
+                recipient = parsed.get('recipient', '').strip()
+                subject = parsed.get('subject', '').strip()
+                body = parsed.get('body', '').strip()
                 ai_generated = parsed.get('ai_generated', False)
                 
-                # Open Gmail in browser
-                result = self.email_tool._run(recipient, subject, body)
+                # Validate recipient
+                if not recipient or len(recipient) < 2:
+                    state['error'] = "❌ No valid recipient found. Please specify who to send the email to."
+                    state['response_message'] = state['error']
+                    return state
+                
+                print(f"[EMAIL] Opening Gmail for: {recipient}")
+                print(f"[EMAIL] Subject: {subject}")
+                print(f"[EMAIL] Body length: {len(body)} chars")
+                
+                # Build Gmail URL with proper encoding
+                try:
+                    gmail_base = "https://mail.google.com/mail/?view=cm&fs=1"
+                    params = []
+                    
+                    if recipient:
+                        params.append(f"to={urllib.parse.quote(recipient, safe='')}")
+                    if subject:
+                        params.append(f"su={urllib.parse.quote(subject, safe='')}")
+                    if body:
+                        # Gmail has URL length limits, truncate if too long
+                        max_body_length = 5000
+                        if len(body) > max_body_length:
+                            body = body[:max_body_length] + "\n\n[Content truncated due to length]"
+                        params.append(f"body={urllib.parse.quote(body, safe='')}")
+                    
+                    gmail_url = gmail_base + ("&" + "&".join(params) if params else "")
+                    
+                    # Open in browser
+                    webbrowser.open(gmail_url)
+                    print(f"[EMAIL] Gmail URL opened successfully")
+                    
+                except Exception as e:
+                    print(f"[EMAIL] Failed to open Gmail: {str(e)}")
+                    state['error'] = f"Failed to open Gmail: {str(e)}"
+                    state['response_message'] = "❌ Failed to open Gmail"
+                    return state
                 
                 # Build response message
-                response_parts = [f"✅ Gmail compose opened in browser for {recipient}"]
+                response_parts = [f"✅ Gmail compose opened for: {recipient}"]
                 if subject:
                     response_parts.append(f"📧 Subject: {subject}")
                 if ai_generated and body:
                     response_parts.append(f"🤖 AI-generated email content ready!")
-                    # Show full preview (limited to 300 chars for readability)
-                    if len(body) > 300:
-                        response_parts.append(f"📝 Preview: {body[:300]}...")
+                    # Show preview (limited to 200 chars)
+                    if len(body) > 200:
+                        response_parts.append(f"📝 Preview: {body[:200]}...")
                     else:
-                        response_parts.append(f"📝 Preview: {body}")
+                        response_parts.append(f"📝 Content: {body}")
                 elif body:
-                    response_parts.append(f"📝 Message: {body}")
+                    if len(body) > 200:
+                        response_parts.append(f"📝 Message: {body[:200]}...")
+                    else:
+                        response_parts.append(f"📝 Message: {body}")
                 
-                # Build Gmail URL for reference
-                gmail_url = f"https://mail.google.com/mail/?view=cm&fs=1&to={urllib.parse.quote(recipient)}"
                 state['email_url'] = gmail_url
                 state['response_message'] = "\n".join(response_parts)
                 state['error'] = None
                 
             except Exception as e:
-                state['error'] = f"Failed to open email client: {str(e)}"
-                state['response_message'] = "❌ Failed to open email"
+                print(f"[EMAIL] Error in compose_email_node: {str(e)}")
+                state['error'] = f"Failed to compose email: {str(e)}"
+                state['response_message'] = f"❌ Failed to compose email: {str(e)}"
                 
             return state
         
