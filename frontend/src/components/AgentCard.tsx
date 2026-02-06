@@ -39,9 +39,10 @@ export function AgentCard({
       transition={{ delay, duration: 0.5 }}
       whileHover={{
         y: isDisabled ? 0 : -8,
-        scale: isDisabled ? 1 : 1.02
+        scale: isDisabled ? 1 : 1.02,
+        zIndex: isDisabled ? 1 : 10
       }}
-      className={`relative group h-full ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+      className={`relative group ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       onMouseEnter={() => !isDisabled && setShowExamples(true)}
       onMouseLeave={() => setShowExamples(false)}
@@ -50,7 +51,7 @@ export function AgentCard({
       <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${agent.color} opacity-20 group-hover:opacity-30 transition-opacity duration-500`} />
 
       {/* Glass effect */}
-      <div className="relative h-full p-6 rounded-2xl border border-white/20 glass backdrop-blur-lg group-hover:border-white/30 transition-all duration-500">
+      <div className="relative p-6 rounded-2xl border border-white/20 glass backdrop-blur-lg group-hover:border-white/30 transition-all duration-500">
         {/* Active indicator */}
         {isActive && (
           <motion.div
@@ -105,30 +106,29 @@ export function AgentCard({
           <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-100 transition-colors duration-500 pointer-events-none">
             {agent.name}
           </h3>
-          <p className="text-gray-300 text-sm leading-relaxed mb-4 pointer-events-none">
+          <p className="text-gray-300 text-sm leading-relaxed pointer-events-none">
             {agent.description}
           </p>
 
-          {/* Examples - Always visible, clickable */}
+          {/* Examples - Show below description */}
           <AnimatePresence mode="wait">
-            {showExamples && agent.examples && agent.examples.length > 0 ? (
+            {showExamples && agent.examples && agent.examples.length > 0 && (
               <motion.div
                 key="examples"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-                className="mb-4 overflow-hidden"
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="mt-4 overflow-hidden"
               >
-                <div className="text-xs text-gray-400 mb-2 pointer-events-none">Click to try:</div>
+                <div className="text-xs text-blue-400 mb-2 pointer-events-none font-medium">Click to try:</div>
                 <div className="space-y-2">
                   {agent.examples.map((example, idx) => (
                     <motion.button
                       key={idx}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      transition={{ delay: idx * 0.1, duration: 0.3 }}
+                      transition={{ delay: idx * 0.08, duration: 0.2 }}
                       onClick={(e) => {
                         e.stopPropagation();
                         if (!isDisabled) {
@@ -136,24 +136,13 @@ export function AgentCard({
                         }
                       }}
                       disabled={isDisabled}
-                      className={`w-full text-xs text-left text-blue-300 bg-white/5 hover:bg-white/10 rounded-lg px-3 py-2 transition-all duration-300 border border-white/10 hover:border-white/20 ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer hover:scale-105'
+                      className={`w-full text-xs text-left text-blue-300 bg-white/10 hover:bg-white/20 rounded-lg px-3 py-2 transition-all duration-300 border border-white/20 hover:border-blue-400/50 ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer hover:scale-105'
                         }`}
                     >
                       "{example}"
                     </motion.button>
                   ))}
                 </div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="placeholder"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                className="mb-4 h-24 flex items-center justify-center pointer-events-none"
-              >
-                <p className="text-xs text-gray-500">Hover to see examples</p>
               </motion.div>
             )}
           </AnimatePresence>

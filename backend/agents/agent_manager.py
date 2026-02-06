@@ -104,6 +104,7 @@ ENHANCEMENT RULES:
 5. Make commands more specific and actionable
 6. Keep the intent clear (email, call, search, etc.)
 7. Add missing context when obvious (e.g., "send to Jay" → identify what to send)
+8. For system control commands (volume, brightness, battery, time), preserve them EXACTLY as spoken - DO NOT change or add words
 
 EXAMPLES:
 Input: "send email to Jay his email is 7819 Vijay sharma@gmail.com subject internship give details from graph api"
@@ -127,11 +128,24 @@ Output: "open apple.pdf file"
 Input: "search for cats on youtube"
 Output: "search for cats on YouTube"
 
+Input: "increase volume"
+Output: "increase volume"
+
+Input: "volume up"
+Output: "volume up"
+
+Input: "make it louder"
+Output: "increase volume"
+
+Input: "check battery"
+Output: "battery status"
+
 IMPORTANT:
 - Return ONLY the enhanced command, no explanations
 - Keep it natural and conversational
 - Don't over-complicate simple commands
-- Preserve the user's intent exactly""")
+- Preserve the user's intent exactly
+- System control commands should remain simple and clear""")
                 
                 human_msg = HumanMessage(content=f"Enhance this command: {original_input}")
                 
