@@ -195,11 +195,11 @@ export default function CrewAIPage() {
         // For conversations and information, allow full speech
         else if (result.agent_used === 'conversation' ||
           result.agent_used === 'websearch') {
-          maxLength = 1000; // Full responses for learning/conversation
+          maxLength = 2000; // Increased limit for full responses
         }
 
         const finalSpeech = speechText.length > maxLength
-          ? speechText.substring(0, maxLength) + '...'
+          ? speechText.substring(0, speechText.lastIndexOf('.', maxLength) || maxLength) + '.'
           : speechText;
         speak(finalSpeech);
       }
@@ -240,8 +240,10 @@ export default function CrewAIPage() {
   const handleVoiceStart = async () => {
     if (backendStatus !== 'online') return;
 
-    // Stop any current speech and play start sound
+    // Force stop any current speech immediately
     stopSpeaking();
+    // Small delay to ensure speech is stopped before starting new recognition
+    await new Promise(resolve => setTimeout(resolve, 100));
     playSound('start');
 
     // Use real voice recognition
@@ -599,7 +601,7 @@ export default function CrewAIPage() {
         className="mb-12"
       >
         <h2 className="text-2xl font-bold text-white text-center mb-8">Specialized Agents</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start overflow-hidden">
           {agents.map((agent, index) => (
             <AgentCard
               key={agent.id}

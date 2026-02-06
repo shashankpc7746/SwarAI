@@ -38,12 +38,14 @@ export function AgentCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5 }}
       whileHover={{
-        y: isDisabled ? 0 : -8,
-        scale: isDisabled ? 1 : 1.02,
-        zIndex: isDisabled ? 1 : 10
+        y: isDisabled ? 0 : -4,
+        scale: isDisabled ? 1 : 1.01,
+        zIndex: isDisabled ? 1 : 10,
+        transition: { duration: 0.2 }
       }}
-      className={`relative group ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''
+      className={`relative group ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
         }`}
+      style={{ willChange: 'transform' }}
       onMouseEnter={() => !isDisabled && setShowExamples(true)}
       onMouseLeave={() => setShowExamples(false)}
     >
@@ -115,11 +117,12 @@ export function AgentCard({
             {showExamples && agent.examples && agent.examples.length > 0 && (
               <motion.div
                 key="examples"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
+                initial={{ opacity: 0, maxHeight: 0 }}
+                animate={{ opacity: 1, maxHeight: 500 }}
+                exit={{ opacity: 0, maxHeight: 0 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
                 className="mt-4 overflow-hidden"
+                style={{ willChange: 'max-height, opacity' }}
               >
                 <div className="text-xs text-blue-400 mb-2 pointer-events-none font-medium">Click to try:</div>
                 <div className="space-y-2">
