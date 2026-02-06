@@ -39,9 +39,8 @@ export function AgentCard({
       transition={{ delay, duration: 0.5 }}
       whileHover={{
         y: isDisabled ? 0 : -4,
-        scale: isDisabled ? 1 : 1.01,
         zIndex: isDisabled ? 1 : 10,
-        transition: { duration: 0.2 }
+        transition: { duration: 0.4, ease: "easeOut" }
       }}
       className={`relative group ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
         }`}
@@ -120,7 +119,7 @@ export function AgentCard({
                 initial={{ opacity: 0, maxHeight: 0 }}
                 animate={{ opacity: 1, maxHeight: 500 }}
                 exit={{ opacity: 0, maxHeight: 0 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
+                transition={{ duration: 0.35, ease: "easeInOut" }}
                 className="mt-4 overflow-hidden"
                 style={{ willChange: 'max-height, opacity' }}
               >

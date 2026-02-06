@@ -598,7 +598,7 @@ export default function CrewAIPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="mb-12"
+        className="mb-12 mt-16"
       >
         <h2 className="text-2xl font-bold text-white text-center mb-8">Specialized Agents</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start overflow-hidden">

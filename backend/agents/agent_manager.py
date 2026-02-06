@@ -105,6 +105,7 @@ ENHANCEMENT RULES:
 6. Keep the intent clear (email, call, search, etc.)
 7. Add missing context when obvious (e.g., "send to Jay" → identify what to send)
 8. For system control commands (volume, brightness, battery, time), preserve them EXACTLY as spoken - DO NOT change or add words
+9. For information questions about people or topics (who is, tell me about), DO NOT convert to file search - keep as information query
 
 EXAMPLES:
 Input: "send email to Jay his email is 7819 Vijay sharma@gmail.com subject internship give details from graph api"
@@ -140,13 +141,28 @@ Output: "increase volume"
 Input: "check battery"
 Output: "battery status"
 
+Input: "who is Jay"
+Output: "who is Jay"
+
+Input: "tell me about Shashank"
+Output: "tell me about Shashank"
+
+Input: "what do you know about John"
+Output: "what do you know about John"
+
+Input: "send my recent whatsapp chat to"
+Output: "send WhatsApp message about recent conversation to"
+
+Input: "share the conversation we had"
+Output: "send WhatsApp message about our conversation"
+
 IMPORTANT:
 - Return ONLY the enhanced command, no explanations
 - Keep it natural and conversational
 - Don't over-complicate simple commands
 - Preserve the user's intent exactly
-- System control commands should remain simple and clear""")
-                
+- System control commands should remain simple and clear
+- Information queries should stay as questions, not file searches""")                
                 human_msg = HumanMessage(content=f"Enhance this command: {original_input}")
                 
                 try:
@@ -224,15 +240,24 @@ IMPORTANT:
                 # Detect file intent with better distinction
                 file_keywords = ["find", "search", "open", "ownership", "folder", "photo", "video", "pdf", "doc", "docx", "excel", "presentation", "report"]
                 
-                # Questions about capabilities (should go to conversation)
-                capability_questions = ["can you", "are you able", "do you", "what can", "how do", "tell me about", "what is", "explain", "why", "how"]
+                # Information queries about people or topics (should go to conversation)
+                information_questions = ["who is", "who's", "tell me about", "what do you know about", "information about", "details about", "tell me more about", "what is", "what's", "explain", "describe"]
+                capability_questions = ["can you", "are you able", "do you", "what can", "how do", "why", "how"]
                 general_questions = ["what", "how", "why", "when", "where", "who", "?"]
+                
+                # Check if it's an information query about a person/topic
+                is_information_query = any(phrase in user_input_lower for phrase in information_questions)
                 is_capability_question = any(phrase in user_input_lower for phrase in capability_questions)
                 is_general_question = any(word in user_input_lower for word in general_questions) and not any(op_word in user_input_lower for op_word in ["find", "search", "open", "send"])
                 
                 # Actual file operations (should go to filesearch)
+                # Must have file-related context AND operation keywords
+                file_extensions = [".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt", ".jpg", ".png", ".mp4", ".mp3"]
+                file_context = ["file", "document", "folder", "pdf", "doc", "excel", "photo", "video", "music", "ownership", "report", "presentation"]
                 file_operation_keywords = ["find", "search", "open", "locate", "show me"]
-                has_file_operation = any(keyword in user_input_lower for keyword in file_operation_keywords) and not is_capability_question
+                
+                has_file_context = any(ctx in user_input_lower for ctx in file_context) or any(ext in user_input_lower for ext in file_extensions)
+                has_file_operation = any(keyword in user_input_lower for keyword in file_operation_keywords) and has_file_context and not is_information_query and not is_capability_question
                 
                 # Multi-agent detection (file + communication)
                 has_whatsapp_intent = any(keyword in user_input_lower for keyword in whatsapp_keywords)
@@ -254,8 +279,10 @@ IMPORTANT:
                 whatsapp_patterns = ["send whatsapp", "whatsapp to", "message to", "text to"]
                 is_whatsapp_command = any(pattern in user_input_lower for pattern in whatsapp_patterns)
                 
+                print(f"[DEBUG] Is information query: {is_information_query}")
                 print(f"[DEBUG] Is capability question: {is_capability_question}")
                 print(f"[DEBUG] Is general question: {is_general_question}")
+                print(f"[DEBUG] Has file context: {has_file_context}")
                 print(f"[DEBUG] Has file operation: {has_file_operation}")
                 print(f"[DEBUG] Has WhatsApp intent: {has_whatsapp_intent}")
                 print(f"[DEBUG] Has Email intent: {has_email_intent}")
@@ -271,6 +298,14 @@ IMPORTANT:
                 print(f"[DEBUG] Is multi-agent command: {is_multi_agent_command}")
                 
                 # Priority routing: Check for specific agent intents first
+                
+                # Information queries about people/topics (HIGH PRIORITY - before file search)
+                if is_information_query and not has_file_context:
+                    state['detected_intent'] = "conversation"
+                    state['agent_name'] = "conversation"
+                    print(f"[DEBUG] Routed to: conversation (information query)")
+                    return state
+                
                 # System control commands (high priority - specific actions)
                 if has_system_control_intent:
                     state['detected_intent'] = "system_control"
