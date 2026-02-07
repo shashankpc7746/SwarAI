@@ -647,6 +647,7 @@ export default function CrewAIPage() {
                 <button
                   onClick={() => setShowHistory(false)}
                   className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+                  aria-label="Close conversation history"
                 >
                   <X className="w-5 h-5" />
                 </button>
