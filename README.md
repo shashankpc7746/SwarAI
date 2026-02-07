@@ -65,12 +65,14 @@
 
 - 🤖 **13 Specialized AI Agents** for different tasks
 - 🎤 **Voice Recognition** with multiple engines (Google Speech, Whisper AI)
-- 🗣️ **Text-to-Speech** with multiple TTS engines (Edge TTS, gTTS, Coqui)
-- 📱 **WhatsApp Integration** for automated messaging
-- 📁 **Intelligent File Search** with fuzzy matching
+- 🗣️ **Text-to-Speech** with intelligent speech filtering and context-aware output
+- 📱 **WhatsApp Integration** with fuzzy contact matching and grammar correction
+- 📁 **Intelligent File Search** with fuzzy matching and latest file detection
+- 📧 **AI-Powered Email** with automatic content generation and subject correction
+- 🧠 **Smart Intent Detection** distinguishes information queries from file operations
 - 🔄 **Multi-Agent Orchestration** using CrewAI
-- 🌐 **Modern Web Interface** built with Next.js
-- 🚀 **FastAPI Backend** with WebSocket support
+- 🌐 **Modern Web Interface** with smooth animations and accessibility support
+- 🚀 **FastAPI Backend** with WebSocket support and AI Enhancement Layer
 - 💾 **Conversation Memory** with MongoDB (optional)
 
 ---
@@ -85,6 +87,7 @@
 - Multi-turn conversation support
 - Intent classification and routing
 - Emotional intelligence
+- **AI Enhancement Layer**: Automatically improves command clarity and fixes typos using Groq LLM
 
 #### 2. **Voice Recognition & TTS**
 - **Speech-to-Text**: Google Speech Recognition, Whisper AI
@@ -92,6 +95,7 @@
 - Multi-language support (English variants)
 - Noise reduction and ambient adjustment
 - Real-time voice processing
+- Context-aware speech filtering (removes URLs, paths, technical jargon)
 
 #### 3. **WhatsApp Automation**
 - Send messages via voice or text commands
@@ -371,6 +375,15 @@ pip install screen-brightness-control
 "Send WhatsApp to Jay: Hello, how are you?"
 "Message Mom: I'll be late for dinner"
 "WhatsApp Vijay: Can we reschedule the meeting?"
+"WhatsApp Shivam clg about project deadline"
+```
+
+#### Email
+```
+"Draft email to Jay about meeting tomorrow"
+"Send email to hr@company.com subject job application"
+"Compose email to Vijay Sharma about internship"
+"Email my professor regarding project submission"
 ```
 
 #### File Search
@@ -378,15 +391,25 @@ pip install screen-brightness-control
 "Find my presentation"
 "Search for report.pdf"
 "Open the latest invoice"
-"Find photos from last week"
+"Open pdf" (opens newest PDF from Downloads)
+"Find NPTEL certificates"
+```
+
+#### Information Queries
+```
+"Who is Shashank?"
+"Tell me about Jay"
+"What do you know about the Harappan civilization?"
+"Give me details about quantum computing"
 ```
 
 #### System Control
 ```
-"Set volume to 50%"
-"Increase brightness"
+"Increase volume"
+"Volume up"
+"Make it louder"
 "Check battery status"
-"What's my system info?"
+"What's the time?"
 ```
 
 #### Conversation
@@ -394,6 +417,31 @@ pip install screen-brightness-control
 "Hello SwarAI!"
 "What can you do?"
 "Help me with my tasks"
+"How's your day going?"
+```
+
+#### Calendar
+```
+"What's my schedule for today?"
+"Show me upcoming events"
+"Add meeting on Friday at 3 PM"
+"Do I have any appointments tomorrow?"
+```
+
+#### Web Search
+```
+"Search for latest AI news"
+"Show me Python tutorials"
+"Look up weather in Mumbai"
+"Find information about quantum computing"
+```
+
+#### Screenshot
+```
+"Take a screenshot"
+"Capture my screen"
+"Save current screen as image"
+```
 "Tell me a joke"
 ```
 
@@ -439,11 +487,11 @@ ws.send(JSON.stringify({
 
 | Agent | Description | Capabilities |
 |-------|-------------|--------------|
-| **WhatsApp** | Message automation | Send messages, contact search, URL generation |
-| **FileSearch** | File management | Search files, open files, fuzzy matching |
-| **Conversation** | Natural dialogue | Context-aware chat, personality, memory |
-| **System Control** | System operations | Volume, brightness, battery, system info |
-| **Email** | Email automation | Compose, send emails (Gmail integration) |
+| **WhatsApp** | Message automation | Send messages, contact search, fuzzy matching, grammar correction |
+| **FileSearch** | File management | Search files, open files, fuzzy matching, latest file detection |
+| **Conversation** | Natural dialogue | Context-aware chat, personality, memory, information queries |
+| **System Control** | System operations | Volume, brightness, battery, system info, COM-initialized audio |
+| **Email** | Email automation | AI-generated content, Gmail integration, subject correction |
 | **Calendar** | Calendar management | Create events, reminders (Google Calendar) |
 | **Payment** | Payment processing | PayPal, Google Pay, UPI integration |
 | **WebSearch** | Web searching | Google, Bing, DuckDuckGo, YouTube |
@@ -811,6 +859,88 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 ## 🎉 Recent Improvements & New Features
+
+### Version 2.5 - Enhanced UX & Intelligence (Latest)
+
+#### 🎨 Refined Agent Card Interface
+**Improvements:**
+- Smoother hover animations (0.4s easing instead of instant)
+- Removed zoom effect for cleaner interaction
+- Fixed grid layout to prevent height synchronization issues
+- Added GPU-accelerated animations with `will-change` properties
+- Eliminated layout shake during hover
+- Cards now expand independently without affecting others
+
+**Result:** Professional, buttery-smooth card interactions with zero layout jank.
+
+#### 🧠 Intelligent Intent Detection
+**Problem:** Information queries like "who is Jay" were routing to file manager.
+
+**Solution:** Enhanced intent detection with:
+- Information query patterns: "who is", "tell me about", "what do you know about"
+- File context validation (requires file-related keywords AND operations)
+- Priority routing: Information queries → Conversation agent
+- Preserved file operations: "find ownership document" → File manager
+
+**Examples:**
+✅ "who is Jay" → Conversation agent (answers about the person)
+✅ "tell me about Shashank" → Conversation agent (information)
+✅ "find ownership document" → File manager (actual file search)
+✅ "open presentation.pdf" → File manager (file operation)
+
+**Result:** Natural conversational queries get intelligent responses, not file search errors.
+
+#### 📧 Robust Email Agent
+**Improvements:**
+- **Better Recipient Parsing:** Handles concatenated command words like "draftanemailtoVijaySharma"
+- **Reliable Gmail Opening:** Proper URL encoding with UTF-8 support
+- **AI Content Generation:** Automatically drafts professional emails (200-400 words)
+- **Subject Grammar Correction:** Auto-capitalizes and formats subject lines
+- **Validation:** Checks recipient validity before opening Gmail
+- **Enhanced Logging:** Detailed debug output for troubleshooting
+
+**Features:**
+- AI-generated email bodies when content is not provided
+- Professional tone with proper greetings and closings
+- Smart truncation for long content (5000 char limit)
+- Fallback handling if AI generation fails
+
+**Result:** Reliable email composition every time, with professional AI-generated content.
+
+#### 🗣️ Complete Speech Playback
+**Problem:** Speech was cutting off mid-sentence for long responses.
+
+**Solution:**
+- Increased speech limit: 1000 → 2000 characters for conversations
+- Smart truncation at sentence boundaries (finds last period)
+- Prevents mid-word cuts with proper sentence completion
+
+**Before:**
+> "I've got a wealth of information on the Indus Valley Harappan civilization. The Harappans were a sophisticated Bronze Age civilization that thrived in the Indus Valley region, which is now modern-day Pakistan and northwestern India, from around 3300 to 1300 BCE. They're known for their impressive urban planning, architecture, and water management systems, as well as their unique writing system, which has yet to be fully deciphered. If you'd like, I can provide more specific information on their" ❌
+
+**After:**
+> "I've got a wealth of information on the Indus Valley Harappan civilization. The Harappans were a sophisticated Bronze Age civilization that thrived in the Indus Valley region, which is now modern-day Pakistan and northwestern India, from around 3300 to 1300 BCE. They're known for their impressive urban planning, architecture, and water management systems, as well as their unique writing system, which has yet to be fully deciphered." ✅
+
+#### 🛑 Reliable Speech Stop Control
+**Problem:** Speech continued after page refresh or clicking "Tap to Speak".
+
+**Solution:** Enhanced stop mechanism with:
+- Double-cancel pattern (immediate + 50ms delayed)
+- State checking before cancellation
+- 100ms delay before starting new recognition
+- Cleanup on unmount, refresh, and navigation
+
+**Result:** Speech always stops immediately when requested. Clean audio control.
+
+#### ♿ Accessibility Improvements
+**Added:**
+- `aria-label` attributes to icon-only buttons
+- Descriptive labels for screen readers
+- Proper semantic HTML structure
+
+**Complies with:** WCAG 2.1 Level AA standards
+
+---
 
 ### Version 2.4 - UX Improvements
 
