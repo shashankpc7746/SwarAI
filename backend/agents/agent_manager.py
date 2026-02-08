@@ -154,6 +154,18 @@ Output: "who is Jay"
 Input: "tell me about Shashank"
 Output: "tell me about Shashank"
 
+Input: "open ko pilot"
+Output: "open Copilot"
+
+Input: "open co pilot"
+Output: "open Copilot"
+
+Input: "open anti gravity"
+Output: "open Antigravity"
+
+Input: "open antigravity"
+Output: "open Antigravity"
+
 Input: "what do you know about John"
 Output: "what do you know about John"
 
@@ -267,8 +279,8 @@ IMPORTANT:
                 app_names = ["file manager", "file explorer", "explorer", "notepad", "calculator", "calc", "paint", "settings", 
                              "setting", "control panel", "controlpanel", "task manager", "taskmanager", "device manager", 
                              "devicemanager", "recycle bin", "recyclebin", "chrome", "firefox", "edge", "opera", "brave", "browser", "copilot", 
-                             "github desktop", "githubdesktop", "github", "anydesk", "word", "excel", "powerpoint", "outlook", 
-                             "vscode", "code", "spotify", "discord", "teams", "zoom", "skype", "cmd", "powershell", "terminal"]
+                             "github desktop", "githubdesktop", "github", "anydesk", "antigravity", "google antigravity", 
+                             "word", "excel", "powerpoint", "outlook", "vscode", "code", "spotify", "discord", "teams", "zoom", "skype", "cmd", "powershell", "terminal"]
                 
                 # Check if this is an app launch command (open/launch/start + app name)
                 is_app_launch = any(f"{verb} {app}" in user_input_lower for verb in ["open", "launch", "start", "run"] for app in app_names)

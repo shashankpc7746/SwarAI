@@ -92,6 +92,8 @@ class AppLauncherTool(BaseTool):
         "teams": r"C:\Users\{username}\AppData\Local\Microsoft\Teams\current\Teams.exe",
         "msteams": r"C:\Users\{username}\AppData\Local\Microsoft\Teams\current\Teams.exe",
         "zoom": r"C:\Users\{username}\AppData\Roaming\Zoom\bin\Zoom.exe",
+        "antigravity": r"C:\Users\{username}\AppData\Local\Programs\Antigravity\Antigravity.exe",
+        "googleantigravity": r"C:\Users\{username}\AppData\Local\Programs\Antigravity\Antigravity.exe",
     }
     
     # Popular websites
@@ -364,10 +366,27 @@ class AppLauncherAgent:
         
         print(f"[APP_LAUNCHER] Extracted: '{extracted_name}', Normalized: '{normalized_name}'")
         
-        # PRIORITY 1: Check if it's a known system application
+        # Handle phonetic variations and common misrecognitions
+        phonetic_map = {
+            "kopilot": "copilot",
+            "ko-pilot": "copilot",
+            "cocpilot": "copilot",
+            "antigravity": "antigravity",  # Keep as is for partial matching
+        }
+        if normalized_name in phonetic_map:
+            normalized_name = phonetic_map[normalized_name]
+            print(f"[APP_LAUNCHER] Applied phonetic correction: {normalized_name}")
+        
+        # PRIORITY 1: Check if it's a known system application (exact match)
         if normalized_name in self.launcher_tool.WINDOWS_APPS:
             print(f"[APP_LAUNCHER] Found in WINDOWS_APPS: {normalized_name}")
             return (normalized_name, "application", None)
+        
+        # PRIORITY 1.5: Check for partial matches (e.g., "antigravity" matches app containing "antigravity")
+        for app_key in self.launcher_tool.WINDOWS_APPS.keys():
+            if normalized_name in app_key or app_key in normalized_name:
+                print(f"[APP_LAUNCHER] Partial match found: '{normalized_name}' matches '{app_key}'")
+                return (app_key, "application", None)
         
         # Also check the original extracted name with spaces
         if extracted_name.replace(" ", "") in self.launcher_tool.WINDOWS_APPS:
