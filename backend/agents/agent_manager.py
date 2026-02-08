@@ -281,7 +281,7 @@ IMPORTANT:
                              "devicemanager", "recycle bin", "recyclebin", "chrome", "google chrome", "firefox", "edge", "opera", "brave", "browser", "copilot", 
                              "github desktop", "githubdesktop", "github", "anydesk", "antigravity", "google antigravity", 
                              "word", "excel", "powerpoint", "outlook", "onenote", "one note", "vscode", "code", "spotify", "discord", "teams", "zoom", "skype", 
-                             "cmd", "powershell", "terminal", "vlc", "vlc media", "vlc player", "camera", "clock", "clipchamp", "store", "microsoft store", "truecaller"]
+                             "cmd", "powershell", "terminal", "vlc", "vlc media", "vlc player", "camera", "clock", "alarms", "calendar", "clipchamp", "store", "microsoft store", "truecaller"]
                 
                 # Check if this is an app launch command (open/launch/start + app name)
                 is_app_launch = any(f"{verb} {app}" in user_input_lower for verb in ["open", "launch", "start", "run"] for app in app_names)
