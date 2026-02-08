@@ -99,16 +99,16 @@ class AppLauncherTool(BaseTool):
         "vlc": r"C:\Program Files\VideoLAN\VLC\vlc.exe",
         "vlcmediaplayer": r"C:\Program Files\VideoLAN\VLC\vlc.exe",
         "vlcplayer": r"C:\Program Files\VideoLAN\VLC\vlc.exe",
-        "camera": "ms-windows-store://pdp/?ProductId=9WZDNCRFJBBG",
-        "windowscamera": "ms-windows-store://pdp/?ProductId=9WZDNCRFJBBG",
-        "clock": "ms-windows-store://pdp/?ProductId=9WZDNCRFJ3PR",
-        "windowsclock": "ms-windows-store://pdp/?ProductId=9WZDNCRFJ3PR",
-        "alarmsclock": "ms-windows-store://pdp/?ProductId=9WZDNCRFJ3PR",
-        "clipchamp": "ms-windows-store://pdp/?ProductId=9P1J8S7CCWWT",
-        "microsoftclipchamp": "ms-windows-store://pdp/?ProductId=9P1J8S7CCWWT",
-        "store": "ms-windows-store://home",
-        "microsoftstore": "ms-windows-store://home",
-        "windowsstore": "ms-windows-store://home",
+        "camera": "microsoft.windows.camera:",
+        "windowscamera": "microsoft.windows.camera:",
+        "clock": "outlookcal:",
+        "windowsclock": "outlookcal:",
+        "alarmsclock": "outlookcal:",
+        "clipchamp": "ms-clipchamp:",
+        "microsoftclipchamp": "ms-clipchamp:",
+        "store": "ms-windows-store:",
+        "microsoftstore": "ms-windows-store:",
+        "windowsstore": "ms-windows-store:",
     }
     
     # Popular websites
@@ -228,8 +228,18 @@ class AppLauncherTool(BaseTool):
                     subprocess.Popen([app_path])
                     return f"Launched {app_name}"
                 else:
-                    print(f"[APP_LAUNCHER] Path doesn't exist, trying start command with: {app_path}")
-                    # Try using start command with the actual app path/command
+                    print(f"[APP_LAUNCHER] Path doesn't exist, trying alternate methods")
+                    # For Office apps or other apps with known executables, try just the exe name
+                    if app_name in ['outlook', 'msoutlook', 'word', 'msword', 'excel', 'msexcel', 'powerpoint', 'ppt', 'onenote', 'msonenote']:
+                        # Extract just the executable name for Office apps
+                        exe_name = os.path.basename(app_path)
+                        print(f"[APP_LAUNCHER] Trying Office app by executable name: {exe_name}")
+                        try:
+                            subprocess.Popen(['cmd', '/c', 'start', '', exe_name])
+                            return f"Launched {app_name}"
+                        except:
+                            pass
+                    # Fall back to trying the full path (might work if in PATH)
                     subprocess.Popen(['cmd', '/c', 'start', '', app_path], shell=True)
                     return f"Launched {app_name}"
             except Exception as e:

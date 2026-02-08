@@ -522,10 +522,13 @@ class SystemControlAgent:
                     "hibernate": "sleep"
                 }
                 
-                # Find matching action
+                # Find matching action - use word boundaries to avoid partial matches (e.g., "lock" in "clock")
+                import re
                 detected_action = None
                 for phrase, action in action_mapping.items():
-                    if phrase in user_input:
+                    # Use word boundaries to match whole phrases only
+                    pattern = r'\b' + re.escape(phrase) + r'\b'
+                    if re.search(pattern, user_input):
                         detected_action = action
                         print(f"[SYSTEM_CONTROL] Matched phrase: '{phrase}' -> action: '{action}'")
                         break
