@@ -123,7 +123,7 @@ export function AgentCard({
                 className="mt-4 overflow-hidden"
                 style={{ willChange: 'max-height, opacity' }}
               >
-                <div className="text-xs text-blue-400 mb-2 pointer-events-none font-medium">Click to try:</div>
+                <div className="text-xs text-gray-100 mb-2 pointer-events-none font-medium">Click to try:</div>
                 <div className="space-y-2">
                   {agent.examples.map((example, idx) => (
                     <motion.button
@@ -138,7 +138,7 @@ export function AgentCard({
                         }
                       }}
                       disabled={isDisabled}
-                      className={`w-full text-xs text-left text-blue-300 bg-white/10 hover:bg-white/20 rounded-lg px-3 py-2 transition-all duration-300 border border-white/20 hover:border-blue-400/50 ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer hover:scale-105'
+                      className={`w-full text-xs text-left text-white bg-white/15 hover:bg-white/25 rounded-lg px-3 py-2 transition-all duration-300 border border-white/30 hover:border-white/50 ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer hover:scale-105'
                         }`}
                     >
                       "{example}"

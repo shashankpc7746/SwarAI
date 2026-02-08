@@ -38,96 +38,122 @@ class ScreenshotTool(BaseTool):
     description: str = "Capture screenshot of the screen"
     
     def _run(self) -> Dict[str, Any]:
-        """Capture screenshot - ACTUALLY WORKS NOW!"""
+        """Capture screenshot - Uses Windows keyboard shortcut"""
         try:
+            import subprocess
+            
             # Create screenshots directory
             screenshots_dir = Path.home() / "Pictures" / "Screenshots"
             screenshots_dir.mkdir(parents=True, exist_ok=True)
             
-            # Generate filename with timestamp
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            screenshot_path = screenshots_dir / f"screenshot_{timestamp}.png"
+            # Initialize screenshot_path
+            screenshot_path = None
             
             system = platform.system()
             
-            # METHOD 1: PIL ImageGrab (BEST - Works on Windows/Mac/Linux with X11)
+            # METHOD 1: PIL ImageGrab with all_screens (BEST - Handles DPI properly)
             if PIL_AVAILABLE:
-                print(f"[SCREENSHOT] Using PIL ImageGrab method")
+                print(f"[SCREENSHOT] Using PIL ImageGrab with DPI awareness")
                 try:
-                    # Capture entire screen
-                    screenshot = ImageGrab.grab()
+                    # Generate filename with timestamp
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    screenshot_path = screenshots_dir / f"screenshot_{timestamp}.png"
+                    
+                    print(f"[SCREENSHOT] Target path: {screenshot_path}")
+                    
+                    # Capture entire screen with all_screens=True for multi-monitor and DPI support
+                    print(f"[SCREENSHOT] Capturing screen...")
+                    screenshot = ImageGrab.grab(all_screens=True)
+                    
+                    print(f"[SCREENSHOT] Screen captured, size: {screenshot.size}")
                     
                     # Save as PNG
                     screenshot.save(str(screenshot_path), 'PNG')
+                    print(f"[SCREENSHOT] Image saved")
                     
                     # Verify file exists
                     if screenshot_path.exists():
                         file_size = screenshot_path.stat().st_size / 1024  # KB
+                        print(f"[SCREENSHOT] File verified: {file_size:.2f} KB")
                         return {
                             "success": True,
-                            "message": f"✅ Screenshot captured successfully!",
+                            "message": "Screenshot captured successfully",
                             "path": str(screenshot_path),
                             "size_kb": round(file_size, 2),
                             "method": "PIL ImageGrab"
                         }
+                    else:
+                        print(f"[SCREENSHOT] ERROR: File not found after saving!")
+                        raise Exception("Screenshot file not created")
                 except Exception as e:
                     print(f"[SCREENSHOT] PIL method failed: {e}")
-                    # Fall through to platform-specific methods
+                    import traceback
+                    traceback.print_exc()
             
-            # METHOD 2: Platform-specific fallbacks
-            import subprocess
-            
+            # METHOD 2: Use Windows PowerShell (fallback)
             if system == "Windows":
-                print(f"[SCREENSHOT] Using Windows fallback method")
-                # Try PowerShell with better error handling
-                ps_script = f'''
+                print(f"[SCREENSHOT] Using Windows PowerShell fallback")
+                try:
+                    import subprocess
+                    
+                    # Generate filename with timestamp
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    screenshot_path = screenshots_dir / f"screenshot_{timestamp}.png"
+                    
+                    # Prepare path for PowerShell (escape backslashes)
+                    ps_path = str(screenshot_path).replace("\\", "\\\\")
+                    
+                    # Simplified PowerShell script without complex DPI handling
+                    ps_script = f'''
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-$screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
-$bitmap = New-Object System.Drawing.Bitmap $screen.Width, $screen.Height
+# Get all screens bounds
+$bounds = [System.Windows.Forms.SystemInformation]::VirtualScreen
+$bitmap = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
 $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-$graphics.CopyFromScreen($screen.Location, [System.Drawing.Point]::Empty, $screen.Size)
-$bitmap.Save('{screenshot_path}', [System.Drawing.Imaging.ImageFormat]::Png)
+$graphics.CopyFromScreen($bounds.Left, $bounds.Top, 0, 0, $bounds.Size)
+$bitmap.Save('{ps_path}', [System.Drawing.Imaging.ImageFormat]::Png)
 $graphics.Dispose()
 $bitmap.Dispose()
-
-Write-Output "Screenshot saved"
+Write-Output "Success"
 '''
-                result = subprocess.run(
-                    ['powershell', '-ExecutionPolicy', 'Bypass', '-Command', ps_script],
-                    capture_output=True,
-                    text=True,
-                    timeout=10
-                )
-                
-                # Check if PowerShell worked
-                if screenshot_path.exists():
-                    file_size = screenshot_path.stat().st_size / 1024
-                    return {
-                        "success": True,
-                        "message": f"✅ Screenshot captured via PowerShell!",
-                        "path": str(screenshot_path),
-                        "size_kb": round(file_size, 2),
-                        "method": "PowerShell"
-                    }
-                else:
-                    # Last resort: Open Snipping Tool
-                    subprocess.Popen(['snippingtool', '/clip'])
-                    return {
-                        "success": True,
-                        "message": "📸 Snipping Tool opened - please capture manually and save",
-                        "path": str(screenshots_dir),
-                        "manual": True,
-                        "method": "Snipping Tool"
-                    }
+                    result = subprocess.run(
+                        ['powershell', '-ExecutionPolicy', 'Bypass', '-Command', ps_script],
+                        capture_output=True,
+                        text=True,
+                        timeout=10
+                    )
                     
+                    # Check if screenshot file was created
+                    if screenshot_path.exists():
+                        file_size = screenshot_path.stat().st_size / 1024
+                        return {
+                            "success": True,
+                            "message": "Screenshot captured successfully",
+                            "path": str(screenshot_path),
+                            "size_kb": round(file_size, 2),
+                            "method": "PowerShell"
+                        }
+                    
+                except Exception as e:
+                    print(f"[SCREENSHOT] PowerShell method failed: {e}")
+            
+            # METHOD 3: macOS and Linux fallbacks
             elif system == "Darwin":  # macOS
                 print(f"[SCREENSHOT] Using macOS screencapture")
+                import subprocess
+                # Generate filename with timestamp
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                screenshot_path = screenshots_dir / f"screenshot_{timestamp}.png"
                 subprocess.run(['screencapture', str(screenshot_path)], check=True)
                 
             else:  # Linux
                 print(f"[SCREENSHOT] Using Linux screenshot tools")
+                import subprocess
+                # Generate filename with timestamp
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                screenshot_path = screenshots_dir / f"screenshot_{timestamp}.png"
                 # Try various Linux tools
                 tools = [
                     (['scrot', str(screenshot_path)], 'scrot'),
@@ -143,12 +169,12 @@ Write-Output "Screenshot saved"
                     except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
                         continue
             
-            # Verify screenshot was created
-            if screenshot_path.exists():
+            # Verify screenshot was created (for macOS and Linux)
+            if screenshot_path and screenshot_path.exists():
                 file_size = screenshot_path.stat().st_size / 1024  # KB
                 return {
                     "success": True,
-                    "message": f"✅ Screenshot captured successfully!",
+                    "message": "Screenshot captured successfully",
                     "path": str(screenshot_path),
                     "size_kb": round(file_size, 2),
                     "method": f"{system} native"
@@ -156,7 +182,7 @@ Write-Output "Screenshot saved"
             else:
                 return {
                     "success": False,
-                    "message": "❌ Screenshot capture failed. Try: Win+Shift+S or Win+PrintScreen",
+                    "message": "Screenshot capture failed. Try Win+Shift+S or Win+PrintScreen",
                     "path": None,
                     "error": "File not created",
                     "suggestion": "Install PIL: pip install pillow"
@@ -165,7 +191,7 @@ Write-Output "Screenshot saved"
         except Exception as e:
             return {
                 "success": False,
-                "message": f"❌ Screenshot error: {str(e)}",
+                "message": f"Screenshot error: {str(e)}",
                 "path": None,
                 "error": str(e),
                 "suggestion": "Try manual: Win+Shift+S (Windows) or Cmd+Shift+4 (Mac)"
@@ -209,22 +235,17 @@ class ScreenshotAgent:
                 if result['success']:
                     state['screenshot_path'] = result.get('path')
                     state['screenshot_size'] = result.get('size_kb')
+                    # Clean message without emojis or technical details
                     state['response_message'] = result['message']
-                    
-                    # Add helpful info
-                    if result.get('method'):
-                        state['response_message'] += f"\n📍 Location: {result['path']}"
-                        if result.get('size_kb'):
-                            state['response_message'] += f"\n📊 Size: {result['size_kb']} KB"
                 else:
                     state['error'] = result.get('error')
                     state['response_message'] = result['message']
                     if result.get('suggestion'):
-                        state['response_message'] += f"\n💡 {result['suggestion']}"
+                        state['response_message'] += f". {result['suggestion']}"
                     
             except Exception as e:
                 state['error'] = str(e)
-                state['response_message'] = f"❌ Screenshot failed: {str(e)}"
+                state['response_message'] = f"Screenshot failed: {str(e)}"
             
             return state
         
@@ -264,7 +285,7 @@ class ScreenshotAgent:
         except Exception as e:
             return {
                 "success": False,
-                "message": f"❌ Screenshot agent error: {str(e)}",
+                "message": f"Screenshot agent error: {str(e)}",
                 "path": None,
                 "error": str(e)
             }

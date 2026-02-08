@@ -97,13 +97,18 @@ class EmailAgent:
                 - use_ai: true if user wants AI to write/enhance the email (keywords: "ai", "groq", "generate", "write for me", "compose", "draft")
                 - context: any additional context for AI to use when generating content
                 
-                IMPORTANT: For recipient, extract ONLY the name or email, nothing else!
+                IMPORTANT RULES:
+                1. For recipient, extract ONLY the name or email, nothing else!
+                2. If user says "Shashank Gupta 7746 at the rate gmail.com", extract it as: "shashankgupta7746@gmail.com" (lowercase, no spaces, proper @ symbol)
+                3. If user says "[name] [number] at the rate [domain]", format as: "[name][number]@[domain]" (all lowercase, no spaces)
+                4. Keep name-number order as spoken: "shashank 7746" stays "shashank7746", NOT "7746shashank"
                 
                 Examples:
                 - "send email to jay@email.com subject meeting" -> recipient: "jay@email.com", subject: "meeting", body: "", use_ai: false
                 - "draft email to Vijay Sharma about internship" -> recipient: "Vijay Sharma", subject: "internship", use_ai: true
                 - "compose email to hr@company.com about application" -> recipient: "hr@company.com", subject: "application", use_ai: true
                 - "email Jay regarding project" -> recipient: "Jay", subject: "project", use_ai: true
+                - "send mail to Shashank Gupta 7746 at the rate gmail.com wishing happy birthday" -> recipient: "shashankgupta7746@gmail.com", subject: "Happy Birthday", use_ai: true
                 
                 Return ONLY a JSON object with these fields. If not mentioned, use empty string for text fields and false for use_ai.""")
                 
@@ -385,22 +390,29 @@ class EmailAgent:
             "gitanjali mam": "gitanjali@college.edu",
             "shivam": "shivam@email.com",
             "shivam clg": "shivam@email.com",
+            "shashank gupta": "shashankgupta7746@gmail.com",
+            "shashank": "shashankgupta7746@gmail.com",
         }
         
-        # Look for email patterns (handle spaces in email addresses)
-        # First, try to find emails with potential spaces: "7819 Vijay sharma@gmail.com" -> "7819Vijaysharma@gmail.com"
-        email_with_spaces = r'([\w\d\s]+@[\w\d.-]+\.[A-Za-z]{2,})'
-        match = re.search(email_with_spaces, text)
+        # First, handle 'at the rate' pattern explicitly
+        # "Shashank Gupta 7746 at the rate gmail.com" -> "shashankgupta7746@gmail.com"
+        at_rate_pattern = r'([\w\s]+?)\s*(?:at the rate|at rate|@)\s*([\w.-]+\.\w+)'
+        match = re.search(at_rate_pattern, text, re.IGNORECASE)
         if match:
-            # Remove spaces from email
-            email = match.group(0).replace(' ', '')
-            return email
+            # Get the parts
+            left_part = match.group(1).strip()  # "Shashank Gupta 7746"
+            domain = match.group(2).strip()      # "gmail.com"
+            
+            # Remove spaces and convert to lowercase
+            email_address = left_part.replace(' ', '').lower() + '@' + domain.lower()
+            print(f"[EMAIL] Parsed 'at the rate' format: '{left_part}' @ '{domain}' -> '{email_address}'")
+            return email_address
         
         # Standard email pattern
         email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
         match = re.search(email_pattern, text)
         if match:
-            return match.group(0)
+            return match.group(0).lower()
         
         # Look for "to [name]" pattern
         to_pattern = r'(?:to|email)\s+([A-Za-z\s]+?)(?:\s+about|\s+regarding|\s+for|\s+his|\s+her|$)'

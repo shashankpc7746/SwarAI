@@ -189,7 +189,8 @@ export default function CrewAIPage() {
         if (result.agent_used === 'whatsapp' ||
           result.agent_used === 'filesearch' ||
           result.agent_used === 'email' ||
-          result.agent_used === 'payment') {
+          result.agent_used === 'payment' ||
+          result.agent_used === 'screenshot') {
           maxLength = 100; // Brief confirmations
         }
         // For conversations and information, allow full speech

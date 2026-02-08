@@ -44,9 +44,13 @@ class AppLauncherTool(BaseTool):
         "explorer": "explorer.exe",
         "cmd": "cmd.exe",
         "powershell": "powershell.exe",
+        "settings": "ms-settings:",
+        "copilot": "microsoft-edge:///?ux=copilot&tcp=1&source=taskbar",
         "chrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
         "firefox": r"C:\Program Files\Mozilla Firefox\firefox.exe",
         "edge": "msedge.exe",
+        "opera": r"C:\Users\{username}\AppData\Local\Programs\Opera\opera.exe",
+        "brave": r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe",
         "word": r"C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE",
         "excel": r"C:\Program Files\Microsoft Office\root\Office16\EXCEL.EXE",
         "powerpoint": r"C:\Program Files\Microsoft Office\root\Office16\POWERPNT.EXE",
@@ -138,6 +142,20 @@ class AppLauncherTool(BaseTool):
         if app_name in self.WINDOWS_APPS:
             app_path = self.WINDOWS_APPS[app_name].replace('{username}', username)
             
+            # Handle special URI schemes (Settings, Copilot, etc.)
+            if app_path.startswith(('ms-', 'microsoft-edge://')):
+                try:
+                    # Use start command for URI schemes
+                    if app_name == 'copilot':
+                        # Open Copilot via Edge
+                        subprocess.Popen(['start', 'msedge', '--app=' + app_path], shell=True)
+                    else:
+                        subprocess.Popen(['start', app_path], shell=True)
+                    return f"Launched {app_name}"
+                except Exception as e:
+                    print(f"[APP_LAUNCHER] Failed to launch {app_name} via URI: {e}")
+                    return f"Failed to launch {app_name}"
+            
             # Handle wildcard paths (like Discord with version numbers)
             if '*' in app_path:
                 import glob
@@ -151,16 +169,25 @@ class AppLauncherTool(BaseTool):
                     return f"Launched {app_name}"
                 else:
                     # Try using start command
-                    subprocess.Popen(['cmd', '/c', 'start', app_name], shell=True)
+                    subprocess.Popen(['cmd', '/c', 'start', '', app_name], shell=True)
                     return f"Launched {app_name}"
-            except:
+            except Exception as e:
+                print(f"[APP_LAUNCHER] Error launching {app_name}: {e}")
                 # Fallback to simple command
-                subprocess.Popen(app_name, shell=True)
-                return f"Launched {app_name}"
+                try:
+                    subprocess.Popen(['start', '', app_name], shell=True)
+                    return f"Launched {app_name}"
+                except:
+                    return f"Failed to launch {app_name}"
         else:
-            # Try to launch by name
-            subprocess.Popen(['cmd', '/c', 'start', app_name], shell=True)
-            return f"Attempted to launch {app_name}"
+            # Try to launch by name using Windows start command
+            # This handles many built-in Windows apps and installed programs
+            try:
+                subprocess.Popen(['cmd', '/c', 'start', '', app_name], shell=True)
+                return f"Launched {app_name}"
+            except Exception as e:
+                print(f"[APP_LAUNCHER] Failed to launch {app_name}: {e}")
+                return f"Could not find or launch {app_name}"
     
     def _launch_macos_app(self, app_name: str) -> str:
         """Launch application on macOS"""

@@ -97,19 +97,26 @@ class AgentManager:
 Your job is to understand what the user REALLY wants to do, even if they speak casually or make typos.
 
 ENHANCEMENT RULES:
-1. Fix typos and spacing in emails/names (e.g., "7819 Vijay sharma@gmail.com" → "7819Vijaysharma@gmail.com")
-2. Clarify vague requests (e.g., "find that apple thing" → "find apple.pdf file")
-3. Expand abbreviated commands (e.g., "msg Jay" → "send WhatsApp message to Jay")
-4. Preserve all important details (names, numbers, subjects, context)
-5. Make commands more specific and actionable
-6. Keep the intent clear (email, call, search, etc.)
-7. Add missing context when obvious (e.g., "send to Jay" → identify what to send)
-8. For system control commands (volume, brightness, battery, time), preserve them EXACTLY as spoken - DO NOT change or add words
-9. For information questions about people or topics (who is, tell me about), DO NOT convert to file search - keep as information query
+1. Fix typos and spacing - but PRESERVE word order as spoken
+2. For email addresses with "at the rate", convert to @ symbol and keep name-number order:
+   - "shashank gupta 7746 at the rate gmail.com" → "shashankgupta7746@gmail.com" (lowercase, no spaces)
+   - "john 123 at rate test.com" → "john123@test.com"
+   - NEVER reorder: "shashank 7746" stays "shashank7746", NOT "7746shashank"
+3. Clarify vague requests (e.g., "find that apple thing" → "find apple.pdf file")
+4. Expand abbreviated commands (e.g., "msg Jay" → "send WhatsApp message to Jay")
+5. Preserve all important details (names, numbers, subjects, context)
+6. Make commands more specific and actionable
+7. Keep the intent clear (email, call, search, etc.)
+8. Add missing context when obvious (e.g., "send to Jay" → identify what to send)
+9. For system control commands (volume, brightness, battery, time), preserve them EXACTLY as spoken - DO NOT change or add words
+10. For information questions about people or topics (who is, tell me about), DO NOT convert to file search - keep as information query
 
 EXAMPLES:
-Input: "send email to Jay his email is 7819 Vijay sharma@gmail.com subject internship give details from graph api"
-Output: "send email to 7819Vijaysharma@gmail.com with subject 'application for internship' and include details about the Graph API project"
+Input: "send mail to Shashank Gupta 7746 at the rate gmail.com wishing happy birthday"
+Output: "send email to shashankgupta7746@gmail.com with subject 'Happy Birthday' and write a birthday wish"
+
+Input: "send email to Jay his email is john 123 at rate example.com subject internship"
+Output: "send email to john123@example.com with subject 'internship application'"
 
 Input: "call jay"
 Output: "call Jay"
