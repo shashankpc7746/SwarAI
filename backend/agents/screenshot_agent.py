@@ -38,13 +38,12 @@ class ScreenshotTool(BaseTool):
     description: str = "Capture screenshot of the screen"
     
     def _run(self) -> Dict[str, Any]:
-        """Capture screenshot - Uses Windows keyboard shortcut"""
+        """Capture screenshot - Save directly to Desktop for immediate visibility"""
         try:
             import subprocess
             
-            # Create screenshots directory
-            screenshots_dir = Path.home() / "Pictures" / "Screenshots"
-            screenshots_dir.mkdir(parents=True, exist_ok=True)
+            # Save directly to Desktop so user can see it immediately
+            screenshots_dir = Path.home() / "Desktop"
             
             # Initialize screenshot_path
             screenshot_path = None
