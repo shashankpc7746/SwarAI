@@ -53,7 +53,7 @@ class ScreenshotTool(BaseTool):
             
             # METHOD 1: PIL ImageGrab with all_screens (BEST - Handles DPI properly)
             if PIL_AVAILABLE:
-                print(f"[SCREENSHOT] Using PIL ImageGrab with DPI awareness")
+                print(f"[SCREENSHOT] Using PIL ImageGrab")
                 try:
                     # Generate filename with timestamp
                     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -61,20 +61,33 @@ class ScreenshotTool(BaseTool):
                     
                     print(f"[SCREENSHOT] Target path: {screenshot_path}")
                     
-                    # Capture entire screen with all_screens=True for multi-monitor and DPI support
+                    # Capture entire screen - try without all_screens first for compatibility
                     print(f"[SCREENSHOT] Capturing screen...")
-                    screenshot = ImageGrab.grab(all_screens=True)
+                    try:
+                        screenshot = ImageGrab.grab()
+                    except Exception as e:
+                        print(f"[SCREENSHOT] Standard grab failed, trying bbox method: {e}")
+                        # Fallback: Try with explicit bbox
+                        import ctypes
+                        user32 = ctypes.windll.user32
+                        width = user32.GetSystemMetrics(0)
+                        height = user32.GetSystemMetrics(1)
+                        screenshot = ImageGrab.grab(bbox=(0, 0, width, height))
                     
                     print(f"[SCREENSHOT] Screen captured, size: {screenshot.size}")
                     
                     # Save as PNG
-                    screenshot.save(str(screenshot_path), 'PNG')
-                    print(f"[SCREENSHOT] Image saved")
+                    screenshot.save(str(screenshot_path), 'PNG', optimize=False)
+                    print(f"[SCREENSHOT] Image saved to {screenshot_path}")
+                    
+                    # Force file system sync
+                    import time
+                    time.sleep(0.1)
                     
                     # Verify file exists
                     if screenshot_path.exists():
                         file_size = screenshot_path.stat().st_size / 1024  # KB
-                        print(f"[SCREENSHOT] File verified: {file_size:.2f} KB")
+                        print(f"[SCREENSHOT] SUCCESS: File verified: {file_size:.2f} KB")
                         return {
                             "success": True,
                             "message": "Screenshot captured successfully",

@@ -39,27 +39,53 @@ class AppLauncherTool(BaseTool):
     WINDOWS_APPS: ClassVar[Dict[str, str]] = {
         "notepad": "notepad.exe",
         "calculator": "calc.exe",
+        "calc": "calc.exe",
         "paint": "mspaint.exe",
         "wordpad": "write.exe",
         "explorer": "explorer.exe",
+        "fileexplorer": "explorer.exe",
+        "filemanager": "explorer.exe",
+        "files": "explorer.exe",
         "cmd": "cmd.exe",
+        "commandprompt": "cmd.exe",
+        "terminal": "cmd.exe",
         "powershell": "powershell.exe",
         "settings": "ms-settings:",
+        "setting": "ms-settings:",
+        "systemsettings": "ms-settings:",
+        "controlpanel": "control.exe",
+        "control": "control.exe",
+        "taskmanager": "taskmgr.exe",
+        "taskmgr": "taskmgr.exe",
+        "devicemanager": "devmgmt.msc",
+        "devmgr": "devmgmt.msc",
         "copilot": "microsoft-edge:///?ux=copilot&tcp=1&source=taskbar",
         "chrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        "googlechrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
         "firefox": r"C:\Program Files\Mozilla Firefox\firefox.exe",
+        "mozillafirefox": r"C:\Program Files\Mozilla Firefox\firefox.exe",
         "edge": "msedge.exe",
+        "microsoftedge": "msedge.exe",
         "opera": r"C:\Users\{username}\AppData\Local\Programs\Opera\opera.exe",
+        "operabrowser": r"C:\Users\{username}\AppData\Local\Programs\Opera\opera.exe",
         "brave": r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe",
+        "bravebrowser": r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe",
         "word": r"C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE",
+        "msword": r"C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE",
         "excel": r"C:\Program Files\Microsoft Office\root\Office16\EXCEL.EXE",
+        "msexcel": r"C:\Program Files\Microsoft Office\root\Office16\EXCEL.EXE",
         "powerpoint": r"C:\Program Files\Microsoft Office\root\Office16\POWERPNT.EXE",
+        "ppt": r"C:\Program Files\Microsoft Office\root\Office16\POWERPNT.EXE",
         "outlook": r"C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE",
+        "msoutlook": r"C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE",
         "vscode": r"C:\Users\{username}\AppData\Local\Programs\Microsoft VS Code\Code.exe",
+        "code": r"C:\Users\{username}\AppData\Local\Programs\Microsoft VS Code\Code.exe",
+        "visualstudiocode": r"C:\Users\{username}\AppData\Local\Programs\Microsoft VS Code\Code.exe",
         "spotify": r"C:\Users\{username}\AppData\Roaming\Spotify\Spotify.exe",
         "discord": r"C:\Users\{username}\AppData\Local\Discord\app-*\Discord.exe",
         "skype": r"C:\Program Files\Microsoft\Skype for Desktop\Skype.exe",
         "teams": r"C:\Users\{username}\AppData\Local\Microsoft\Teams\current\Teams.exe",
+        "msteams": r"C:\Users\{username}\AppData\Local\Microsoft\Teams\current\Teams.exe",
         "zoom": r"C:\Users\{username}\AppData\Roaming\Zoom\bin\Zoom.exe",
     }
     
@@ -138,17 +164,23 @@ class AppLauncherTool(BaseTool):
         """Launch application on Windows"""
         username = os.getenv('USERNAME', 'User')
         
+        print(f"[APP_LAUNCHER] Attempting to launch Windows app: '{app_name}'")
+        
         # Check known apps
         if app_name in self.WINDOWS_APPS:
             app_path = self.WINDOWS_APPS[app_name].replace('{username}', username)
+            print(f"[APP_LAUNCHER] Found in WINDOWS_APPS: {app_path}")
             
             # Handle special URI schemes (Settings, Copilot, etc.)
             if app_path.startswith(('ms-', 'microsoft-edge://')):
                 try:
                     # Use start command for URI schemes
-                    if app_name == 'copilot':
-                        # Open Copilot via Edge
-                        subprocess.Popen(['start', 'msedge', '--app=' + app_path], shell=True)
+                    if app_name in ['copilot', 'settings', 'setting', 'systemsettings']:
+                        print(f"[APP_LAUNCHER] Launching URI scheme: {app_path}")
+                        if app_name in ['copilot']:
+                            subprocess.Popen(['start', 'msedge', '--app=' + app_path], shell=True)
+                        else:
+                            subprocess.Popen(['start', app_path], shell=True)
                     else:
                         subprocess.Popen(['start', app_path], shell=True)
                     return f"Launched {app_name}"
@@ -162,14 +194,17 @@ class AppLauncherTool(BaseTool):
                 matches = glob.glob(app_path)
                 if matches:
                     app_path = matches[0]
+                    print(f"[APP_LAUNCHER] Resolved wildcard path: {app_path}")
             
             try:
                 if os.path.exists(app_path):
+                    print(f"[APP_LAUNCHER] Path exists, launching: {app_path}")
                     subprocess.Popen([app_path])
                     return f"Launched {app_name}"
                 else:
-                    # Try using start command
-                    subprocess.Popen(['cmd', '/c', 'start', '', app_name], shell=True)
+                    print(f"[APP_LAUNCHER] Path doesn't exist, trying start command with: {app_path}")
+                    # Try using start command with the actual app path/command
+                    subprocess.Popen(['cmd', '/c', 'start', '', app_path], shell=True)
                     return f"Launched {app_name}"
             except Exception as e:
                 print(f"[APP_LAUNCHER] Error launching {app_name}: {e}")
@@ -178,16 +213,17 @@ class AppLauncherTool(BaseTool):
                     subprocess.Popen(['start', '', app_name], shell=True)
                     return f"Launched {app_name}"
                 except:
-                    return f"Failed to launch {app_name}"
+                    return f"Could not launch {app_name}. It may not be installed."
         else:
-            # Try to launch by name using Windows start command
+            # App not in known list - try to launch by name using Windows start command
             # This handles many built-in Windows apps and installed programs
+            print(f"[APP_LAUNCHER] Not in known apps, trying generic start command for: {app_name}")
             try:
                 subprocess.Popen(['cmd', '/c', 'start', '', app_name], shell=True)
-                return f"Launched {app_name}"
+                return f"Attempted to launch {app_name}"
             except Exception as e:
                 print(f"[APP_LAUNCHER] Failed to launch {app_name}: {e}")
-                return f"Could not find or launch {app_name}"
+                return f"Could not find application: {app_name}. Please check if it's installed."
     
     def _launch_macos_app(self, app_name: str) -> str:
         """Launch application on macOS"""
@@ -284,46 +320,67 @@ class AppLauncherAgent:
         """Parse launch request to determine app name, type, and URL"""
         text_lower = text.lower()
         
-        # Check for website patterns
-        website_keywords = ["open", "goto", "visit", "browse", "search"]
-        website_names = ["google", "youtube", "gmail", "github", "chatgpt", "claude", "netflix", "amazon"]
-        
-        if any(keyword in text_lower for keyword in website_keywords) and any(site in text_lower for site in website_names):
-            for site in website_names:
-                if site in text_lower:
-                    return (site, "website", None)
-        
-        # Check for URL patterns
-        if "http://" in text_lower or "https://" in text_lower or ".com" in text_lower or ".org" in text_lower:
-            url_match = re.search(r'(https?://[^\s]+|www\.[^\s]+|[a-z0-9-]+\.[a-z]{2,})', text_lower)
-            if url_match:
-                return (url_match.group(0), "website", url_match.group(0))
-        
-        # Check for browser launch
-        if any(browser in text_lower for browser in ["chrome", "firefox", "edge", "browser"]):
-            for browser in ["chrome", "firefox", "edge"]:
-                if browser in text_lower:
-                    return (browser, "browser", None)
-        
-        # Application launch patterns
+        # Extract the app/site name after action verbs
         app_patterns = [
-            r'(?:open|launch|start|run)\s+([a-z\s]+)',
-            r'([a-z]+)\s+application',
+            r'(?:open|launch|start|run)\s+([a-z\s]+?)(?:\s+application|\s+app|\s+browser|$)',
+            r'([a-z\s]+?)\s+(?:application|app|browser)$',
         ]
         
+        extracted_name = ""
         for pattern in app_patterns:
             match = re.search(pattern, text_lower)
             if match:
-                app_name = match.group(1).strip()
-                return (app_name, "application", None)
+                extracted_name = match.group(1).strip()
+                break
         
-        # Fallback: extract first word after action verb
-        words = text_lower.split()
-        for i, word in enumerate(words):
-            if word in ["open", "launch", "start", "run"] and i + 1 < len(words):
-                return (words[i + 1], "application", None)
+        # If no pattern matched, try simple extraction
+        if not extracted_name:
+            words = text_lower.split()
+            for i, word in enumerate(words):
+                if word in ["open", "launch", "start", "run"] and i + 1 < len(words):
+                    # Get the next word(s), but stop at certain keywords
+                    remaining = words[i+1:]
+                    stop_words = ["application", "app", "browser", "in", "on"]
+                    app_words = []
+                    for w in remaining:
+                        if w in stop_words:
+                            break
+                        app_words.append(w)
+                    extracted_name = " ".join(app_words)
+                    break
         
-        return ("", "application", None)
+        # Normalize app name (remove spaces, common variations)
+        normalized_name = extracted_name.replace(" ", "").replace("-", "")
+        
+        print(f"[APP_LAUNCHER] Extracted: '{extracted_name}', Normalized: '{normalized_name}'")
+        
+        # PRIORITY 1: Check if it's a known system application
+        if normalized_name in self.launcher_tool.WINDOWS_APPS:
+            print(f"[APP_LAUNCHER] Found in WINDOWS_APPS: {normalized_name}")
+            return (normalized_name, "application", None)
+        
+        # Also check the original extracted name with spaces
+        if extracted_name.replace(" ", "") in self.launcher_tool.WINDOWS_APPS:
+            normalized = extracted_name.replace(" ", "")
+            print(f"[APP_LAUNCHER] Found in WINDOWS_APPS (after space removal): {normalized}")
+            return (normalized, "application", None)
+        
+        # PRIORITY 2: Check for URL patterns
+        if "http://" in text_lower or "https://" in text_lower or ".com" in text_lower or ".org" in text_lower:
+            url_match = re.search(r'(https?://[^\s]+|www\.[^\s]+|[a-z0-9-]+\.[a-z]{2,})', text_lower)
+            if url_match:
+                print(f"[APP_LAUNCHER] Found URL pattern: {url_match.group(0)}")
+                return (url_match.group(0), "website", url_match.group(0))
+        
+        # PRIORITY 3: Check if it's a known website
+        if normalized_name in self.launcher_tool.WEBSITES or extracted_name in self.launcher_tool.WEBSITES:
+            site_name = normalized_name if normalized_name in self.launcher_tool.WEBSITES else extracted_name
+            print(f"[APP_LAUNCHER] Found in WEBSITES: {site_name}")
+            return (site_name, "website", None)
+        
+        # PRIORITY 4: If nothing matched, treat as application and let Windows handle it
+        print(f"[APP_LAUNCHER] Not found in known apps, trying as generic application: {normalized_name}")
+        return (normalized_name if normalized_name else extracted_name, "application", None)
     
     def process_command(self, user_input: str) -> Dict[str, Any]:
         """Process app launch command and return result"""

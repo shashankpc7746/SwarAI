@@ -263,8 +263,18 @@ IMPORTANT:
                 file_context = ["file", "document", "folder", "pdf", "doc", "excel", "photo", "video", "music", "ownership", "report", "presentation"]
                 file_operation_keywords = ["find", "search", "open", "locate", "show me"]
                 
+                # Specific app names that should go to app_launcher (not filesearch)
+                app_names = ["file manager", "file explorer", "explorer", "notepad", "calculator", "calc", "paint", "settings", 
+                             "setting", "control panel", "controlpanel", "task manager", "taskmanager", "device manager", 
+                             "devicemanager", "chrome", "firefox", "edge", "opera", "brave", "browser", "copilot", 
+                             "word", "excel", "powerpoint", "outlook", "vscode", "code", "spotify", "discord", "teams", 
+                             "zoom", "skype", "cmd", "powershell", "terminal"]
+                
+                # Check if this is an app launch command (open/launch/start + app name)
+                is_app_launch = any(f"{verb} {app}" in user_input_lower for verb in ["open", "launch", "start", "run"] for app in app_names)
+                
                 has_file_context = any(ctx in user_input_lower for ctx in file_context) or any(ext in user_input_lower for ext in file_extensions)
-                has_file_operation = any(keyword in user_input_lower for keyword in file_operation_keywords) and has_file_context and not is_information_query and not is_capability_question
+                has_file_operation = any(keyword in user_input_lower for keyword in file_operation_keywords) and has_file_context and not is_information_query and not is_capability_question and not is_app_launch
                 
                 # Multi-agent detection (file + communication)
                 has_whatsapp_intent = any(keyword in user_input_lower for keyword in whatsapp_keywords)
@@ -272,8 +282,8 @@ IMPORTANT:
                 has_calendar_intent = any(keyword in user_input_lower for keyword in calendar_keywords)
                 has_phone_intent = any(keyword in user_input_lower for keyword in phone_keywords)
                 has_payment_intent = any(keyword in user_input_lower for keyword in payment_keywords)
-                has_app_intent = any(keyword in user_input_lower for keyword in app_keywords)
-                has_search_intent = any(keyword in user_input_lower for keyword in search_keywords)
+                has_app_intent = any(keyword in user_input_lower for keyword in app_keywords) or is_app_launch
+                has_search_intent = any(keyword in user_input_lower for keyword in search_keywords) and not is_app_launch
                 has_task_intent = any(keyword in user_input_lower for keyword in task_keywords)
                 has_screenshot_intent = any(keyword in user_input_lower for keyword in screenshot_keywords)
                 has_system_control_intent = any(keyword in user_input_lower for keyword in system_control_keywords)
