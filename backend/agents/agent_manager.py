@@ -266,9 +266,9 @@ IMPORTANT:
                 # Specific app names that should go to app_launcher (not filesearch)
                 app_names = ["file manager", "file explorer", "explorer", "notepad", "calculator", "calc", "paint", "settings", 
                              "setting", "control panel", "controlpanel", "task manager", "taskmanager", "device manager", 
-                             "devicemanager", "chrome", "firefox", "edge", "opera", "brave", "browser", "copilot", 
-                             "word", "excel", "powerpoint", "outlook", "vscode", "code", "spotify", "discord", "teams", 
-                             "zoom", "skype", "cmd", "powershell", "terminal"]
+                             "devicemanager", "recycle bin", "recyclebin", "chrome", "firefox", "edge", "opera", "brave", "browser", "copilot", 
+                             "github desktop", "githubdesktop", "github", "anydesk", "word", "excel", "powerpoint", "outlook", 
+                             "vscode", "code", "spotify", "discord", "teams", "zoom", "skype", "cmd", "powershell", "terminal"]
                 
                 # Check if this is an app launch command (open/launch/start + app name)
                 is_app_launch = any(f"{verb} {app}" in user_input_lower for verb in ["open", "launch", "start", "run"] for app in app_names)

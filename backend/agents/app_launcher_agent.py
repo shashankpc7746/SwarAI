@@ -59,7 +59,12 @@ class AppLauncherTool(BaseTool):
         "taskmgr": "taskmgr.exe",
         "devicemanager": "devmgmt.msc",
         "devmgr": "devmgmt.msc",
+        "recyclebin": "shell:RecycleBinFolder",
+        "recycle": "shell:RecycleBinFolder",
         "copilot": "microsoft-edge:///?ux=copilot&tcp=1&source=taskbar",
+        "githubdesktop": r"C:\Users\{username}\AppData\Local\GitHubDesktop\GitHubDesktop.exe",
+        "github": r"C:\Users\{username}\AppData\Local\GitHubDesktop\GitHubDesktop.exe",
+        "anydesk": r"C:\Program Files (x86)\AnyDesk\AnyDesk.exe",
         "chrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
         "googlechrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
         "firefox": r"C:\Program Files\Mozilla Firefox\firefox.exe",
@@ -94,7 +99,8 @@ class AppLauncherTool(BaseTool):
         "google": "https://www.google.com",
         "youtube": "https://www.youtube.com",
         "gmail": "https://mail.google.com",
-        "github": "https://www.github.com",
+        "githubwebsite": "https://www.github.com",
+        "githubsite": "https://www.github.com",
         "stackoverflow": "https://stackoverflow.com",
         "linkedin": "https://www.linkedin.com",
         "facebook": "https://www.facebook.com",
@@ -171,18 +177,22 @@ class AppLauncherTool(BaseTool):
             app_path = self.WINDOWS_APPS[app_name].replace('{username}', username)
             print(f"[APP_LAUNCHER] Found in WINDOWS_APPS: {app_path}")
             
-            # Handle special URI schemes (Settings, Copilot, etc.)
-            if app_path.startswith(('ms-', 'microsoft-edge://')):
+            # Handle special URI schemes (Settings, Copilot, Recycle Bin, etc.)
+            if app_path.startswith(('ms-', 'microsoft-edge://', 'shell:')):
                 try:
                     # Use start command for URI schemes
-                    if app_name in ['copilot', 'settings', 'setting', 'systemsettings']:
-                        print(f"[APP_LAUNCHER] Launching URI scheme: {app_path}")
-                        if app_name in ['copilot']:
-                            subprocess.Popen(['start', 'msedge', '--app=' + app_path], shell=True)
-                        else:
-                            subprocess.Popen(['start', app_path], shell=True)
+                    if app_name in ['copilot']:
+                        print(f"[APP_LAUNCHER] Launching Copilot via Edge")
+                        # Open Copilot in Edge with proper URL quoting
+                        subprocess.Popen(['cmd', '/c', 'start', 'msedge', f'--app={app_path}'], shell=True)
+                    elif app_name in ['settings', 'setting', 'systemsettings']:
+                        print(f"[APP_LAUNCHER] Launching Settings: {app_path}")
+                        subprocess.Popen(['cmd', '/c', 'start', app_path], shell=True)
+                    elif app_path.startswith('shell:'):
+                        print(f"[APP_LAUNCHER] Launching shell command: {app_path}")
+                        subprocess.Popen(['explorer', app_path])
                     else:
-                        subprocess.Popen(['start', app_path], shell=True)
+                        subprocess.Popen(['cmd', '/c', 'start', app_path], shell=True)
                     return f"Launched {app_name}"
                 except Exception as e:
                     print(f"[APP_LAUNCHER] Failed to launch {app_name} via URI: {e}")
