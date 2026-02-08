@@ -38,14 +38,13 @@ class ScreenshotTool(BaseTool):
     description: str = "Capture screenshot of the screen"
     
     def _run(self) -> Dict[str, Any]:
-        """Capture screenshot - Save to Desktop (OneDrive-aware)"""
+        """Capture screenshot - Save to OneDrive Pictures\Screenshots"""
         try:
             import subprocess
             
-            # Check for OneDrive Desktop first (visible Desktop), fallback to local
-            onedrive_desktop = Path.home() / "OneDrive" / "Desktop"
-            local_desktop = Path.home() / "Desktop"
-            screenshots_dir = onedrive_desktop if onedrive_desktop.exists() else local_desktop
+            # Use OneDrive Pictures\Screenshots folder (user's actual Pictures location)
+            screenshots_dir = Path.home() / "OneDrive" / "Pictures" / "Screenshots"
+            screenshots_dir.mkdir(parents=True, exist_ok=True)
             
             # Initialize screenshot_path
             screenshot_path = None
