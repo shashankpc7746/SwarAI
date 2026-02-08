@@ -36,22 +36,9 @@ class ContactSearchTool(BaseTool):
     
     # Mock contact database - in real implementation, this would connect to actual contacts
     mock_contacts: ClassVar[Dict[str, str]] = {
-        "jay": "+919321781905",
-        "jay sharma": "+919321781905",
-        "vijay": "+919876543211",
-        "vijay sharma": "+919876543211", 
-        "mom": "+919876543212",
-        "dad": "+919876543213",
-        "john": "+919876543214",
-        "alice": "+919876543215",
-        "boss": "+919876543216",
-        "shivam": "+919876543217",
-        "shivam patel": "+919876543217",
-        "shivam clg": "+919876543217",
-        "shivam college": "+919876543217",
-        "karthikeya": "+919876543218",
-        "gitanjali": "+919876543219",
-        "gitanjali mam": "+919876543219",
+        "shashank":"+917977305279",
+        "shivam 2":"+918928013540",
+        "vijay":"+919321781905"
     }
     
     def _fuzzy_match(self, search_name: str) -> Optional[str]:

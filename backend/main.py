@@ -17,6 +17,7 @@ from datetime import datetime
 from config import config
 from agents.agent_manager import agent_manager
 from utils.enhanced_speech_processor import enhanced_speech_processor
+from auth import auth_router
 
 # JSON serialization helper function
 def json_serializable(obj):
@@ -52,6 +53,9 @@ app.add_middleware(
     allow_headers=["*"],
     expose_headers=["*"]
 )
+
+# Include authentication router
+app.include_router(auth_router)
 
 # Startup message with enhanced features
 @app.on_event("startup")
