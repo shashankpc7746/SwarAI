@@ -65,24 +65,26 @@ class AppLauncherTool(BaseTool):
         "githubdesktop": r"C:\Users\{username}\AppData\Local\GitHubDesktop\GitHubDesktop.exe",
         "github": r"C:\Users\{username}\AppData\Local\GitHubDesktop\GitHubDesktop.exe",
         "anydesk": r"C:\Program Files (x86)\AnyDesk\AnyDesk.exe",
-        "chrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-        "googlechrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-        "firefox": r"C:\Program Files\Mozilla Firefox\firefox.exe",
-        "mozillafirefox": r"C:\Program Files\Mozilla Firefox\firefox.exe",
+        "chrome": r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        "googlechrome": r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        "firefox": r"C:\Program Files (x86)\Mozilla Firefox\firefox.exe",
+        "mozillafirefox": r"C:\Program Files (x86)\Mozilla Firefox\firefox.exe",
         "edge": "msedge.exe",
         "microsoftedge": "msedge.exe",
         "opera": r"C:\Users\{username}\AppData\Local\Programs\Opera\opera.exe",
         "operabrowser": r"C:\Users\{username}\AppData\Local\Programs\Opera\opera.exe",
         "brave": r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe",
         "bravebrowser": r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe",
-        "word": r"C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE",
-        "msword": r"C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE",
-        "excel": r"C:\Program Files\Microsoft Office\root\Office16\EXCEL.EXE",
-        "msexcel": r"C:\Program Files\Microsoft Office\root\Office16\EXCEL.EXE",
-        "powerpoint": r"C:\Program Files\Microsoft Office\root\Office16\POWERPNT.EXE",
-        "ppt": r"C:\Program Files\Microsoft Office\root\Office16\POWERPNT.EXE",
-        "outlook": r"C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE",
-        "msoutlook": r"C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE",
+        "word": r"C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.EXE",
+        "msword": r"C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.EXE",
+        "excel": r"C:\Program Files (x86)\Microsoft Office\root\Office16\EXCEL.EXE",
+        "msexcel": r"C:\Program Files (x86)\Microsoft Office\root\Office16\EXCEL.EXE",
+        "powerpoint": r"C:\Program Files (x86)\Microsoft Office\root\Office16\POWERPNT.EXE",
+        "ppt": r"C:\Program Files (x86)\Microsoft Office\root\Office16\POWERPNT.EXE",
+        "outlook": r"C:\Program Files (x86)\Microsoft Office\root\Office16\OUTLOOK.EXE",
+        "msoutlook": r"C:\Program Files (x86)\Microsoft Office\root\Office16\OUTLOOK.EXE",
+        "onenote": r"C:\Program Files (x86)\Microsoft Office\root\Office16\ONENOTE.EXE",
+        "msonenote": r"C:\Program Files (x86)\Microsoft Office\root\Office16\ONENOTE.EXE",
         "vscode": r"C:\Users\{username}\AppData\Local\Programs\Microsoft VS Code\Code.exe",
         "code": r"C:\Users\{username}\AppData\Local\Programs\Microsoft VS Code\Code.exe",
         "visualstudiocode": r"C:\Users\{username}\AppData\Local\Programs\Microsoft VS Code\Code.exe",
@@ -94,6 +96,19 @@ class AppLauncherTool(BaseTool):
         "zoom": r"C:\Users\{username}\AppData\Roaming\Zoom\bin\Zoom.exe",
         "antigravity": r"C:\Users\{username}\AppData\Local\Programs\Antigravity\Antigravity.exe",
         "googleantigravity": r"C:\Users\{username}\AppData\Local\Programs\Antigravity\Antigravity.exe",
+        "vlc": r"C:\Program Files\VideoLAN\VLC\vlc.exe",
+        "vlcmediaplayer": r"C:\Program Files\VideoLAN\VLC\vlc.exe",
+        "vlcplayer": r"C:\Program Files\VideoLAN\VLC\vlc.exe",
+        "camera": "ms-windows-store://pdp/?ProductId=9WZDNCRFJBBG",
+        "windowscamera": "ms-windows-store://pdp/?ProductId=9WZDNCRFJBBG",
+        "clock": "ms-windows-store://pdp/?ProductId=9WZDNCRFJ3PR",
+        "windowsclock": "ms-windows-store://pdp/?ProductId=9WZDNCRFJ3PR",
+        "alarmsclock": "ms-windows-store://pdp/?ProductId=9WZDNCRFJ3PR",
+        "clipchamp": "ms-windows-store://pdp/?ProductId=9P1J8S7CCWWT",
+        "microsoftclipchamp": "ms-windows-store://pdp/?ProductId=9P1J8S7CCWWT",
+        "store": "ms-windows-store://home",
+        "microsoftstore": "ms-windows-store://home",
+        "windowsstore": "ms-windows-store://home",
     }
     
     # Popular websites
@@ -179,22 +194,21 @@ class AppLauncherTool(BaseTool):
             app_path = self.WINDOWS_APPS[app_name].replace('{username}', username)
             print(f"[APP_LAUNCHER] Found in WINDOWS_APPS: {app_path}")
             
-            # Handle special URI schemes (Settings, Copilot, Recycle Bin, etc.)
+            # Handle special URI schemes (Settings, Copilot, Recycle Bin, Windows Store apps, etc.)
             if app_path.startswith(('ms-', 'microsoft-edge://', 'shell:')):
                 try:
                     # Use start command for URI schemes
                     if app_name in ['copilot']:
                         print(f"[APP_LAUNCHER] Launching Copilot via Edge")
-                        # Open Copilot in Edge with proper URL quoting
-                        subprocess.Popen(['cmd', '/c', 'start', 'msedge', f'--app={app_path}'], shell=True)
-                    elif app_name in ['settings', 'setting', 'systemsettings']:
-                        print(f"[APP_LAUNCHER] Launching Settings: {app_path}")
-                        subprocess.Popen(['cmd', '/c', 'start', app_path], shell=True)
+                        # Open Copilot in Edge - DON'T use shell=True to avoid & parsing issues
+                        subprocess.Popen(['cmd', '/c', 'start', '', 'msedge', f'--app={app_path}'])
                     elif app_path.startswith('shell:'):
                         print(f"[APP_LAUNCHER] Launching shell command: {app_path}")
                         subprocess.Popen(['explorer', app_path])
                     else:
-                        subprocess.Popen(['cmd', '/c', 'start', app_path], shell=True)
+                        # For ms-settings:, ms-windows-store:// URIs
+                        print(f"[APP_LAUNCHER] Launching URI: {app_path}")
+                        subprocess.Popen(['cmd', '/c', 'start', '', app_path])
                     return f"Launched {app_name}"
                 except Exception as e:
                     print(f"[APP_LAUNCHER] Failed to launch {app_name} via URI: {e}")
