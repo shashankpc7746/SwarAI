@@ -380,7 +380,8 @@ IMPORTANT:
                     return state
                 
                 # Calendar commands (moved down to avoid conflicts with WhatsApp)
-                elif has_calendar_intent and not has_whatsapp_intent:
+                # Exclude simple app launch commands like "open calendar"
+                elif has_calendar_intent and not has_whatsapp_intent and not is_app_launch:
                     state['detected_intent'] = "calendar"
                     state['agent_name'] = "calendar"
                     print(f"[DEBUG] Routed to: calendar")

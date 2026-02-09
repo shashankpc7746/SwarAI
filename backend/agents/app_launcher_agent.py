@@ -199,7 +199,7 @@ class AppLauncherTool(BaseTool):
             print(f"[APP_LAUNCHER] Found in WINDOWS_APPS: {app_path}")
             
             # Handle special URI schemes (Settings, Copilot, Recycle Bin, Windows Store apps, etc.)
-            if app_path.startswith(('ms-', 'microsoft-edge://', 'shell:')):
+            if app_path.startswith(('ms-', 'microsoft-edge://', 'microsoft.windows.', 'shell:')):
                 try:
                     # Use start command for URI schemes
                     if app_name in ['copilot']:
@@ -210,9 +210,14 @@ class AppLauncherTool(BaseTool):
                         print(f"[APP_LAUNCHER] Launching shell command: {app_path}")
                         subprocess.Popen(['explorer', app_path])
                     else:
-                        # For ms-settings:, ms-windows-store:// URIs
+                        # For ms-* URIs (ms-settings:, ms-clock:, ms-clockalarms:, outlookcal:, etc.)
                         print(f"[APP_LAUNCHER] Launching URI: {app_path}")
-                        subprocess.Popen(['cmd', '/c', 'start', '', app_path])
+                        try:
+                            # Try with explorer first (better for protocol handlers)
+                            subprocess.Popen(['explorer', app_path])
+                        except:
+                            # Fallback to start command
+                            subprocess.Popen(['cmd', '/c', 'start', '', app_path])
                     return f"Launched {app_name}"
                 except Exception as e:
                     print(f"[APP_LAUNCHER] Failed to launch {app_name} via URI: {e}")
