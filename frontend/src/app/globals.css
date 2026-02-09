@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@config "../../tailwind.config.ts";
 
 :root {
   --background: 222.2 84% 4.9%;
@@ -21,10 +22,10 @@
   --input: 217.2 32.6% 17.5%;
   --ring: 224.3 76.3% 94.1%;
   --radius: 0.75rem;
-  
+
   /* Custom variables */
-  --font-inter: 'Inter', sans-serif;
-  --font-jetbrains-mono: 'JetBrains Mono', monospace;
+  --font-inter: "Inter", sans-serif;
+  --font-jetbrains-mono: "JetBrains Mono", monospace;
 }
 
 @media (prefers-color-scheme: light) {
@@ -53,19 +54,26 @@
 
 * {
   border-color: hsl(var(--border));
+  box-sizing: border-box;
 }
 
 body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
-  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
-  font-feature-settings: "rlig" 1, "calt" 1;
+  font-family: var(--font-inter), "Inter", system-ui, sans-serif;
+  font-feature-settings:
+    "rlig" 1,
+    "calt" 1;
   min-height: 100vh;
   overflow-x: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 html {
   scroll-behavior: smooth;
+  margin: 0;
+  padding: 0;
 }
 
 /* Favicon styling - Note: This applies to any favicon images used in the page */
@@ -77,18 +85,21 @@ link[rel="apple-touch-icon"] {
 
 /* Glassmorphism utilities */
 .glass {
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .glass-dark {
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   background: rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .glass-strong {
+  -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -96,12 +107,14 @@ link[rel="apple-touch-icon"] {
 
 /* Modern gradient mesh */
 .gradient-mesh {
-  background: linear-gradient(135deg, 
-    hsl(var(--primary)) 0%, 
-    hsl(var(--secondary)) 25%, 
-    hsl(var(--accent)) 50%, 
-    hsl(var(--primary)) 75%, 
-    hsl(var(--secondary)) 100%);
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary)) 0%,
+    hsl(var(--secondary)) 25%,
+    hsl(var(--accent)) 50%,
+    hsl(var(--primary)) 75%,
+    hsl(var(--secondary)) 100%
+  );
   background-size: 400% 400%;
   animation: gradientShift 8s ease infinite;
 }
@@ -113,7 +126,7 @@ link[rel="apple-touch-icon"] {
 }
 
 .voice-ripple::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -122,7 +135,9 @@ link[rel="apple-touch-icon"] {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.6);
   transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+  transition:
+    width 0.6s,
+    height 0.6s;
 }
 
 .voice-ripple.active::before {
@@ -149,14 +164,26 @@ link[rel="apple-touch-icon"] {
 
 /* Custom animations */
 @keyframes gradientShift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  33% { transform: translateY(-10px) rotate(1deg); }
-  66% { transform: translateY(-5px) rotate(-1deg); }
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(-5px) rotate(-1deg);
+  }
 }
 
 @keyframes glow {
@@ -164,7 +191,9 @@ link[rel="apple-touch-icon"] {
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
   }
   to {
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.8), 0 0 40px rgba(59, 130, 246, 0.3);
+    box-shadow:
+      0 0 30px rgba(59, 130, 246, 0.8),
+      0 0 40px rgba(59, 130, 246, 0.3);
   }
 }
 
@@ -184,4 +213,56 @@ link[rel="apple-touch-icon"] {
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
+}
+
+/* Range slider styling */
+input[type="range"].slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+input[type="range"].slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+  transition: all 0.2s ease;
+}
+
+input[type="range"].slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.6);
+}
+
+input[type="range"].slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+  transition: all 0.2s ease;
+}
+
+input[type="range"].slider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.6);
+}
+
+input[type="range"].slider::-webkit-slider-runnable-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  height: 8px;
+}
+
+input[type="range"].slider::-moz-range-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  height: 8px;
 }

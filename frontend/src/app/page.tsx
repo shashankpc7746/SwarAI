@@ -14,7 +14,8 @@ import {
   Wifi,
   WifiOff,
   History,
-  X
+  X,
+  User
 } from 'lucide-react';
 import useVoiceRecognition from '@/hooks/useVoiceRecognition';
 import { useCrewAI } from '@/hooks/useCrewAI';
@@ -23,6 +24,9 @@ import { VoiceVisualization } from '@/components/VoiceVisualization';
 import { AgentCard } from '@/components/AgentCard';
 import { ResultDisplay } from '@/components/ResultDisplay';
 import { StatusIndicator } from '@/components/StatusIndicator';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { ProfileSettings } from '@/components/ProfileSettings';
+import { useAuth } from '@/context/AuthContext';
 
 export default function CrewAIPage() {
   const [currentAgent, setCurrentAgent] = useState<string | null>(null);
@@ -36,6 +40,10 @@ export default function CrewAIPage() {
     result?: any;
   }>>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [showProfileSettings, setShowProfileSettings] = useState(false);
+
+  const { user } = useAuth();
 
   const {
     backendStatus,
@@ -49,6 +57,11 @@ export default function CrewAIPage() {
 
   const { playSound, speak, stopSpeaking } = useSound();
   const { isListening: voiceListening, startVoiceRecognition } = useVoiceRecognition();
+
+  // Set mounted state for client-side rendering
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Stop speech on page refresh or unmount
   useEffect(() => {
@@ -429,7 +442,46 @@ export default function CrewAIPage() {
   ];
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
+    <ProtectedRoute>
+      <div className="min-h-screen p-4 md:p-8 relative overflow-hidden">
+        {/* Animated background gradient */}
+        <div className="fixed inset-0 bg-gradient-to-br from-black via-gray-900 to-black -z-10">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-700 via-gray-900 to-black opacity-50" />
+        </div>
+
+        {/* Floating stars */}
+        <div className="fixed inset-0 overflow-hidden -z-10">
+          {isMounted && [...Array(30)].map((_, i) => {
+            const randomX = Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920);
+            const randomY = Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080);
+            const randomOpacity = Math.random() * 0.5;
+            const randomDuration = Math.random() * 10 + 10;
+            const randomTargetY = Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080);
+            const randomTargetOpacity = Math.random() * 0.5;
+
+            return (
+              <motion.div
+                key={i}
+                className="absolute w-1 h-1 bg-white rounded-full"
+                initial={{
+                  x: randomX,
+                  y: randomY,
+                  opacity: randomOpacity,
+                }}
+                animate={{
+                  y: [null, randomTargetY],
+                  opacity: [null, randomTargetOpacity, 0],
+                }}
+                transition={{
+                  duration: randomDuration,
+                  repeat: Infinity,
+                  ease: 'linear',
+                }}
+              />
+            );
+          })}
+        </div>
+
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
@@ -474,9 +526,21 @@ export default function CrewAIPage() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="glass p-3 rounded-xl text-white hover:bg-white/20 transition-all"
+            onClick={() => setShowProfileSettings(true)}
+            className="glass p-3 rounded-xl hover:bg-white/20 transition-all"
+            title="Profile & Settings"
           >
-            <Settings className="w-6 h-6" />
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+              {user?.profilePicture ? (
+                <img
+                  src={user.profilePicture}
+                  alt={user.name}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                <User className="w-4 h-4 text-white" />
+              )}
+            </div>
           </motion.button>
         </div>
       </motion.header>
@@ -806,6 +870,13 @@ export default function CrewAIPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Profile Settings Modal */}
+      <ProfileSettings
+        isOpen={showProfileSettings}
+        onClose={() => setShowProfileSettings(false)}
+      />
     </div>
+    </ProtectedRoute>
   );
 }
