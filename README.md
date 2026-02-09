@@ -65,15 +65,18 @@
 ### Key Highlights
 
 - 🤖 **13 Specialized AI Agents** for different tasks
+- 🚀 **65+ Application Launchers** including Windows apps, browsers, Office suite, and development tools
+- 🌐 **15+ Website Quick Access** to popular platforms and services
 - 🎤 **Voice Recognition** with multiple engines (Google Speech, Whisper AI)
 - 🗣️ **Text-to-Speech** with intelligent speech filtering and context-aware output
-- 📱 **WhatsApp Integration** with fuzzy contact matching and grammar correction
-- 📁 **Intelligent File Search** with fuzzy matching and latest file detection
+- 📱 **WhatsApp Integration** with fuzzy contact matching and smart message handling
+- 📁 **Intelligent File Search** with fuzzy matching, multi-location scanning, and latest file detection
 - 📧 **AI-Powered Email** with automatic content generation and subject correction
-- 🧠 **Smart Intent Detection** distinguishes information queries from file operations
-- 🔄 **Multi-Agent Orchestration** using CrewAI
+- ⚙️ **System Control** (11 operations): Volume, brightness, battery, lock, power management
+- 🧠 **Smart Intent Detection** with AI Enhancement Layer (auto-fixes typos and improves clarity)
+- 🔄 **Multi-Agent Orchestration** using CrewAI for complex workflows
 - 🌐 **Modern Web Interface** with smooth animations and accessibility support
-- 🚀 **FastAPI Backend** with WebSocket support and AI Enhancement Layer
+- 🚀 **FastAPI Backend** with WebSocket support and real-time processing
 - 💾 **Conversation Memory** with MongoDB (optional)
 
 ---
@@ -512,23 +515,28 @@ ws.send(
 
 ## 🤖 AI Agents
 
-### Available Agents
+### All 13 Specialized Agents
 
-| Agent              | Description            | Capabilities                                                      |
-| ------------------ | ---------------------- | ----------------------------------------------------------------- |
-| **WhatsApp**       | Message automation     | Send messages, contact search, fuzzy matching, grammar correction |
-| **FileSearch**     | File management        | Search files, open files, fuzzy matching, latest file detection   |
-| **Conversation**   | Natural dialogue       | Context-aware chat, personality, memory, information queries      |
-| **System Control** | System operations      | Volume, brightness, battery, system info, COM-initialized audio   |
-| **Email**          | Email automation       | AI-generated content, Gmail integration, subject correction       |
-| **Calendar**       | Calendar management    | Create events, reminders (Google Calendar)                        |
-| **Payment**        | Payment processing     | PayPal, Google Pay, UPI integration                               |
-| **WebSearch**      | Web searching          | Google, Bing, DuckDuckGo, YouTube                                 |
-| **Phone**          | Phone operations       | Make calls, SMS (platform-dependent)                              |
-| **App Launcher**   | Application control    | Launch apps, manage windows                                       |
-| **Screenshot**     | Screen capture         | Take screenshots, save images                                     |
-| **Task**           | Task management        | Create, manage tasks and reminders                                |
-| **Multi-Task**     | Workflow orchestration | Complex multi-step operations                                     |
+| Agent | Description | Key Features |
+|-------|-------------|--------------|
+| **🚀 App Launcher** | Opens applications, browsers, websites | 65+ apps (Office, Chrome, VS Code, Spotify, Discord, etc.), 15+ websites (Google, YouTube, GitHub, etc.), phonetic correction, URI schemes |
+| **📅 Calendar** | Event scheduling & reminders | Create events with title/time/location, Google Calendar integration, relative time parsing ("tomorrow at 3pm"), auto 1-hour duration |
+| **💬 Conversation** | Natural AI dialogue | Answer questions, context awareness, personality-driven, multi-turn conversations, Groq LLM powered |
+| **📧 Email** | Email composition & sending | AI content generation, Gmail integration, smart recipient extraction, subject line generation, CC/BCC support |
+| **📁 File Search** | Cross-platform file management | Fuzzy matching, multi-location search (Documents/Desktop/OneDrive), MIME detection, file metadata, open/share files |
+| **💳 Payment** | Online payment processing | PayPal, Google Pay, Paytm, PhonePe, UPI links, multi-currency (USD/INR/EUR), pre-filled payment details |
+| **📞 Phone** | Call initiation & contacts | Fuzzy contact search, tel: protocol, Skype integration, direct dialing, 9 mock contacts |
+| **📸 Screenshot** | Screen capture | PIL ImageGrab (high-DPI), multi-monitor, OneDrive/Pictures/Screenshots, PNG with timestamps, size reporting |
+| **⚙️ System Control** | System operations | **11 actions**: Volume ±10%/mute, brightness ±10%, battery status, time, lock, shutdown, restart, sleep (pycaw, psutil, screen-brightness-control) |
+| **✅ Task** | To-do list & reminders | Add/list/complete/delete tasks, priorities (low/medium/high), due dates, JSON persistence |
+| **🔍 Web Search** | Internet searching | **7 engines**: Google, Bing, DuckDuckGo, YouTube, Scholar, Maps, Images; auto-detect, URL encoding |
+| **💬 WhatsApp** | Message automation | wa.me links, fuzzy contact matching, URL encoding, 10+ mock contacts, quote/filler removal |
+| **🔗 Multi-Task Orchestrator** | Complex workflows | CrewAI coordination, file+communication chains, screenshot+send, sequential execution, data passing |
+
+### Statistics
+
+- **Total Agents**: 13 | **Apps**: 65+ | **Websites**: 15+ | **Search Engines**: 7 | **System Actions**: 11 | **Payment Platforms**: 4
+- **Technologies**: Groq LLM (llama-3.3-70b-versatile), LangGraph, CrewAI, FastAPI, MongoDB (optional)
 
 ### Agent Architecture
 
