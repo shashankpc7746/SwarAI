@@ -517,26 +517,26 @@ ws.send(
 
 ### All 13 Specialized Agents
 
-| Agent | Description | Key Features |
-|-------|-------------|--------------|
-| **🚀 App Launcher** | Opens applications, browsers, websites | 65+ apps (Office, Chrome, VS Code, Spotify, Discord, etc.), 15+ websites (Google, YouTube, GitHub, etc.), phonetic correction, URI schemes |
-| **📅 Calendar** | Event scheduling & reminders | Create events with title/time/location, Google Calendar integration, relative time parsing ("tomorrow at 3pm"), auto 1-hour duration |
-| **💬 Conversation** | Natural AI dialogue | Answer questions, context awareness, personality-driven, multi-turn conversations, Groq LLM powered |
-| **📧 Email** | Email composition & sending | AI content generation, Gmail integration, smart recipient extraction, subject line generation, CC/BCC support |
-| **📁 File Search** | Cross-platform file management | Fuzzy matching, multi-location search (Documents/Desktop/OneDrive), MIME detection, file metadata, open/share files |
-| **💳 Payment** | Online payment processing | PayPal, Google Pay, Paytm, PhonePe, UPI links, multi-currency (USD/INR/EUR), pre-filled payment details |
-| **📞 Phone** | Call initiation & contacts | Fuzzy contact search, tel: protocol, Skype integration, direct dialing, 9 mock contacts |
-| **📸 Screenshot** | Screen capture | PIL ImageGrab (high-DPI), multi-monitor, OneDrive/Pictures/Screenshots, PNG with timestamps, size reporting |
-| **⚙️ System Control** | System operations | **11 actions**: Volume ±10%/mute, brightness ±10%, battery status, time, lock, shutdown, restart, sleep (pycaw, psutil, screen-brightness-control) |
-| **✅ Task** | To-do list & reminders | Add/list/complete/delete tasks, priorities (low/medium/high), due dates, JSON persistence |
-| **🔍 Web Search** | Internet searching | **7 engines**: Google, Bing, DuckDuckGo, YouTube, Scholar, Maps, Images; auto-detect, URL encoding |
-| **💬 WhatsApp** | Message automation | wa.me links, fuzzy contact matching, URL encoding, 10+ mock contacts, quote/filler removal |
-| **🔗 Multi-Task Orchestrator** | Complex workflows | CrewAI coordination, file+communication chains, screenshot+send, sequential execution, data passing |
+| Agent               | Description | Key Capabilities |
+|---------------------|-------------|------------------|
+| **App Launcher**    | Application & website control | 65+ apps (Office, browsers, dev tools), 15+ websites, phonetic correction |
+| **WhatsApp**        | Message automation | wa.me links, fuzzy matching, 10+ contacts, quote removal |
+| **File Search**     | Cross-platform file management | Fuzzy search, multi-location scan, MIME detection, open/share |
+| **Conversation**    | Natural AI dialogue | Context-aware chat, personality, multi-turn, Groq LLM powered |
+| **System Control**  | System operations | Volume, brightness, battery, time, lock, shutdown, restart, sleep |
+| **Email**           | Email automation | AI content generation, Gmail integration, subject correction |
+| **Calendar**        | Event scheduling | Create events, Google Calendar, relative time parsing |
+| **Payment**         | Payment processing | PayPal, Google Pay, Paytm, PhonePe, UPI, multi-currency |
+| **Web Search**      | Internet searching | Google, Bing, DuckDuckGo, YouTube, Scholar, Maps, Images |
+| **Phone**           | Call operations | Fuzzy contact search, tel: protocol, Skype integration |
+| **Screenshot**      | Screen capture | PIL ImageGrab, multi-monitor, OneDrive save, PNG timestamps |
+| **Task**            | To-do management | Add/list/complete/delete, priorities, due dates, JSON storage |
+| **Multi-Task**      | Workflow orchestration | CrewAI coordination, agent chaining, file+communication flows |
 
 ### Statistics
 
 - **Total Agents**: 13 | **Apps**: 65+ | **Websites**: 15+ | **Search Engines**: 7 | **System Actions**: 11 | **Payment Platforms**: 4
-- **Technologies**: Groq LLM (llama-3.3-70b-versatile), LangGraph, CrewAI, FastAPI, MongoDB (optional)
+- **Powered by**: Groq LLM (llama-3.3-70b-versatile), LangGraph, CrewAI, FastAPI, MongoDB (optional)
 
 ### Agent Architecture
 
