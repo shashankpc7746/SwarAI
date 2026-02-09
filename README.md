@@ -517,21 +517,21 @@ ws.send(
 
 ### All 13 Specialized Agents
 
-| Agent               | Description | Key Capabilities |
-|---------------------|-------------|------------------|
-| **App Launcher**    | Application & website control | 65+ apps (Office, browsers, dev tools), 15+ websites, phonetic correction |
-| **WhatsApp**        | Message automation | wa.me links, fuzzy matching, 10+ contacts, quote removal |
-| **File Search**     | Cross-platform file management | Fuzzy search, multi-location scan, MIME detection, open/share |
-| **Conversation**    | Natural AI dialogue | Context-aware chat, personality, multi-turn, Groq LLM powered |
-| **System Control**  | System operations | Volume, brightness, battery, time, lock, shutdown, restart, sleep |
-| **Email**           | Email automation | AI content generation, Gmail integration, subject correction |
-| **Calendar**        | Event scheduling | Create events, Google Calendar, relative time parsing |
-| **Payment**         | Payment processing | PayPal, Google Pay, Paytm, PhonePe, UPI, multi-currency |
-| **Web Search**      | Internet searching | Google, Bing, DuckDuckGo, YouTube, Scholar, Maps, Images |
-| **Phone**           | Call operations | Fuzzy contact search, tel: protocol, Skype integration |
-| **Screenshot**      | Screen capture | PIL ImageGrab, multi-monitor, OneDrive save, PNG timestamps |
-| **Task**            | To-do management | Add/list/complete/delete, priorities, due dates, JSON storage |
-| **Multi-Task**      | Workflow orchestration | CrewAI coordination, agent chaining, file+communication flows |
+| Agent              | Description                    | Key Capabilities                                                          |
+| ------------------ | ------------------------------ | ------------------------------------------------------------------------- |
+| **App Launcher**   | Application & website control  | 65+ apps (Office, browsers, dev tools), 15+ websites, phonetic correction |
+| **WhatsApp**       | Message automation             | wa.me links, fuzzy matching, 10+ contacts, quote removal                  |
+| **File Search**    | Cross-platform file management | Fuzzy search, multi-location scan, MIME detection, open/share             |
+| **Conversation**   | Natural AI dialogue            | Context-aware chat, personality, multi-turn, Groq LLM powered             |
+| **System Control** | System operations              | Volume, brightness, battery, time, lock, shutdown, restart, sleep         |
+| **Email**          | Email automation               | AI content generation, Gmail integration, subject correction              |
+| **Calendar**       | Event scheduling               | Create events, Google Calendar, relative time parsing                     |
+| **Payment**        | Payment processing             | PayPal, Google Pay, Paytm, PhonePe, UPI, multi-currency                   |
+| **Web Search**     | Internet searching             | Google, Bing, DuckDuckGo, YouTube, Scholar, Maps, Images                  |
+| **Phone**          | Call operations                | Fuzzy contact search, tel: protocol, Skype integration                    |
+| **Screenshot**     | Screen capture                 | PIL ImageGrab, multi-monitor, OneDrive save, PNG timestamps               |
+| **Task**           | To-do management               | Add/list/complete/delete, priorities, due dates, JSON storage             |
+| **Multi-Task**     | Workflow orchestration         | CrewAI coordination, agent chaining, file+communication flows             |
 
 ### Statistics
 
