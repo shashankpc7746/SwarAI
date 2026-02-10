@@ -75,7 +75,8 @@
 - ⚙️ **System Control** (11 operations): Volume, brightness, battery, lock, power management
 - 🧠 **Smart Intent Detection** with AI Enhancement Layer (auto-fixes typos and improves clarity)
 - 🔄 **Multi-Agent Orchestration** using CrewAI for complex workflows
-- 🌐 **Modern Web Interface** with smooth animations and accessibility support
+- 🌐 **Modern Web Interface** with dynamic animations, login system, and profile settings
+- 🔐 **Authentication** with JWT tokens and protected routes
 - 🚀 **FastAPI Backend** with WebSocket support and real-time processing
 - 💾 **Conversation Memory** with MongoDB (optional)
 
@@ -914,7 +915,34 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🎉 Recent Improvements & New Features
 
-### Version 2.5 - Enhanced UX & Intelligence (Latest)
+### Version 3.0 - Auth, UI Overhaul & Animations (Latest)
+
+#### 🔐 Authentication System
+- Login page with name, email, age fields
+- JWT-based session management with 7-day expiry
+- Protected routes — main app requires authentication
+- Profile settings modal (replaces dummy settings button)
+- Google OAuth placeholder (ready for integration)
+
+#### 🎙️ Dynamic Voice Button Animations
+- 3 orbital rings rotating at different speeds around the button
+- 8 radial floating particles with staggered timing
+- Pulsing gradient glow effect (blue ↔ purple)
+- Animated box shadow cycling per state (ready/listening/processing)
+- Mic icon float animation with spring physics
+- Glowing "TAP TO SPEAK" text with animated text-shadow
+- Triple expanding ripple effects during listening/processing
+- Wobble effect on hover, smooth scale on tap
+
+#### 🎨 UI Polish
+- Restored original logo size with "SwarAI / Multi-Agent AI System" text
+- Safari compatibility: `-webkit-backdrop-filter` for all glass classes
+- Animated starfield background on main page and login
+- Proper content spacing to prevent agent cards clipping
+
+---
+
+### Version 2.5 - Enhanced UX & Intelligence
 
 #### 🎨 Refined Agent Card Interface
 
