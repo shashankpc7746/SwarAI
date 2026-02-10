@@ -918,6 +918,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### Version 3.0 - Auth, UI Overhaul & Animations (Latest)
 
 #### 🔐 Authentication System
+
 - Login page with name, email, age fields
 - JWT-based session management with 7-day expiry
 - Protected routes — main app requires authentication
@@ -925,6 +926,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Google OAuth placeholder (ready for integration)
 
 #### 🎙️ Dynamic Voice Button Animations
+
 - 3 orbital rings rotating at different speeds around the button
 - 8 radial floating particles with staggered timing
 - Pulsing gradient glow effect (blue ↔ purple)
@@ -935,6 +937,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Wobble effect on hover, smooth scale on tap
 
 #### 🎨 UI Polish
+
 - Restored original logo size with "SwarAI / Multi-Agent AI System" text
 - Safari compatibility: `-webkit-backdrop-filter` for all glass classes
 - Animated starfield background on main page and login
