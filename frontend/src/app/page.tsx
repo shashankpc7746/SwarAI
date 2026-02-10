@@ -555,35 +555,148 @@ export default function CrewAIPage() {
           className="relative mx-auto mb-8"
           style={{ width: 'fit-content' }}
         >
+          {/* Orbital rings */}
+          {!voiceListening && !isProcessing && (
+            <>
+              <motion.div
+                className="absolute inset-0 w-48 h-48 rounded-full border-2 border-blue-400/30"
+                style={{ left: '50%', top: '50%', x: '-50%', y: '-50%' }}
+                animate={{ rotate: 360, scale: [1, 1.1, 1] }}
+                transition={{ rotate: { duration: 8, repeat: Infinity, ease: "linear" }, scale: { duration: 3, repeat: Infinity } }}
+              />
+              <motion.div
+                className="absolute inset-0 w-56 h-56 rounded-full border-2 border-purple-400/20"
+                style={{ left: '50%', top: '50%', x: '-50%', y: '-50%' }}
+                animate={{ rotate: -360, scale: [1, 1.15, 1] }}
+                transition={{ rotate: { duration: 12, repeat: Infinity, ease: "linear" }, scale: { duration: 4, repeat: Infinity } }}
+              />
+              <motion.div
+                className="absolute inset-0 w-64 h-64 rounded-full border border-cyan-400/10"
+                style={{ left: '50%', top: '50%', x: '-50%', y: '-50%' }}
+                animate={{ rotate: 360, scale: [1, 1.2, 1] }}
+                transition={{ rotate: { duration: 15, repeat: Infinity, ease: "linear" }, scale: { duration: 5, repeat: Infinity } }}
+              />
+            </>
+          )}
+
+          {/* Floating particles */}
+          {!voiceListening && !isProcessing && isMounted && [...Array(8)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"
+              style={{
+                left: '50%',
+                top: '50%',
+              }}
+              animate={{
+                x: [0, Math.cos(i * Math.PI / 4) * 120],
+                y: [0, Math.sin(i * Math.PI / 4) * 120],
+                opacity: [0, 1, 0],
+                scale: [0, 1, 0],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                delay: i * 0.2,
+                ease: "easeOut"
+              }}
+            />
+          ))}
+
+          {/* Pulsing glow effect */}
+          <motion.div
+            className="absolute inset-0 w-48 h-48 rounded-full blur-2xl"
+            style={{ left: '50%', top: '50%', x: '-50%', y: '-50%' }}
+            animate={{
+              background: [
+                'radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%)',
+                'radial-gradient(circle, rgba(168,85,247,0.4) 0%, transparent 70%)',
+                'radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%)',
+              ],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          />
+
           <motion.button
             onClick={handleVoiceStart}
             disabled={backendStatus !== 'online' || voiceListening || isProcessing}
             className={`
-              relative w-48 h-48 rounded-full transition-all duration-300 transform
+              relative w-48 h-48 rounded-full transition-all duration-500 transform overflow-hidden
               ${voiceListening
-                ? 'bg-red-500 shadow-2xl scale-110 animate-pulse'
+                ? 'bg-gradient-to-br from-red-500 via-pink-500 to-red-600 shadow-2xl shadow-red-500/50'
                 : isProcessing
-                  ? 'bg-yellow-500 shadow-xl animate-bounce'
-                  : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-xl hover:shadow-2xl hover:scale-105'
+                  ? 'bg-gradient-to-br from-yellow-400 via-orange-500 to-yellow-600 shadow-2xl shadow-yellow-500/50'
+                  : 'bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 shadow-2xl shadow-blue-500/50'
               }
               disabled:opacity-50 disabled:cursor-not-allowed
-              glass-strong voice-ripple ${voiceListening ? 'active' : ''}
             `}
-            whileHover={{ scale: backendStatus === 'online' ? 1.05 : 1 }}
-            whileTap={{ scale: backendStatus === 'online' ? 0.95 : 1 }}
+            whileHover={{ 
+              scale: backendStatus === 'online' ? 1.08 : 1,
+              rotate: [0, -2, 2, -2, 0],
+              transition: { rotate: { duration: 0.5 } }
+            }}
+            whileTap={{ scale: backendStatus === 'online' ? 0.92 : 1 }}
+            animate={{
+              boxShadow: voiceListening 
+                ? [
+                    '0 0 30px rgba(239, 68, 68, 0.5)',
+                    '0 0 50px rgba(239, 68, 68, 0.8)',
+                    '0 0 30px rgba(239, 68, 68, 0.5)',
+                  ]
+                : isProcessing
+                  ? [
+                      '0 0 30px rgba(234, 179, 8, 0.5)',
+                      '0 0 50px rgba(234, 179, 8, 0.8)',
+                      '0 0 30px rgba(234, 179, 8, 0.5)',
+                    ]
+                  : [
+                      '0 0 30px rgba(59, 130, 246, 0.5)',
+                      '0 0 50px rgba(168, 85, 247, 0.5)',
+                      '0 0 30px rgba(59, 130, 246, 0.5)',
+                    ]
+            }}
+            transition={{ boxShadow: { duration: 2, repeat: Infinity } }}
           >
-            <div className="absolute inset-4 rounded-full bg-white/20 flex items-center justify-center">
+            {/* Animated background gradient */}
+            <motion.div
+              className="absolute inset-0 opacity-50"
+              animate={{
+                background: [
+                  'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)',
+                  'radial-gradient(circle at 80% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)',
+                  'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)',
+                ],
+              }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            />
+
+            <div className="absolute inset-3 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
               <AnimatePresence mode="wait">
                 {voiceListening ? (
                   <motion.div
                     key="listening"
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
+                    initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
                     className="flex flex-col items-center"
+                    transition={{ type: "spring", damping: 15 }}
                   >
-                    <Mic className="w-16 h-16 text-white animate-pulse" />
-                    <span className="text-white text-sm font-bold mt-2">Listening...</span>
+                    <motion.div
+                      animate={{ 
+                        scale: [1, 1.2, 1],
+                      }}
+                      transition={{ duration: 0.8, repeat: Infinity }}
+                    >
+                      <Mic className="w-16 h-16 text-white drop-shadow-lg" />
+                    </motion.div>
+                    <motion.span 
+                      className="text-white text-sm font-bold mt-2"
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      Listening...
+                    </motion.span>
                   </motion.div>
                 ) : isProcessing ? (
                   <motion.div
@@ -594,42 +707,100 @@ export default function CrewAIPage() {
                     className="flex flex-col items-center"
                   >
                     <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      animate={{ 
+                        rotate: 360,
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{ 
+                        rotate: { duration: 2, repeat: Infinity, ease: "linear" },
+                        scale: { duration: 1, repeat: Infinity }
+                      }}
                     >
-                      <Zap className="w-16 h-16 text-white" />
+                      <Zap className="w-16 h-16 text-white drop-shadow-lg" />
                     </motion.div>
                     <span className="text-white text-sm font-bold mt-2">Processing...</span>
                   </motion.div>
                 ) : (
                   <motion.div
                     key="ready"
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
                     className="flex flex-col items-center"
+                    transition={{ type: "spring", damping: 10 }}
                   >
-                    <Mic className="w-16 h-16 text-white group-hover:scale-110 transition-transform" />
-                    <span className="text-white text-lg font-bold mt-2">TAP TO SPEAK</span>
+                    <motion.div
+                      animate={{ 
+                        y: [0, -8, 0],
+                      }}
+                      transition={{ 
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      <Mic className="w-16 h-16 text-white drop-shadow-lg" />
+                    </motion.div>
+                    <motion.span 
+                      className="text-white text-lg font-bold mt-2 tracking-wider"
+                      animate={{
+                        textShadow: [
+                          '0 0 10px rgba(255,255,255,0.5)',
+                          '0 0 20px rgba(255,255,255,0.8)',
+                          '0 0 10px rgba(255,255,255,0.5)',
+                        ]
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      TAP TO SPEAK
+                    </motion.span>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Ripple effect */}
+            {/* Multiple ripple effects */}
             {(voiceListening || isProcessing) && (
-              <motion.div
-                className="absolute inset-0 rounded-full border-4 border-white"
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.8, 0, 0.8]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
+              <>
+                <motion.div
+                  className="absolute inset-0 rounded-full border-4 border-white/60"
+                  animate={{
+                    scale: [1, 1.3],
+                    opacity: [0.6, 0]
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeOut"
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-0 rounded-full border-4 border-white/40"
+                  animate={{
+                    scale: [1, 1.5],
+                    opacity: [0.4, 0]
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                    delay: 0.5
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-0 rounded-full border-2 border-white/20"
+                  animate={{
+                    scale: [1, 1.8],
+                    opacity: [0.2, 0]
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                    delay: 1
+                  }}
+                />
+              </>
             )}
           </motion.button>
 
