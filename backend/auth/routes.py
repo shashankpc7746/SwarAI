@@ -23,7 +23,7 @@ async def login(credentials: UserLogin):
     try:
         # Check if user exists
         existing_user = auth_db.get_user_by_email(credentials.email)
-        
+
         if existing_user:
             # User exists, update info if needed
             if existing_user.name != credentials.name or existing_user.age != credentials.age:
@@ -32,7 +32,7 @@ async def login(credentials: UserLogin):
                     "age": credentials.age
                 })
                 existing_user = auth_db.get_user_by_id(existing_user.id)
-            
+
             user = existing_user
         else:
             # Create new user
@@ -65,41 +65,129 @@ async def login(credentials: UserLogin):
             detail="Login failed"
         )
 
-@router.get("/google")
-async def google_login():
+@router.post("/google")
+async def google_login(token: dict):
     """
     Google OAuth login endpoint
-    Redirects to Google OAuth consent screen
+    Receives Google ID token from frontend and validates it
+    Only accesses name and email from Google account
     """
-    # In a production environment, you would:
-    # 1. Redirect to Google OAuth URL with client_id, redirect_uri, etc.
-    # 2. Handle the callback in /api/auth/google/callback
-    # 3. Exchange authorization code for access token
-    # 4. Get user info from Google
-    # 5. Create/update user in database
-    # 6. Generate JWT token
-    # 7. Redirect to frontend with token
-    
-    # For now, return a simple message
-    # You'll need to set up Google OAuth credentials and implement the full flow
-    
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Google OAuth not yet implemented. Please use regular login."
-    )
+    try:
+        from google.oauth2 import id_token
+        from google.auth.transport import requests
+        import os
+        
+        logger.info("🔐 Google OAuth login attempt started")
+        
+        google_token = token.get('credential')
+        if not google_token:
+            logger.error("❌ No credential provided in request")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Google token is required"
+            )
+        
+        # Get Google Client ID from environment
+        client_id = os.getenv('GOOGLE_CLIENT_ID') or os.getenv('NEXT_PUBLIC_GOOGLE_CLIENT_ID')
+        
+        if not client_id:
+            logger.error("❌ GOOGLE_CLIENT_ID not found in environment variables")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Server configuration error: Google Client ID not set"
+            )
+        
+        logger.info(f"🔑 Using Client ID: {client_id[:20]}...")
+        
+        try:
+            # Verify token with Google (this validates the token and returns user info)
+            idinfo = id_token.verify_oauth2_token(
+                google_token, 
+                requests.Request(), 
+                client_id
+            )
+            
+            logger.info(f"✅ Token verified successfully. User info: {list(idinfo.keys())}")
+            
+            # Extract ONLY name and email from token (as requested)
+            email = idinfo.get('email')
+            name = idinfo.get('name')
+            picture = idinfo.get('picture')  # Optional: for profile picture
+            
+            logger.info(f"📧 Email: {email}, 👤 Name: {name}")
+            
+            if not email:
+                logger.error("❌ Email not found in Google token")
+                raise ValueError("Email not found in token")
+            
+            if not name:
+                logger.error("❌ Name not found in Google token")
+                raise ValueError("Name not found in token")
+            
+            # Check if user exists
+            existing_user = auth_db.get_user_by_email(email)
 
-@router.get("/google/callback")
-async def google_callback(code: str):
-    """
-    Google OAuth callback endpoint
-    Handles the redirect from Google after user authorization
-    """
-    # This would handle the OAuth callback from Google
-    # Exchange code for token, get user info, create/login user
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Google OAuth callback not yet implemented"
-    )
+            if existing_user:
+                logger.info(f"👤 Existing user found: {existing_user.id}")
+                # Update profile picture if available
+                if picture and existing_user.profilePicture != picture:
+                    auth_db.update_user(existing_user.id, {
+                        "profilePicture": picture
+                    })
+                    existing_user = auth_db.get_user_by_id(existing_user.id)
+                user = existing_user
+            else:
+                # Create new user from Google account (name and email only)
+                logger.info(f"🆕 Creating new user for: {email}")
+                user_id = generate_user_id()
+                user = User(
+                    id=user_id,
+                    name=name,
+                    email=email,
+                    age=18,  # Default age for Google OAuth users
+                    profilePicture=picture if picture else None,
+                    createdAt=datetime.now(timezone.utc)
+                )
+                auth_db.create_user(user)
+                logger.info(f"✅ New user created: {user.id}")
+            
+            # Generate JWT token
+            access_token = create_access_token(
+                data={"sub": user.id, "email": user.email}
+            )
+            
+            logger.info(f"✅ User logged in via Google: {user.email}")
+            
+            return AuthResponse(
+                user=user,
+                token=access_token
+            )
+            
+        except ValueError as e:
+            error_msg = str(e)
+            logger.error(f"❌ Token validation error: {error_msg}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Invalid Google token: {error_msg}"
+            )
+    
+    except ImportError as e:
+        logger.error(f"❌ google-auth library not installed: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="Google OAuth requires google-auth library. Install: pip install google-auth"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        logger.error(f"❌ Google login error: {str(e)}")
+        logger.error(f"Traceback: {error_trace}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Google login failed: {str(e)}"
+        )
 
 @router.post("/logout")
 async def logout():

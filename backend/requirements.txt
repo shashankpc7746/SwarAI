@@ -28,6 +28,9 @@ PyJWT>=2.8.0
 # ===== Authentication =====
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
+google-auth>=2.23.0
+google-auth-oauthlib>=1.1.0
+google-auth-httplib2>=0.1.1
 
 # ===== Audio =====
 SpeechRecognition>=3.10.0
@@ -36,8 +39,7 @@ pydub>=0.25.0
 pygame>=2.5.0
 
 # ===== Database =====
-pymongo>=4.7.0
-motor>=3.4.0
+# (MongoDB drivers removed — using in-memory auth DB)
 
 # ===== UI & Visualization =====
 streamlit>=1.30.0

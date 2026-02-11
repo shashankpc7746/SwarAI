@@ -533,20 +533,21 @@ export default function CrewAIPage() {
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex justify-between items-center mb-8"
+        className="flex justify-between items-center mb-6"
       >
         <div className="flex items-center space-x-4">
           <motion.div
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.3 }}
-            className="w-16 h-16 rounded-2xl flex items-center justify-center overflow-hidden bg-white/10 backdrop-blur-sm p-1"
+            className="w-32 h-32 flex items-center justify-center overflow-hidden"
           >
             <img
               src="/swarai_logo.png"
               alt="SwarAI Logo"
-              className="w-full h-full object-contain rounded-xl"
+              className="w-full h-full object-contain"
             />
           </motion.div>
+
           <div>
             <h1 className="text-3xl font-bold text-shimmer">SwarAI</h1>
             <p className="text-gray-400 text-sm tracking-wider">Multi-Agent AI System</p>

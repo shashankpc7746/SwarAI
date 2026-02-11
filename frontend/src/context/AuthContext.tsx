@@ -82,12 +82,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const loginWithGoogle = async () => {
+  const loginWithGoogle = async (credentialResponse: any) => {
     try {
-      // Initiate Google OAuth flow
-      window.location.href = 'http://localhost:8000/api/auth/google';
-    } catch (error) {
-      console.error('Google login error:', error);
+      console.log('🔐 Starting Google login process...');
+      console.log('📝 Credential received:', credentialResponse.credential ? 'Yes' : 'No');
+      
+      // Send Google credential to backend for verification
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
+      try {
+        console.log('📡 Sending request to backend...');
+        const response = await fetch('http://localhost:8000/api/auth/google', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            credential: credentialResponse.credential,
+          }),
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+        console.log('📡 Backend response status:', response.status);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+          console.error('❌ Backend error:', errorData);
+          throw new Error(errorData.detail || 'Google login failed');
+        }
+
+        const data = await response.json();
+        console.log('✅ Login successful! User:', data.user?.name, data.user?.email);
+        
+        const user: User = data.user;
+        const token = data.token;
+
+        // Store user and token
+        localStorage.setItem('swarai_user', JSON.stringify(user));
+        localStorage.setItem('swarai_token', token);
+
+        setAuthState({
+          user,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+
+        console.log('🎉 Redirecting to main page...');
+        // Redirect to main page
+        window.location.href = '/';
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          console.error('❌ Request timeout - Backend not responding');
+          throw new Error('Request timeout. Please check if backend is running.');
+        }
+        throw fetchError;
+      }
+    } catch (error: any) {
+      console.error('❌ Google login error:', error);
+      console.error('Error details:', error.message);
       throw error;
     }
   };
