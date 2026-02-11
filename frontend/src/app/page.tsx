@@ -61,10 +61,10 @@ function CursorGlow() {
       trailPos.current.y += (mousePos.current.y - trailPos.current.y) * 0.03;
 
       if (glowRef.current) {
-        glowRef.current.style.transform = `translate(${currentPos.current.x - 200}px, ${currentPos.current.y - 200}px)`;
+        glowRef.current.style.transform = `translate(${currentPos.current.x - 125}px, ${currentPos.current.y - 125}px)`;
       }
       if (trailRef.current) {
-        trailRef.current.style.transform = `translate(${trailPos.current.x - 300}px, ${trailPos.current.y - 300}px)`;
+        trailRef.current.style.transform = `translate(${trailPos.current.x - 200}px, ${trailPos.current.y - 200}px)`;
       }
 
       rafId.current = requestAnimationFrame(animate);
@@ -81,27 +81,27 @@ function CursorGlow() {
 
   return (
     <>
-      {/* Primary cursor glow */}
+      {/* Primary cursor glow — smaller */}
       <div
         ref={glowRef}
         className="fixed pointer-events-none -z-10"
         style={{
-          width: 500,
-          height: 500,
+          width: 250,
+          height: 250,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(99, 102, 241, 0.06) 40%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.05) 40%, transparent 70%)',
           willChange: 'transform',
         }}
       />
-      {/* Trailing secondary glow */}
+      {/* Trailing secondary glow — smaller */}
       <div
         ref={trailRef}
         className="fixed pointer-events-none -z-10"
         style={{
-          width: 700,
-          height: 700,
+          width: 400,
+          height: 400,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(168, 85, 247, 0.10) 0%, rgba(168, 85, 247, 0.03) 40%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, rgba(168, 85, 247, 0.02) 40%, transparent 70%)',
           willChange: 'transform',
         }}
       />
@@ -131,18 +131,31 @@ export default function CrewAIPage() {
   });
   const swiperRef = useRef<HTMLDivElement>(null);
 
-  // Pre-compute particle random values once — prevents recalculation on every render
+  // Moving star particles — drift across the screen
   const particleData = useMemo(() =>
-    Array.from({ length: 25 }, (_, i) => ({
-      size: Math.random() * 3 + 1.5,
+    Array.from({ length: 50 }, (_, i) => ({
+      size: Math.random() * 4 + 3,
       startX: Math.random() * 100,
       startY: Math.random() * 100,
-      duration: Math.random() * 20 + 12,
+      duration: Math.random() * 12 + 8,
       delay: Math.random() * 8,
-      yRange: -(60 + Math.random() * 80),
-      xRange: Math.sin(i) * 40,
+      yRange: (Math.random() - 0.5) * 250,
+      xRange: (Math.random() - 0.5) * 250,
       colorIndex: i % 4,
       glowIndex: i % 3,
+    })),
+    []
+  );
+
+  // Static twinkling stars — stay in place, fade in/out
+  const twinkleStars = useMemo(() =>
+    Array.from({ length: 40 }, () => ({
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1.5,
+      duration: Math.random() * 3 + 1.5,
+      delay: Math.random() * 4,
+      brightness: Math.random() * 0.7 + 0.3,
     })),
     []
   );
@@ -675,94 +688,7 @@ export default function CrewAIPage() {
         {/* Base dark gradient */}
         <div className="fixed inset-0 -z-20 bg-[#050508]" />
 
-        {/* Aurora gradient orbs - smooth, slow-moving color blobs */}
-        <div className="fixed inset-0 -z-10 overflow-hidden">
-          {/* Primary orb - blue/indigo */}
-          <div
-            className="absolute w-[600px] h-[600px] rounded-full opacity-[0.12] blur-[120px]"
-            style={{
-              background: 'radial-gradient(circle, #6366f1 0%, #4f46e5 40%, transparent 70%)',
-              top: '-10%',
-              left: '10%',
-              animation: 'aurora 20s ease-in-out infinite',
-              willChange: 'transform',
-              transform: 'translateZ(0)',
-            }}
-          />
-          {/* Secondary orb - purple/violet */}
-          <div
-            className="absolute w-[500px] h-[500px] rounded-full opacity-[0.10] blur-[100px]"
-            style={{
-              background: 'radial-gradient(circle, #a855f7 0%, #7c3aed 40%, transparent 70%)',
-              bottom: '0%',
-              right: '5%',
-              animation: 'aurora2 25s ease-in-out infinite',
-              willChange: 'transform',
-              transform: 'translateZ(0)',
-            }}
-          />
-          {/* Tertiary orb - cyan/teal subtle accent */}
-          <div
-            className="absolute w-[400px] h-[400px] rounded-full opacity-[0.06] blur-[80px]"
-            style={{
-              background: 'radial-gradient(circle, #06b6d4 0%, #0891b2 40%, transparent 70%)',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%) translateZ(0)',
-              animation: 'aurora3 18s ease-in-out infinite',
-              willChange: 'transform',
-            }}
-          />
-
-          {/* Extra orb 1 - rose/pink, bottom-left */}
-          <div
-            className="absolute w-[450px] h-[450px] rounded-full opacity-[0.09] blur-[110px]"
-            style={{
-              background: 'radial-gradient(circle, #f43f5e 0%, #e11d48 40%, transparent 70%)',
-              bottom: '20%',
-              left: '-5%',
-              animation: 'aurora4 22s ease-in-out infinite',
-              willChange: 'transform',
-              transform: 'translateZ(0)',
-            }}
-          />
-          {/* Extra orb 2 - emerald/green, top-right */}
-          <div
-            className="absolute w-[350px] h-[350px] rounded-full opacity-[0.07] blur-[90px]"
-            style={{
-              background: 'radial-gradient(circle, #10b981 0%, #059669 40%, transparent 70%)',
-              top: '10%',
-              right: '20%',
-              animation: 'aurora5 28s ease-in-out infinite',
-              willChange: 'transform',
-              transform: 'translateZ(0)',
-            }}
-          />
-          {/* Extra orb 3 - amber/warm, center-right */}
-          <div
-            className="absolute w-[500px] h-[500px] rounded-full opacity-[0.06] blur-[100px]"
-            style={{
-              background: 'radial-gradient(circle, #f59e0b 0%, #d97706 40%, transparent 70%)',
-              top: '60%',
-              right: '-10%',
-              animation: 'aurora6 24s ease-in-out infinite',
-              willChange: 'transform',
-              transform: 'translateZ(0)',
-            }}
-          />
-          {/* Extra orb 4 - sky/blue, bottom-center */}
-          <div
-            className="absolute w-[550px] h-[550px] rounded-full opacity-[0.08] blur-[130px]"
-            style={{
-              background: 'radial-gradient(circle, #38bdf8 0%, #0284c7 40%, transparent 70%)',
-              bottom: '-15%',
-              left: '35%',
-              animation: 'aurora7 30s ease-in-out infinite',
-              willChange: 'transform',
-              transform: 'translateZ(0)',
-            }}
-          />
-        </div>
+        {/* Aurora orbs removed — replaced by particle starfield */}
 
         {/* Noise texture */}
         <div className="noise-overlay" />
@@ -772,11 +698,12 @@ export default function CrewAIPage() {
           <CursorGlow />
         )}
 
-        {/* Floating particles - pre-computed for performance */}
+        {/* Starfield — moving particles + static twinkling stars */}
         <div className="fixed inset-0 overflow-hidden -z-10">
+          {/* Moving star particles */}
           {isMounted && particleData.map((p, i) => (
             <motion.div
-              key={i}
+              key={`m-${i}`}
               className="absolute rounded-full"
               style={{
                 width: p.size,
@@ -784,25 +711,55 @@ export default function CrewAIPage() {
                 left: `${p.startX}%`,
                 top: `${p.startY}%`,
                 background: p.colorIndex === 0
-                  ? 'rgba(99, 102, 241, 0.6)'
+                  ? 'rgba(165, 180, 252, 0.7)'
                   : p.colorIndex === 1
-                    ? 'rgba(168, 85, 247, 0.5)'
+                    ? 'rgba(196, 181, 253, 0.6)'
                     : p.colorIndex === 2
-                      ? 'rgba(6, 182, 212, 0.4)'
-                      : 'rgba(255, 255, 255, 0.35)',
-                boxShadow: p.glowIndex === 0 ? `0 0 ${p.size * 3}px rgba(99, 102, 241, 0.3)` : 'none',
+                      ? 'rgba(255, 255, 255, 0.5)'
+                      : 'rgba(147, 197, 253, 0.55)',
+                boxShadow: `0 0 ${p.size * 4}px ${p.colorIndex === 0
+                  ? 'rgba(165, 180, 252, 0.5)'
+                  : p.colorIndex === 1
+                    ? 'rgba(196, 181, 253, 0.4)'
+                    : 'rgba(255, 255, 255, 0.35)'}`,
                 willChange: 'transform, opacity',
               }}
               animate={{
                 y: [0, p.yRange, 0],
                 x: [0, p.xRange, 0],
-                opacity: [0, 0.9, 0],
-                scale: [0.5, 1.2, 0.5],
+                opacity: [0.1, 0.9, 0.1],
+                scale: [0.6, 1.3, 0.6],
               }}
               transition={{
                 duration: p.duration,
                 repeat: Infinity,
                 delay: p.delay,
+                ease: 'easeInOut',
+              }}
+            />
+          ))}
+
+          {/* Static twinkling stars */}
+          {isMounted && twinkleStars.map((s, i) => (
+            <motion.div
+              key={`t-${i}`}
+              className="absolute rounded-full"
+              style={{
+                width: s.size,
+                height: s.size,
+                left: `${s.x}%`,
+                top: `${s.y}%`,
+                background: `rgba(255, 255, 255, ${s.brightness})`,
+                boxShadow: `0 0 ${s.size * 3}px rgba(255, 255, 255, ${s.brightness * 0.6})`,
+              }}
+              animate={{
+                opacity: [0.1, s.brightness, 0.1],
+                scale: [0.8, 1.2, 0.8],
+              }}
+              transition={{
+                duration: s.duration,
+                repeat: Infinity,
+                delay: s.delay,
                 ease: 'easeInOut',
               }}
             />
@@ -819,12 +776,12 @@ export default function CrewAIPage() {
           <motion.div
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.3 }}
-            className="w-32 h-32 flex items-center justify-center overflow-hidden"
+            className="w-16 h-16 rounded-2xl flex items-center justify-center overflow-hidden bg-white/10 backdrop-blur-sm p-1"
           >
             <img
               src="/swarai_logo.png"
               alt="SwarAI Logo"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain rounded-xl"
             />
           </motion.div>
 
@@ -931,9 +888,23 @@ export default function CrewAIPage() {
             />
           ))}
 
-          {/* Pulsing glow effect */}
+          {/* Ambient color glow around the button */}
           <motion.div
-            className="absolute inset-0 w-48 h-48 rounded-full blur-2xl"
+            className="absolute w-72 h-72 rounded-full blur-3xl"
+            style={{ left: '50%', top: '50%', x: '-50%', y: '-50%' }}
+            animate={{
+              background: [
+                'radial-gradient(circle, rgba(99,102,241,0.35) 0%, rgba(168,85,247,0.15) 40%, transparent 70%)',
+                'radial-gradient(circle, rgba(168,85,247,0.35) 0%, rgba(59,130,246,0.15) 40%, transparent 70%)',
+                'radial-gradient(circle, rgba(99,102,241,0.35) 0%, rgba(168,85,247,0.15) 40%, transparent 70%)',
+              ],
+              scale: [1, 1.3, 1],
+            }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          {/* Inner pulsing glow */}
+          <motion.div
+            className="absolute w-56 h-56 rounded-full blur-2xl"
             style={{ left: '50%', top: '50%', x: '-50%', y: '-50%' }}
             animate={{
               background: [
@@ -1163,7 +1134,7 @@ export default function CrewAIPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="mb-12 mt-16"
+        className="mb-12 mt-4"
       >
         <div className="flex items-center justify-center gap-4 mb-8">
           <div className="glow-line flex-1 max-w-[120px]" />
@@ -1172,40 +1143,36 @@ export default function CrewAIPage() {
         </div>
 
         {/* Swiper container with navigation */}
-        <div className="relative group/swiper">
-          {/* Left arrow */}
+        <div className="relative group/swiper overflow-visible pt-0">
+          {/* Left arrow - fixed position */}
           <button
             onClick={() => scrollSwiper('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/swiper:opacity-100 transition-opacity duration-300 hover:bg-white/20 cursor-pointer -ml-2"
+            className="absolute left-0 top-[124px] z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/swiper:opacity-100 transition-opacity duration-300 hover:bg-white/20 cursor-pointer -ml-5"
             aria-label="Scroll left"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
 
-          {/* Right arrow */}
+          {/* Right arrow - fixed position */}
           <button
             onClick={() => scrollSwiper('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/swiper:opacity-100 transition-opacity duration-300 hover:bg-white/20 cursor-pointer -mr-2"
+            className="absolute right-0 top-[124px] z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/swiper:opacity-100 transition-opacity duration-300 hover:bg-white/20 cursor-pointer -mr-5"
             aria-label="Scroll right"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
 
-          {/* Wider fade edges for smooth card disappearing */}
-          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[#050508] via-[#050508]/80 to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[#050508] via-[#050508]/80 to-transparent z-10 pointer-events-none" />
-
           {/* Scrollable cards — 5 visible at a time, no duplication */}
           <div
             ref={swiperRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 px-10 snap-x snap-mandatory"
+            className="flex gap-4 overflow-x-auto scrollbar-hide pt-2 pb-2 snap-x snap-mandatory"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {agents.map((agent, index) => (
               <div
                 key={agent.id}
-                className="snap-start"
-                style={{ flex: '0 0 calc((100% - 4 * 1rem) / 5)' }}
+                className="snap-start flex-shrink-0"
+                style={{ width: 'calc((100% - 4 * 1rem) / 5)' }}
               >
                 <AgentCard
                   agent={agent}

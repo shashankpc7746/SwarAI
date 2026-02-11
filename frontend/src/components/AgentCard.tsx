@@ -55,7 +55,7 @@ export function AgentCard({
       <div className={`absolute top-0 left-4 right-4 h-[1px] bg-gradient-to-r ${agent.color} opacity-40 group-hover:opacity-70 transition-opacity duration-500 rounded-full`} />
 
       {/* Glass effect */}
-      <div className="relative p-6 rounded-2xl border border-white/10 glass backdrop-blur-lg group-hover:border-white/20 transition-all duration-500">
+      <div className="relative p-6 rounded-2xl border border-white/10 glass backdrop-blur-lg group-hover:border-white/20 transition-all duration-500 min-h-[240px] h-[240px] flex flex-col overflow-hidden">
         {/* Active indicator */}
         {isActive && (
           <motion.div
@@ -106,52 +106,52 @@ export function AgentCard({
         </div>
 
         {/* Content */}
-        <div className="text-center">
+        <div className="text-center flex-1 flex flex-col justify-center">
           <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-100 transition-colors duration-500 pointer-events-none">
             {agent.name}
           </h3>
-          <p className="text-gray-300 text-sm leading-relaxed pointer-events-none">
+          <p className="text-gray-300 text-xs leading-tight pointer-events-none px-1 line-clamp-2">
             {agent.description}
           </p>
-
-          {/* Examples - Show below description */}
-          <AnimatePresence mode="wait">
-            {showExamples && agent.examples && agent.examples.length > 0 && (
-              <motion.div
-                key="examples"
-                initial={{ opacity: 0, maxHeight: 0 }}
-                animate={{ opacity: 1, maxHeight: 500 }}
-                exit={{ opacity: 0, maxHeight: 0 }}
-                transition={{ duration: 0.35, ease: "easeInOut" }}
-                className="mt-4 overflow-hidden"
-                style={{ willChange: 'max-height, opacity' }}
-              >
-                <div className="text-xs text-gray-100 mb-2 pointer-events-none font-medium">Click to try:</div>
-                <div className="space-y-2">
-                  {agent.examples.map((example, idx) => (
-                    <motion.button
-                      key={idx}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.08, duration: 0.2 }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (!isDisabled) {
-                          onExampleClick(example);
-                        }
-                      }}
-                      disabled={isDisabled}
-                      className={`w-full text-xs text-left text-white bg-white/15 hover:bg-white/25 rounded-lg px-3 py-2 transition-all duration-300 border border-white/30 hover:border-white/50 ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer hover:scale-105'
-                        }`}
-                    >
-                      "{example}"
-                    </motion.button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
+
+        {/* Examples overlay — appears on hover INSIDE the card without expanding it */}
+        <AnimatePresence mode="wait">
+          {showExamples && agent.examples && agent.examples.length > 0 && (
+            <motion.div
+              key="examples"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              className="absolute inset-0 rounded-2xl bg-black/70 backdrop-blur-md flex flex-col items-center justify-center p-5 z-20"
+            >
+              <h3 className="text-base font-bold text-white mb-1 pointer-events-none">{agent.name}</h3>
+              <div className="text-xs text-gray-300 mb-3 pointer-events-none font-medium">Click to try:</div>
+              <div className="space-y-2 w-full">
+                {agent.examples.map((example, idx) => (
+                  <motion.button
+                    key={idx}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.08, duration: 0.2 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!isDisabled) {
+                        onExampleClick(example);
+                      }
+                    }}
+                    disabled={isDisabled}
+                    className={`w-full text-xs text-left text-white bg-white/15 hover:bg-white/25 rounded-lg px-3 py-2 transition-all duration-300 border border-white/30 hover:border-white/50 ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer hover:scale-105'
+                      }`}
+                  >
+                    &ldquo;{example}&rdquo;
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Hover glow effect */}
         <motion.div
