@@ -1,3 +1,4 @@
+```markdown
 # SwarAI Quick Start Guide
 
 ## 🚀 Quick Start (Windows)
@@ -92,3 +93,5 @@ See `AUTHENTICATION_GUIDE.md` for detailed documentation.
 ---
 
 **Enjoy using SwarAI! 🎉**
+
+```
