@@ -65,15 +65,19 @@
 ### Key Highlights
 
 - 🤖 **13 Specialized AI Agents** for different tasks
+- 🚀 **65+ Application Launchers** including Windows apps, browsers, Office suite, and development tools
+- 🌐 **15+ Website Quick Access** to popular platforms and services
 - 🎤 **Voice Recognition** with multiple engines (Google Speech, Whisper AI)
 - 🗣️ **Text-to-Speech** with intelligent speech filtering and context-aware output
-- 📱 **WhatsApp Integration** with fuzzy contact matching and grammar correction
-- 📁 **Intelligent File Search** with fuzzy matching and latest file detection
+- 📱 **WhatsApp Integration** with fuzzy contact matching and smart message handling
+- 📁 **Intelligent File Search** with fuzzy matching, multi-location scanning, and latest file detection
 - 📧 **AI-Powered Email** with automatic content generation and subject correction
-- 🧠 **Smart Intent Detection** distinguishes information queries from file operations
-- 🔄 **Multi-Agent Orchestration** using CrewAI
-- 🌐 **Modern Web Interface** with smooth animations and accessibility support
-- 🚀 **FastAPI Backend** with WebSocket support and AI Enhancement Layer
+- ⚙️ **System Control** (11 operations): Volume, brightness, battery, lock, power management
+- 🧠 **Smart Intent Detection** with AI Enhancement Layer (auto-fixes typos and improves clarity)
+- 🔄 **Multi-Agent Orchestration** using CrewAI for complex workflows
+- 🌐 **Modern Web Interface** with dynamic animations, login system, and profile settings
+- 🔐 **Authentication** with JWT tokens and protected routes
+- 🚀 **FastAPI Backend** with WebSocket support and real-time processing
 - 💾 **Conversation Memory** with MongoDB (optional)
 
 ---
@@ -512,23 +516,28 @@ ws.send(
 
 ## 🤖 AI Agents
 
-### Available Agents
+### All 13 Specialized Agents
 
-| Agent              | Description            | Capabilities                                                      |
-| ------------------ | ---------------------- | ----------------------------------------------------------------- |
-| **WhatsApp**       | Message automation     | Send messages, contact search, fuzzy matching, grammar correction |
-| **FileSearch**     | File management        | Search files, open files, fuzzy matching, latest file detection   |
-| **Conversation**   | Natural dialogue       | Context-aware chat, personality, memory, information queries      |
-| **System Control** | System operations      | Volume, brightness, battery, system info, COM-initialized audio   |
-| **Email**          | Email automation       | AI-generated content, Gmail integration, subject correction       |
-| **Calendar**       | Calendar management    | Create events, reminders (Google Calendar)                        |
-| **Payment**        | Payment processing     | PayPal, Google Pay, UPI integration                               |
-| **WebSearch**      | Web searching          | Google, Bing, DuckDuckGo, YouTube                                 |
-| **Phone**          | Phone operations       | Make calls, SMS (platform-dependent)                              |
-| **App Launcher**   | Application control    | Launch apps, manage windows                                       |
-| **Screenshot**     | Screen capture         | Take screenshots, save images                                     |
-| **Task**           | Task management        | Create, manage tasks and reminders                                |
-| **Multi-Task**     | Workflow orchestration | Complex multi-step operations                                     |
+| Agent              | Description                    | Key Capabilities                                                          |
+| ------------------ | ------------------------------ | ------------------------------------------------------------------------- |
+| **App Launcher**   | Application & website control  | 65+ apps (Office, browsers, dev tools), 15+ websites, phonetic correction |
+| **WhatsApp**       | Message automation             | wa.me links, fuzzy matching, 10+ contacts, quote removal                  |
+| **File Search**    | Cross-platform file management | Fuzzy search, multi-location scan, MIME detection, open/share             |
+| **Conversation**   | Natural AI dialogue            | Context-aware chat, personality, multi-turn, Groq LLM powered             |
+| **System Control** | System operations              | Volume, brightness, battery, time, lock, shutdown, restart, sleep         |
+| **Email**          | Email automation               | AI content generation, Gmail integration, subject correction              |
+| **Calendar**       | Event scheduling               | Create events, Google Calendar, relative time parsing                     |
+| **Payment**        | Payment processing             | PayPal, Google Pay, Paytm, PhonePe, UPI, multi-currency                   |
+| **Web Search**     | Internet searching             | Google, Bing, DuckDuckGo, YouTube, Scholar, Maps, Images                  |
+| **Phone**          | Call operations                | Fuzzy contact search, tel: protocol, Skype integration                    |
+| **Screenshot**     | Screen capture                 | PIL ImageGrab, multi-monitor, OneDrive save, PNG timestamps               |
+| **Task**           | To-do management               | Add/list/complete/delete, priorities, due dates, JSON storage             |
+| **Multi-Task**     | Workflow orchestration         | CrewAI coordination, agent chaining, file+communication flows             |
+
+### Statistics
+
+- **Total Agents**: 13 | **Apps**: 65+ | **Websites**: 15+ | **Search Engines**: 7 | **System Actions**: 11 | **Payment Platforms**: 4
+- **Powered by**: Groq LLM (llama-3.3-70b-versatile), LangGraph, CrewAI, FastAPI, MongoDB (optional)
 
 ### Agent Architecture
 
@@ -906,7 +915,37 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🎉 Recent Improvements & New Features
 
-### Version 2.5 - Enhanced UX & Intelligence (Latest)
+### Version 3.0 - Auth, UI Overhaul & Animations (Latest)
+
+#### 🔐 Authentication System
+
+- Login page with name, email, age fields
+- JWT-based session management with 7-day expiry
+- Protected routes — main app requires authentication
+- Profile settings modal (replaces dummy settings button)
+- Google OAuth placeholder (ready for integration)
+
+#### 🎙️ Dynamic Voice Button Animations
+
+- 3 orbital rings rotating at different speeds around the button
+- 8 radial floating particles with staggered timing
+- Pulsing gradient glow effect (blue ↔ purple)
+- Animated box shadow cycling per state (ready/listening/processing)
+- Mic icon float animation with spring physics
+- Glowing "TAP TO SPEAK" text with animated text-shadow
+- Triple expanding ripple effects during listening/processing
+- Wobble effect on hover, smooth scale on tap
+
+#### 🎨 UI Polish
+
+- Restored original logo size with "SwarAI / Multi-Agent AI System" text
+- Safari compatibility: `-webkit-backdrop-filter` for all glass classes
+- Animated starfield background on main page and login
+- Proper content spacing to prevent agent cards clipping
+
+---
+
+### Version 2.5 - Enhanced UX & Intelligence
 
 #### 🎨 Refined Agent Card Interface
 

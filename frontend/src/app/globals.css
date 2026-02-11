@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@config "../../tailwind.config.ts";
 
 :root {
   --background: 222.2 84% 4.9%;
@@ -21,10 +22,10 @@
   --input: 217.2 32.6% 17.5%;
   --ring: 224.3 76.3% 94.1%;
   --radius: 0.75rem;
-  
+
   /* Custom variables */
-  --font-inter: 'Inter', sans-serif;
-  --font-jetbrains-mono: 'JetBrains Mono', monospace;
+  --font-inter: "Inter", sans-serif;
+  --font-jetbrains-mono: "JetBrains Mono", monospace;
 }
 
 @media (prefers-color-scheme: light) {
@@ -53,16 +54,16 @@
 
 * {
   border-color: hsl(var(--border));
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
 body {
-  background: hsl(var(--background));
+  background: #050508;
   color: hsl(var(--foreground));
-  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
-  font-feature-settings: "rlig" 1, "calt" 1;
+  font-family: var(--font-inter), "Inter", system-ui, sans-serif;
+  font-feature-settings:
+    "rlig" 1,
+    "calt" 1;
   min-height: 100vh;
   overflow-x: hidden;
   margin: 0;
@@ -84,18 +85,21 @@ link[rel="apple-touch-icon"] {
 
 /* Glassmorphism utilities */
 .glass {
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .glass-dark {
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   background: rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .glass-strong {
+  -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -103,12 +107,14 @@ link[rel="apple-touch-icon"] {
 
 /* Modern gradient mesh */
 .gradient-mesh {
-  background: linear-gradient(135deg, 
-    hsl(var(--primary)) 0%, 
-    hsl(var(--secondary)) 25%, 
-    hsl(var(--accent)) 50%, 
-    hsl(var(--primary)) 75%, 
-    hsl(var(--secondary)) 100%);
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary)) 0%,
+    hsl(var(--secondary)) 25%,
+    hsl(var(--accent)) 50%,
+    hsl(var(--primary)) 75%,
+    hsl(var(--secondary)) 100%
+  );
   background-size: 400% 400%;
   animation: gradientShift 8s ease infinite;
 }
@@ -120,7 +126,7 @@ link[rel="apple-touch-icon"] {
 }
 
 .voice-ripple::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   left: 50%;
@@ -129,7 +135,9 @@ link[rel="apple-touch-icon"] {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.6);
   transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+  transition:
+    width 0.6s,
+    height 0.6s;
 }
 
 .voice-ripple.active::before {
@@ -156,14 +164,26 @@ link[rel="apple-touch-icon"] {
 
 /* Custom animations */
 @keyframes gradientShift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  33% { transform: translateY(-10px) rotate(1deg); }
-  66% { transform: translateY(-5px) rotate(-1deg); }
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(-5px) rotate(-1deg);
+  }
 }
 
 @keyframes glow {
@@ -171,8 +191,176 @@ link[rel="apple-touch-icon"] {
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
   }
   to {
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.8), 0 0 40px rgba(59, 130, 246, 0.3);
+    box-shadow:
+      0 0 30px rgba(59, 130, 246, 0.8),
+      0 0 40px rgba(59, 130, 246, 0.3);
   }
+}
+
+/* Aurora glow effect */
+@keyframes aurora {
+  0% {
+    transform: translate(-20%, -20%) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translate(10%, -10%) rotate(90deg) scale(1.1);
+  }
+  50% {
+    transform: translate(20%, 20%) rotate(180deg) scale(1);
+  }
+  75% {
+    transform: translate(-10%, 10%) rotate(270deg) scale(1.1);
+  }
+  100% {
+    transform: translate(-20%, -20%) rotate(360deg) scale(1);
+  }
+}
+
+@keyframes aurora2 {
+  0% {
+    transform: translate(20%, 20%) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translate(-10%, 10%) rotate(-90deg) scale(1.15);
+  }
+  50% {
+    transform: translate(-20%, -20%) rotate(-180deg) scale(1);
+  }
+  75% {
+    transform: translate(10%, -10%) rotate(-270deg) scale(1.15);
+  }
+  100% {
+    transform: translate(20%, 20%) rotate(-360deg) scale(1);
+  }
+}
+
+@keyframes aurora3 {
+  0% {
+    transform: translate(0%, -30%) rotate(0deg) scale(1);
+  }
+  33% {
+    transform: translate(20%, 10%) rotate(120deg) scale(1.2);
+  }
+  66% {
+    transform: translate(-20%, 20%) rotate(240deg) scale(0.9);
+  }
+  100% {
+    transform: translate(0%, -30%) rotate(360deg) scale(1);
+  }
+}
+
+/* Grid pattern */
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Dot pattern */
+.dot-pattern {
+  background-image: radial-gradient(
+    rgba(255, 255, 255, 0.07) 1px,
+    transparent 1px
+  );
+  background-size: 30px 30px;
+}
+
+/* Shimmer text effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.text-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 1) 25%,
+    rgba(168, 85, 247, 0.9) 50%,
+    rgba(255, 255, 255, 1) 75%,
+    rgba(255, 255, 255, 0.6) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+/* Animated border gradient */
+@keyframes borderRotate {
+  0% {
+    --angle: 0deg;
+  }
+  100% {
+    --angle: 360deg;
+  }
+}
+
+/* Subtle noise texture overlay */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.015;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Stats counter card */
+.stat-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stat-card:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Marquee / infinite scroll */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* Glow line separator */
+.glow-line {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(99, 102, 241, 0.5) 20%,
+    rgba(168, 85, 247, 0.8) 50%,
+    rgba(99, 102, 241, 0.5) 80%,
+    transparent 100%
+  );
 }
 
 /* Scrollbar styling */

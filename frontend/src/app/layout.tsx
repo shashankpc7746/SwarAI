@@ -50,11 +50,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/swarai_favicon.png" type="image/png" />
-        <link rel="shortcut icon" href="/swarai_favicon.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/swarai_favicon.png" />
-      </head>
+
+
+
       <body className="antialiased m-0 p-0" suppressHydrationWarning>
         <AuthProvider>
           <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">

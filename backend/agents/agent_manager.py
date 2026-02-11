@@ -299,7 +299,19 @@ IMPORTANT:
                 has_search_intent = any(keyword in user_input_lower for keyword in search_keywords) and not is_app_launch
                 has_task_intent = any(keyword in user_input_lower for keyword in task_keywords)
                 has_screenshot_intent = any(keyword in user_input_lower for keyword in screenshot_keywords)
-                has_system_control_intent = any(keyword in user_input_lower for keyword in system_control_keywords)
+                
+                # System control with word boundaries for "lock" to avoid matching "clock"
+                import re
+                has_system_control_intent = False
+                for keyword in system_control_keywords:
+                    if keyword == "lock":
+                        # Use word boundary for "lock" to avoid matching "clock"
+                        if re.search(r'\block\b', user_input_lower):
+                            has_system_control_intent = True
+                            break
+                    elif keyword in user_input_lower:
+                        has_system_control_intent = True
+                        break
                 
                 # Special handling for multi-agent patterns
                 multi_agent_patterns = ["send * to", "share * with", "find * and send", "send the * file"]
@@ -337,7 +349,8 @@ IMPORTANT:
                     return state
                 
                 # System control commands (high priority - specific actions)
-                if has_system_control_intent:
+                # BUT exclude app launch commands (e.g., "open clock" should go to app_launcher)
+                if has_system_control_intent and not is_app_launch:
                     state['detected_intent'] = "system_control"
                     state['agent_name'] = "system_control"
                     print(f"[DEBUG] Routed to: system_control")
@@ -380,7 +393,8 @@ IMPORTANT:
                     return state
                 
                 # Calendar commands (moved down to avoid conflicts with WhatsApp)
-                elif has_calendar_intent and not has_whatsapp_intent:
+                # Exclude simple app launch commands like "open calendar"
+                elif has_calendar_intent and not has_whatsapp_intent and not is_app_launch:
                     state['detected_intent'] = "calendar"
                     state['agent_name'] = "calendar"
                     print(f"[DEBUG] Routed to: calendar")

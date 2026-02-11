@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Mail, User, Calendar } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -22,6 +23,7 @@ export default function LoginPage() {
   const [isMounted, setIsMounted] = useState(false);
 
   const { login, loginWithGoogle } = useAuth();
+  const router = useRouter();
 
   // Set mounted state on client side
   useEffect(() => {
@@ -80,7 +82,7 @@ export default function LoginPage() {
       // Show thank you message before redirecting
       setShowThankYou(true);
       setTimeout(() => {
-        // Navigation will happen automatically via the protected route
+        router.push('/');
       }, 2000);
     } catch (error) {
       console.error('Login failed:', error);

@@ -443,39 +443,86 @@ export default function CrewAIPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen pt-2 px-4 pb-4 md:pt-4 md:px-8 md:pb-8 relative overflow-hidden">
-        {/* Animated background gradient */}
-        <div className="fixed inset-0 bg-gradient-to-br from-black via-gray-900 to-black -z-10">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-700 via-gray-900 to-black opacity-50" />
+      <div className="min-h-screen p-4 md:p-8 relative overflow-hidden">
+        {/* === ENHANCED PROFESSIONAL BACKGROUND === */}
+        {/* Base dark gradient */}
+        <div className="fixed inset-0 -z-20 bg-[#050508]" />
+
+        {/* Aurora gradient orbs - smooth, slow-moving color blobs */}
+        <div className="fixed inset-0 -z-10 overflow-hidden">
+          {/* Primary orb - blue/indigo */}
+          <div
+            className="absolute w-[600px] h-[600px] rounded-full opacity-[0.12] blur-[120px]"
+            style={{
+              background: 'radial-gradient(circle, #6366f1 0%, #4f46e5 40%, transparent 70%)',
+              top: '-10%',
+              left: '10%',
+              animation: 'aurora 20s ease-in-out infinite',
+            }}
+          />
+          {/* Secondary orb - purple/violet */}
+          <div
+            className="absolute w-[500px] h-[500px] rounded-full opacity-[0.10] blur-[100px]"
+            style={{
+              background: 'radial-gradient(circle, #a855f7 0%, #7c3aed 40%, transparent 70%)',
+              bottom: '0%',
+              right: '5%',
+              animation: 'aurora2 25s ease-in-out infinite',
+            }}
+          />
+          {/* Tertiary orb - cyan/teal subtle accent */}
+          <div
+            className="absolute w-[400px] h-[400px] rounded-full opacity-[0.06] blur-[80px]"
+            style={{
+              background: 'radial-gradient(circle, #06b6d4 0%, #0891b2 40%, transparent 70%)',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              animation: 'aurora3 18s ease-in-out infinite',
+            }}
+          />
         </div>
 
-        {/* Floating stars */}
+        {/* Grid pattern overlay */}
+        <div className="fixed inset-0 -z-10 grid-pattern opacity-100" />
+
+        {/* Noise texture */}
+        <div className="noise-overlay" />
+
+        {/* Floating micro-particles */}
         <div className="fixed inset-0 overflow-hidden -z-10">
-          {isMounted && [...Array(30)].map((_, i) => {
-            const randomX = Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920);
-            const randomY = Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080);
-            const randomOpacity = Math.random() * 0.5;
-            const randomDuration = Math.random() * 10 + 10;
-            const randomTargetY = Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080);
-            const randomTargetOpacity = Math.random() * 0.5;
+          {isMounted && [...Array(20)].map((_, i) => {
+            const size = Math.random() * 2 + 1;
+            const startX = Math.random() * 100;
+            const startY = Math.random() * 100;
+            const duration = Math.random() * 30 + 20;
+            const delay = Math.random() * 10;
 
             return (
               <motion.div
                 key={i}
-                className="absolute w-1 h-1 bg-white rounded-full"
-                initial={{
-                  x: randomX,
-                  y: randomY,
-                  opacity: randomOpacity,
+                className="absolute rounded-full"
+                style={{
+                  width: size,
+                  height: size,
+                  left: `${startX}%`,
+                  top: `${startY}%`,
+                  background: i % 3 === 0
+                    ? 'rgba(99, 102, 241, 0.4)'
+                    : i % 3 === 1
+                      ? 'rgba(168, 85, 247, 0.3)'
+                      : 'rgba(255, 255, 255, 0.2)',
                 }}
                 animate={{
-                  y: [null, randomTargetY],
-                  opacity: [null, randomTargetOpacity, 0],
+                  y: [0, -80, 0],
+                  x: [0, Math.sin(i) * 30, 0],
+                  opacity: [0, 0.8, 0],
                 }}
                 transition={{
-                  duration: randomDuration,
+                  duration,
                   repeat: Infinity,
-                  ease: 'linear',
+                  delay,
+                  ease: 'easeInOut',
                 }}
               />
             );
@@ -500,6 +547,11 @@ export default function CrewAIPage() {
               className="w-full h-full object-contain"
             />
           </motion.div>
+
+          <div>
+            <h1 className="text-3xl font-bold text-shimmer">SwarAI</h1>
+            <p className="text-gray-400 text-sm tracking-wider">Multi-Agent AI System</p>
+          </div>
         </div>
 
         <div className="flex items-center space-x-4">
@@ -551,35 +603,148 @@ export default function CrewAIPage() {
           className="relative mx-auto mb-8"
           style={{ width: 'fit-content' }}
         >
+          {/* Orbital rings */}
+          {!voiceListening && !isProcessing && (
+            <>
+              <motion.div
+                className="absolute inset-0 w-48 h-48 rounded-full border-2 border-blue-400/30"
+                style={{ left: '50%', top: '50%', x: '-50%', y: '-50%' }}
+                animate={{ rotate: 360, scale: [1, 1.1, 1] }}
+                transition={{ rotate: { duration: 8, repeat: Infinity, ease: "linear" }, scale: { duration: 3, repeat: Infinity } }}
+              />
+              <motion.div
+                className="absolute inset-0 w-56 h-56 rounded-full border-2 border-purple-400/20"
+                style={{ left: '50%', top: '50%', x: '-50%', y: '-50%' }}
+                animate={{ rotate: -360, scale: [1, 1.15, 1] }}
+                transition={{ rotate: { duration: 12, repeat: Infinity, ease: "linear" }, scale: { duration: 4, repeat: Infinity } }}
+              />
+              <motion.div
+                className="absolute inset-0 w-64 h-64 rounded-full border border-cyan-400/10"
+                style={{ left: '50%', top: '50%', x: '-50%', y: '-50%' }}
+                animate={{ rotate: 360, scale: [1, 1.2, 1] }}
+                transition={{ rotate: { duration: 15, repeat: Infinity, ease: "linear" }, scale: { duration: 5, repeat: Infinity } }}
+              />
+            </>
+          )}
+
+          {/* Floating particles */}
+          {!voiceListening && !isProcessing && isMounted && [...Array(8)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"
+              style={{
+                left: '50%',
+                top: '50%',
+              }}
+              animate={{
+                x: [0, Math.cos(i * Math.PI / 4) * 120],
+                y: [0, Math.sin(i * Math.PI / 4) * 120],
+                opacity: [0, 1, 0],
+                scale: [0, 1, 0],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                delay: i * 0.2,
+                ease: "easeOut"
+              }}
+            />
+          ))}
+
+          {/* Pulsing glow effect */}
+          <motion.div
+            className="absolute inset-0 w-48 h-48 rounded-full blur-2xl"
+            style={{ left: '50%', top: '50%', x: '-50%', y: '-50%' }}
+            animate={{
+              background: [
+                'radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%)',
+                'radial-gradient(circle, rgba(168,85,247,0.4) 0%, transparent 70%)',
+                'radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%)',
+              ],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          />
+
           <motion.button
             onClick={handleVoiceStart}
             disabled={backendStatus !== 'online' || voiceListening || isProcessing}
             className={`
-              relative w-48 h-48 rounded-full transition-all duration-300 transform
+              relative w-48 h-48 rounded-full transition-all duration-500 transform overflow-hidden
               ${voiceListening
-                ? 'bg-red-500 shadow-2xl scale-110 animate-pulse'
+                ? 'bg-gradient-to-br from-red-500 via-pink-500 to-red-600 shadow-2xl shadow-red-500/50'
                 : isProcessing
-                  ? 'bg-yellow-500 shadow-xl animate-bounce'
-                  : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-xl hover:shadow-2xl hover:scale-105'
+                  ? 'bg-gradient-to-br from-yellow-400 via-orange-500 to-yellow-600 shadow-2xl shadow-yellow-500/50'
+                  : 'bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 shadow-2xl shadow-blue-500/50'
               }
               disabled:opacity-50 disabled:cursor-not-allowed
-              glass-strong voice-ripple ${voiceListening ? 'active' : ''}
             `}
-            whileHover={{ scale: backendStatus === 'online' ? 1.05 : 1 }}
-            whileTap={{ scale: backendStatus === 'online' ? 0.95 : 1 }}
+            whileHover={{ 
+              scale: backendStatus === 'online' ? 1.08 : 1,
+              rotate: [0, -2, 2, -2, 0],
+              transition: { rotate: { duration: 0.5 } }
+            }}
+            whileTap={{ scale: backendStatus === 'online' ? 0.92 : 1 }}
+            animate={{
+              boxShadow: voiceListening 
+                ? [
+                    '0 0 30px rgba(239, 68, 68, 0.5)',
+                    '0 0 50px rgba(239, 68, 68, 0.8)',
+                    '0 0 30px rgba(239, 68, 68, 0.5)',
+                  ]
+                : isProcessing
+                  ? [
+                      '0 0 30px rgba(234, 179, 8, 0.5)',
+                      '0 0 50px rgba(234, 179, 8, 0.8)',
+                      '0 0 30px rgba(234, 179, 8, 0.5)',
+                    ]
+                  : [
+                      '0 0 30px rgba(59, 130, 246, 0.5)',
+                      '0 0 50px rgba(168, 85, 247, 0.5)',
+                      '0 0 30px rgba(59, 130, 246, 0.5)',
+                    ]
+            }}
+            transition={{ boxShadow: { duration: 2, repeat: Infinity } }}
           >
-            <div className="absolute inset-4 rounded-full bg-white/20 flex items-center justify-center">
+            {/* Animated background gradient */}
+            <motion.div
+              className="absolute inset-0 opacity-50"
+              animate={{
+                background: [
+                  'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)',
+                  'radial-gradient(circle at 80% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)',
+                  'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)',
+                ],
+              }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            />
+
+            <div className="absolute inset-3 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
               <AnimatePresence mode="wait">
                 {voiceListening ? (
                   <motion.div
                     key="listening"
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
+                    initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
                     className="flex flex-col items-center"
+                    transition={{ type: "spring", damping: 15 }}
                   >
-                    <Mic className="w-16 h-16 text-white animate-pulse" />
-                    <span className="text-white text-sm font-bold mt-2">Listening...</span>
+                    <motion.div
+                      animate={{ 
+                        scale: [1, 1.2, 1],
+                      }}
+                      transition={{ duration: 0.8, repeat: Infinity }}
+                    >
+                      <Mic className="w-16 h-16 text-white drop-shadow-lg" />
+                    </motion.div>
+                    <motion.span 
+                      className="text-white text-sm font-bold mt-2"
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      Listening...
+                    </motion.span>
                   </motion.div>
                 ) : isProcessing ? (
                   <motion.div
@@ -590,42 +755,100 @@ export default function CrewAIPage() {
                     className="flex flex-col items-center"
                   >
                     <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      animate={{ 
+                        rotate: 360,
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{ 
+                        rotate: { duration: 2, repeat: Infinity, ease: "linear" },
+                        scale: { duration: 1, repeat: Infinity }
+                      }}
                     >
-                      <Zap className="w-16 h-16 text-white" />
+                      <Zap className="w-16 h-16 text-white drop-shadow-lg" />
                     </motion.div>
                     <span className="text-white text-sm font-bold mt-2">Processing...</span>
                   </motion.div>
                 ) : (
                   <motion.div
                     key="ready"
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
                     className="flex flex-col items-center"
+                    transition={{ type: "spring", damping: 10 }}
                   >
-                    <Mic className="w-16 h-16 text-white group-hover:scale-110 transition-transform" />
-                    <span className="text-white text-lg font-bold mt-2">TAP TO SPEAK</span>
+                    <motion.div
+                      animate={{ 
+                        y: [0, -8, 0],
+                      }}
+                      transition={{ 
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      <Mic className="w-16 h-16 text-white drop-shadow-lg" />
+                    </motion.div>
+                    <motion.span 
+                      className="text-white text-lg font-bold mt-2 tracking-wider"
+                      animate={{
+                        textShadow: [
+                          '0 0 10px rgba(255,255,255,0.5)',
+                          '0 0 20px rgba(255,255,255,0.8)',
+                          '0 0 10px rgba(255,255,255,0.5)',
+                        ]
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      TAP TO SPEAK
+                    </motion.span>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Ripple effect */}
+            {/* Multiple ripple effects */}
             {(voiceListening || isProcessing) && (
-              <motion.div
-                className="absolute inset-0 rounded-full border-4 border-white"
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.8, 0, 0.8]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
+              <>
+                <motion.div
+                  className="absolute inset-0 rounded-full border-4 border-white/60"
+                  animate={{
+                    scale: [1, 1.3],
+                    opacity: [0.6, 0]
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeOut"
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-0 rounded-full border-4 border-white/40"
+                  animate={{
+                    scale: [1, 1.5],
+                    opacity: [0.4, 0]
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                    delay: 0.5
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-0 rounded-full border-2 border-white/20"
+                  animate={{
+                    scale: [1, 1.8],
+                    opacity: [0.2, 0]
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                    delay: 1
+                  }}
+                />
+              </>
             )}
           </motion.button>
 
@@ -637,7 +860,7 @@ export default function CrewAIPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="text-xl text-gray-300 mb-4"
+          className="text-lg text-gray-400 mb-4 tracking-wide"
         >
           Speak naturally or choose an agent below
         </motion.p>
@@ -661,7 +884,11 @@ export default function CrewAIPage() {
         transition={{ delay: 0.4 }}
         className="mb-12 mt-16"
       >
-        <h2 className="text-2xl font-bold text-white text-center mb-8">Specialized Agents</h2>
+        <div className="flex items-center justify-center gap-4 mb-8">
+          <div className="glow-line flex-1 max-w-[120px]" />
+          <h2 className="text-2xl font-bold text-white text-center tracking-wide">Specialized Agents</h2>
+          <div className="glow-line flex-1 max-w-[120px]" />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start overflow-hidden">
           {agents.map((agent, index) => (
             <AgentCard
@@ -672,6 +899,75 @@ export default function CrewAIPage() {
               onExampleClick={handleExampleClick}
               delay={index * 0.1}
             />
+          ))}
+        </div>
+      </motion.section>
+
+      {/* === INTERACTIVE STATS SECTION === */}
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="mb-12"
+      >
+        <div className="glow-line mb-10" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+          {[
+            { value: '13+', label: 'AI Agents', icon: '🤖', color: 'from-blue-500/20 to-indigo-500/20' },
+            { value: '65+', label: 'App Launchers', icon: '🚀', color: 'from-purple-500/20 to-violet-500/20' },
+            { value: '15+', label: 'Quick Access Sites', icon: '🌐', color: 'from-cyan-500/20 to-teal-500/20' },
+            { value: '11', label: 'System Controls', icon: '⚙️', color: 'from-orange-500/20 to-amber-500/20' },
+          ].map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 + index * 0.1 }}
+              whileHover={{ scale: 1.05, y: -4 }}
+              className="stat-card rounded-2xl p-5 text-center cursor-default"
+            >
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mx-auto mb-3 text-lg`}>
+                {stat.icon}
+              </div>
+              <motion.div
+                className="text-2xl font-bold text-white mb-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.9 + index * 0.1 }}
+              >
+                {stat.value}
+              </motion.div>
+              <div className="text-xs text-gray-400 font-medium uppercase tracking-wider">{stat.label}</div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.section>
+
+      {/* === TECH STACK MARQUEE === */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.9 }}
+        className="mb-8 overflow-hidden relative"
+      >
+        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#050508] to-transparent z-10" />
+        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#050508] to-transparent z-10" />
+        <div className="flex animate-marquee whitespace-nowrap py-3">
+          {[...Array(2)].map((_, setIndex) => (
+            <div key={setIndex} className="flex items-center gap-8 mr-8">
+              {[
+                'CrewAI', 'LangChain', 'Groq LLM', 'FastAPI', 'Next.js', 'WebSocket',
+                'Voice Recognition', 'Whisper AI', 'MongoDB', 'JWT Auth', 'Real-time Processing',
+                'Multi-Agent System', 'Smart Intent Detection', 'TTS Engine'
+              ].map((tech) => (
+                <span
+                  key={`${setIndex}-${tech}`}
+                  className="text-[11px] font-medium text-gray-500 tracking-widest uppercase px-4 py-1.5 rounded-full border border-white/[0.06] bg-white/[0.02] flex-shrink-0"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
           ))}
         </div>
       </motion.section>
@@ -691,7 +987,7 @@ export default function CrewAIPage() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] mx-4 shadow-2xl relative overflow-hidden"
+              className="bg-[#0d0d14] border border-white/10 rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] mx-4 shadow-2xl shadow-black/50 relative overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
@@ -701,13 +997,13 @@ export default function CrewAIPage() {
                     <History className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">Conversation History</h3>
-                    <p className="text-sm text-gray-500">{conversationHistory.length} interactions</p>
+                    <h3 className="text-xl font-bold text-white">Conversation History</h3>
+                    <p className="text-sm text-gray-400">{conversationHistory.length} interactions</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowHistory(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+                  className="text-gray-400 hover:text-gray-200 transition-colors p-2 rounded-full hover:bg-white/10"
                   aria-label="Close conversation history"
                 >
                   <X className="w-5 h-5" />
@@ -718,15 +1014,15 @@ export default function CrewAIPage() {
               <div className="overflow-y-auto max-h-96 space-y-4">
                 {conversationHistory.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
-                    <Bot className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                    <p>No conversations yet. Start talking to SwarAI!</p>
+                    <Bot className="w-12 h-12 mx-auto mb-3 text-gray-600" />
+                    <p className="text-gray-400">No conversations yet. Start talking to SwarAI!</p>
                   </div>
                 ) : (
                   conversationHistory.map((entry, index) => (
                     <div key={index} className={`flex ${entry.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${entry.type === 'user'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-900'
+                        ? 'bg-blue-500/80 text-white'
+                        : 'bg-white/5 border border-white/10 text-gray-200'
                         }`}>
                         <div className="flex items-center space-x-2 mb-1">
                           {entry.type === 'user' ? (
@@ -760,13 +1056,13 @@ export default function CrewAIPage() {
                     setConversationHistory([]);
                     setShowHistory(false);
                   }}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  className="px-4 py-2 text-gray-400 hover:text-gray-200 transition-colors"
                 >
                   Clear History
                 </button>
                 <button
                   onClick={() => setShowHistory(false)}
-                  className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  className="px-6 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 border border-white/10 transition-colors"
                 >
                   Close
                 </button>
