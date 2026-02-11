@@ -65,10 +65,10 @@ class AppLauncherTool(BaseTool):
         "githubdesktop": r"C:\Users\{username}\AppData\Local\GitHubDesktop\GitHubDesktop.exe",
         "github": r"C:\Users\{username}\AppData\Local\GitHubDesktop\GitHubDesktop.exe",
         "anydesk": r"C:\Program Files (x86)\AnyDesk\AnyDesk.exe",
-        "chrome": r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-        "googlechrome": r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-        "firefox": r"C:\Program Files (x86)\Mozilla Firefox\firefox.exe",
-        "mozillafirefox": r"C:\Program Files (x86)\Mozilla Firefox\firefox.exe",
+        "chrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        "googlechrome": r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        "firefox": r"C:\Program Files\Mozilla Firefox\firefox.exe",
+        "mozillafirefox": r"C:\Program Files\Mozilla Firefox\firefox.exe",
         "edge": "msedge.exe",
         "microsoftedge": "msedge.exe",
         "opera": r"C:\Users\{username}\AppData\Local\Programs\Opera\opera.exe",
@@ -237,6 +237,18 @@ class AppLauncherTool(BaseTool):
                     subprocess.Popen([app_path])
                     return f"Launched {app_name}"
                 else:
+                    # Try alternate Program Files location
+                    alt_path = app_path
+                    if r"Program Files (x86)" in app_path:
+                        alt_path = app_path.replace(r"Program Files (x86)", "Program Files")
+                    elif r"Program Files" in app_path and r"Program Files (x86)" not in app_path:
+                        alt_path = app_path.replace(r"Program Files", r"Program Files (x86)")
+                    
+                    if alt_path != app_path and os.path.exists(alt_path):
+                        print(f"[APP_LAUNCHER] Found at alternate path: {alt_path}")
+                        subprocess.Popen([alt_path])
+                        return f"Launched {app_name}"
+                    
                     print(f"[APP_LAUNCHER] Path doesn't exist, trying alternate methods")
                     # For Office apps or other apps with known executables, try just the exe name
                     if app_name in ['outlook', 'msoutlook', 'word', 'msword', 'excel', 'msexcel', 'powerpoint', 'ppt', 'onenote', 'msonenote']:

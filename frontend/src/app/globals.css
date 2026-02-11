@@ -249,6 +249,69 @@ link[rel="apple-touch-icon"] {
   }
 }
 
+@keyframes aurora4 {
+  0% {
+    transform: translate(0%, 0%) rotate(0deg) scale(1) translateZ(0);
+  }
+  30% {
+    transform: translate(15%, -15%) rotate(108deg) scale(1.15) translateZ(0);
+  }
+  60% {
+    transform: translate(-10%, 10%) rotate(216deg) scale(0.95) translateZ(0);
+  }
+  100% {
+    transform: translate(0%, 0%) rotate(360deg) scale(1) translateZ(0);
+  }
+}
+
+@keyframes aurora5 {
+  0% {
+    transform: translate(10%, 10%) rotate(0deg) scale(1) translateZ(0);
+  }
+  40% {
+    transform: translate(-20%, -5%) rotate(-144deg) scale(1.2) translateZ(0);
+  }
+  70% {
+    transform: translate(5%, 20%) rotate(-252deg) scale(0.9) translateZ(0);
+  }
+  100% {
+    transform: translate(10%, 10%) rotate(-360deg) scale(1) translateZ(0);
+  }
+}
+
+@keyframes aurora6 {
+  0% {
+    transform: translate(-10%, -10%) rotate(0deg) scale(1) translateZ(0);
+  }
+  35% {
+    transform: translate(20%, 5%) rotate(126deg) scale(1.1) translateZ(0);
+  }
+  65% {
+    transform: translate(-5%, 15%) rotate(234deg) scale(1.15) translateZ(0);
+  }
+  100% {
+    transform: translate(-10%, -10%) rotate(360deg) scale(1) translateZ(0);
+  }
+}
+
+@keyframes aurora7 {
+  0% {
+    transform: translate(5%, 15%) rotate(0deg) scale(1) translateZ(0);
+  }
+  25% {
+    transform: translate(-15%, -10%) rotate(-90deg) scale(1.1) translateZ(0);
+  }
+  50% {
+    transform: translate(10%, -20%) rotate(-180deg) scale(0.95) translateZ(0);
+  }
+  75% {
+    transform: translate(-5%, 5%) rotate(-270deg) scale(1.1) translateZ(0);
+  }
+  100% {
+    transform: translate(5%, 15%) rotate(-360deg) scale(1) translateZ(0);
+  }
+}
+
 /* Grid pattern */
 .grid-pattern {
   background-image:
@@ -379,6 +442,39 @@ link[rel="apple-touch-icon"] {
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
+}
+
+/* Hide scrollbar for swiper */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Performance: reduce animations for users who prefer it & low-power devices */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* GPU-accelerated layer hints for animated elements */
+.gpu-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+/* Contain layout paint for performance isolation */
+.perf-contain {
+  contain: layout paint;
 }
 
 /* Range slider styling */

@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Mic,
@@ -15,7 +15,16 @@ import {
   WifiOff,
   History,
   X,
-  User
+  User,
+  Phone,
+  CreditCard,
+  AppWindow,
+  Globe,
+  ListTodo,
+  Camera,
+  Monitor,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import useVoiceRecognition from '@/hooks/useVoiceRecognition';
 import { useCrewAI } from '@/hooks/useCrewAI';
@@ -27,6 +36,78 @@ import { StatusIndicator } from '@/components/StatusIndicator';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { ProfileSettings } from '@/components/ProfileSettings';
 import { useAuth } from '@/context/AuthContext';
+
+// === Cursor-following glow component ===
+function CursorGlow() {
+  const glowRef = useRef<HTMLDivElement>(null);
+  const trailRef = useRef<HTMLDivElement>(null);
+  const mousePos = useRef({ x: 0, y: 0 });
+  const currentPos = useRef({ x: 0, y: 0 });
+  const trailPos = useRef({ x: 0, y: 0 });
+  const rafId = useRef<number>(0);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mousePos.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const animate = () => {
+      // Smooth interpolation for main glow
+      currentPos.current.x += (mousePos.current.x - currentPos.current.x) * 0.08;
+      currentPos.current.y += (mousePos.current.y - currentPos.current.y) * 0.08;
+
+      // Even slower trailing glow
+      trailPos.current.x += (mousePos.current.x - trailPos.current.x) * 0.03;
+      trailPos.current.y += (mousePos.current.y - trailPos.current.y) * 0.03;
+
+      if (glowRef.current) {
+        glowRef.current.style.transform = `translate(${currentPos.current.x - 200}px, ${currentPos.current.y - 200}px)`;
+      }
+      if (trailRef.current) {
+        trailRef.current.style.transform = `translate(${trailPos.current.x - 300}px, ${trailPos.current.y - 300}px)`;
+      }
+
+      rafId.current = requestAnimationFrame(animate);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    rafId.current = requestAnimationFrame(animate);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(rafId.current);
+    };
+  }, []);
+
+  return (
+    <>
+      {/* Primary cursor glow */}
+      <div
+        ref={glowRef}
+        className="fixed pointer-events-none -z-10"
+        style={{
+          width: 500,
+          height: 500,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(99, 102, 241, 0.06) 40%, transparent 70%)',
+          willChange: 'transform',
+        }}
+      />
+      {/* Trailing secondary glow */}
+      <div
+        ref={trailRef}
+        className="fixed pointer-events-none -z-10"
+        style={{
+          width: 700,
+          height: 700,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(168, 85, 247, 0.10) 0%, rgba(168, 85, 247, 0.03) 40%, transparent 70%)',
+          willChange: 'transform',
+        }}
+      />
+    </>
+  );
+}
 
 export default function CrewAIPage() {
   const [currentAgent, setCurrentAgent] = useState<string | null>(null);
@@ -42,6 +123,29 @@ export default function CrewAIPage() {
   const [showHistory, setShowHistory] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [showProfileSettings, setShowProfileSettings] = useState(false);
+  const [dynamicStats, setDynamicStats] = useState({
+    agentCount: 0,
+    appLaunchers: 65,
+    quickSites: 15,
+    systemControls: 11,
+  });
+  const swiperRef = useRef<HTMLDivElement>(null);
+
+  // Pre-compute particle random values once — prevents recalculation on every render
+  const particleData = useMemo(() =>
+    Array.from({ length: 25 }, (_, i) => ({
+      size: Math.random() * 3 + 1.5,
+      startX: Math.random() * 100,
+      startY: Math.random() * 100,
+      duration: Math.random() * 20 + 12,
+      delay: Math.random() * 8,
+      yRange: -(60 + Math.random() * 80),
+      xRange: Math.sin(i) * 40,
+      colorIndex: i % 4,
+      glowIndex: i % 3,
+    })),
+    []
+  );
 
   const { user } = useAuth();
 
@@ -83,6 +187,25 @@ export default function CrewAIPage() {
     const interval = setInterval(checkStatus, 10000);
     return () => clearInterval(interval);
   }, []);
+
+  // Fetch dynamic stats from backend
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/agents');
+        if (res.ok) {
+          const data = await res.json();
+          setDynamicStats(prev => ({
+            ...prev,
+            agentCount: data.count || prev.agentCount,
+          }));
+        }
+      } catch {
+        // Silently fail - keep defaults
+      }
+    };
+    fetchStats();
+  }, [backendStatus]);
 
   // Handle WebSocket results with natural conversation flow
   useEffect(() => {
@@ -386,7 +509,7 @@ export default function CrewAIPage() {
     setShowWhatsAppPopup(false);
   };
 
-  const agents = [
+  const agents = useMemo(() => [
     {
       id: 'whatsapp',
       name: 'WhatsApp Agent',
@@ -438,8 +561,112 @@ export default function CrewAIPage() {
         'Tell me about AI',
         'What can you do?'
       ]
+    },
+    {
+      id: 'phone',
+      name: 'Phone Agent',
+      description: 'Make calls and dial contacts instantly',
+      icon: Phone,
+      color: 'from-teal-500 to-green-600',
+      command: 'Try me!',
+      examples: [
+        'Call Mom',
+        'Phone Jay',
+        'Dial +1234567890'
+      ]
+    },
+    {
+      id: 'payment',
+      name: 'Payment Agent',
+      description: 'Send money via PayPal, UPI or Google Pay',
+      icon: CreditCard,
+      color: 'from-yellow-500 to-orange-600',
+      command: 'Try me!',
+      examples: [
+        'Pay $50 to John via PayPal',
+        'Send 100 rupees via GPay',
+        'Transfer money to Jay'
+      ]
+    },
+    {
+      id: 'app_launcher',
+      name: 'App Launcher',
+      description: 'Open any application or program',
+      icon: AppWindow,
+      color: 'from-indigo-500 to-blue-600',
+      command: 'Try me!',
+      examples: [
+        'Open Chrome',
+        'Launch Calculator',
+        'Start VS Code'
+      ]
+    },
+    {
+      id: 'websearch',
+      name: 'Web Search',
+      description: 'Search Google, YouTube and the web',
+      icon: Globe,
+      color: 'from-sky-500 to-blue-600',
+      command: 'Try me!',
+      examples: [
+        'Search for Python tutorials',
+        'Google best restaurants near me',
+        'YouTube funny cats'
+      ]
+    },
+    {
+      id: 'task',
+      name: 'Task Manager',
+      description: 'Manage to-do lists and reminders',
+      icon: ListTodo,
+      color: 'from-pink-500 to-rose-600',
+      command: 'Try me!',
+      examples: [
+        'Add task: buy groceries',
+        'List my tasks',
+        'Complete task 1'
+      ]
+    },
+    {
+      id: 'screenshot',
+      name: 'Screenshot Agent',
+      description: 'Capture and analyze your screen',
+      icon: Camera,
+      color: 'from-fuchsia-500 to-purple-600',
+      command: 'Try me!',
+      examples: [
+        'Take a screenshot',
+        'Capture my screen',
+        'Screenshot this'
+      ]
+    },
+    {
+      id: 'system_control',
+      name: 'System Control',
+      description: 'Volume, brightness, battery & power controls',
+      icon: Monitor,
+      color: 'from-slate-500 to-gray-600',
+      command: 'Try me!',
+      examples: [
+        'Increase volume',
+        'Set brightness to 50%',
+        'Check battery status'
+      ]
+    },
+  ], []);
+
+  // Swiper scroll handlers
+  const scrollSwiper = useCallback((direction: 'left' | 'right') => {
+    if (swiperRef.current) {
+      // Scroll by one card width (container / 5) + gap
+      const containerWidth = swiperRef.current.clientWidth;
+      const scrollAmount = Math.round(containerWidth / 5) + 16;
+      swiperRef.current.scrollBy({
+        left: direction === 'right' ? scrollAmount : -scrollAmount,
+        behavior: 'smooth',
+      });
     }
-  ];
+  }, []);
 
   return (
     <ProtectedRoute>
@@ -458,6 +685,8 @@ export default function CrewAIPage() {
               top: '-10%',
               left: '10%',
               animation: 'aurora 20s ease-in-out infinite',
+              willChange: 'transform',
+              transform: 'translateZ(0)',
             }}
           />
           {/* Secondary orb - purple/violet */}
@@ -468,6 +697,8 @@ export default function CrewAIPage() {
               bottom: '0%',
               right: '5%',
               animation: 'aurora2 25s ease-in-out infinite',
+              willChange: 'transform',
+              transform: 'translateZ(0)',
             }}
           />
           {/* Tertiary orb - cyan/teal subtle accent */}
@@ -477,56 +708,105 @@ export default function CrewAIPage() {
               background: 'radial-gradient(circle, #06b6d4 0%, #0891b2 40%, transparent 70%)',
               top: '50%',
               left: '50%',
-              transform: 'translate(-50%, -50%)',
+              transform: 'translate(-50%, -50%) translateZ(0)',
               animation: 'aurora3 18s ease-in-out infinite',
+              willChange: 'transform',
+            }}
+          />
+
+          {/* Extra orb 1 - rose/pink, bottom-left */}
+          <div
+            className="absolute w-[450px] h-[450px] rounded-full opacity-[0.09] blur-[110px]"
+            style={{
+              background: 'radial-gradient(circle, #f43f5e 0%, #e11d48 40%, transparent 70%)',
+              bottom: '20%',
+              left: '-5%',
+              animation: 'aurora4 22s ease-in-out infinite',
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+            }}
+          />
+          {/* Extra orb 2 - emerald/green, top-right */}
+          <div
+            className="absolute w-[350px] h-[350px] rounded-full opacity-[0.07] blur-[90px]"
+            style={{
+              background: 'radial-gradient(circle, #10b981 0%, #059669 40%, transparent 70%)',
+              top: '10%',
+              right: '20%',
+              animation: 'aurora5 28s ease-in-out infinite',
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+            }}
+          />
+          {/* Extra orb 3 - amber/warm, center-right */}
+          <div
+            className="absolute w-[500px] h-[500px] rounded-full opacity-[0.06] blur-[100px]"
+            style={{
+              background: 'radial-gradient(circle, #f59e0b 0%, #d97706 40%, transparent 70%)',
+              top: '60%',
+              right: '-10%',
+              animation: 'aurora6 24s ease-in-out infinite',
+              willChange: 'transform',
+              transform: 'translateZ(0)',
+            }}
+          />
+          {/* Extra orb 4 - sky/blue, bottom-center */}
+          <div
+            className="absolute w-[550px] h-[550px] rounded-full opacity-[0.08] blur-[130px]"
+            style={{
+              background: 'radial-gradient(circle, #38bdf8 0%, #0284c7 40%, transparent 70%)',
+              bottom: '-15%',
+              left: '35%',
+              animation: 'aurora7 30s ease-in-out infinite',
+              willChange: 'transform',
+              transform: 'translateZ(0)',
             }}
           />
         </div>
 
-        {/* Grid pattern overlay */}
-        <div className="fixed inset-0 -z-10 grid-pattern opacity-100" />
-
         {/* Noise texture */}
         <div className="noise-overlay" />
 
-        {/* Floating micro-particles */}
-        <div className="fixed inset-0 overflow-hidden -z-10">
-          {isMounted && [...Array(20)].map((_, i) => {
-            const size = Math.random() * 2 + 1;
-            const startX = Math.random() * 100;
-            const startY = Math.random() * 100;
-            const duration = Math.random() * 30 + 20;
-            const delay = Math.random() * 10;
+        {/* Cursor-following glow effect */}
+        {isMounted && (
+          <CursorGlow />
+        )}
 
-            return (
-              <motion.div
-                key={i}
-                className="absolute rounded-full"
-                style={{
-                  width: size,
-                  height: size,
-                  left: `${startX}%`,
-                  top: `${startY}%`,
-                  background: i % 3 === 0
-                    ? 'rgba(99, 102, 241, 0.4)'
-                    : i % 3 === 1
-                      ? 'rgba(168, 85, 247, 0.3)'
-                      : 'rgba(255, 255, 255, 0.2)',
-                }}
-                animate={{
-                  y: [0, -80, 0],
-                  x: [0, Math.sin(i) * 30, 0],
-                  opacity: [0, 0.8, 0],
-                }}
-                transition={{
-                  duration,
-                  repeat: Infinity,
-                  delay,
-                  ease: 'easeInOut',
-                }}
-              />
-            );
-          })}
+        {/* Floating particles - pre-computed for performance */}
+        <div className="fixed inset-0 overflow-hidden -z-10">
+          {isMounted && particleData.map((p, i) => (
+            <motion.div
+              key={i}
+              className="absolute rounded-full"
+              style={{
+                width: p.size,
+                height: p.size,
+                left: `${p.startX}%`,
+                top: `${p.startY}%`,
+                background: p.colorIndex === 0
+                  ? 'rgba(99, 102, 241, 0.6)'
+                  : p.colorIndex === 1
+                    ? 'rgba(168, 85, 247, 0.5)'
+                    : p.colorIndex === 2
+                      ? 'rgba(6, 182, 212, 0.4)'
+                      : 'rgba(255, 255, 255, 0.35)',
+                boxShadow: p.glowIndex === 0 ? `0 0 ${p.size * 3}px rgba(99, 102, 241, 0.3)` : 'none',
+                willChange: 'transform, opacity',
+              }}
+              animate={{
+                y: [0, p.yRange, 0],
+                x: [0, p.xRange, 0],
+                opacity: [0, 0.9, 0],
+                scale: [0.5, 1.2, 0.5],
+              }}
+              transition={{
+                duration: p.duration,
+                repeat: Infinity,
+                delay: p.delay,
+                ease: 'easeInOut',
+              }}
+            />
+          ))}
         </div>
 
       {/* Header */}
@@ -548,7 +828,7 @@ export default function CrewAIPage() {
             />
           </motion.div>
           <div>
-            <h1 className="text-3xl font-bold text-shimmer">SwarAI</h1>
+            <h1 className="text-3xl font-bold text-white">SwarAI</h1>
             <p className="text-gray-400 text-sm tracking-wider">Multi-Agent AI System</p>
           </div>
         </div>
@@ -562,7 +842,7 @@ export default function CrewAIPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowHistory(true)}
-            className="glass p-3 rounded-xl text-white hover:bg-white/20 transition-all relative"
+            className="glass p-3 rounded-xl text-white hover:bg-white/20 transition-all relative cursor-pointer"
             title="View conversation history"
           >
             <History className="w-6 h-6" />
@@ -574,7 +854,7 @@ export default function CrewAIPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowProfileSettings(true)}
-            className="glass p-3 rounded-xl hover:bg-white/20 transition-all"
+            className="glass p-3 rounded-xl hover:bg-white/20 transition-all cursor-pointer"
             title="Profile & Settings"
           >
             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
@@ -677,6 +957,7 @@ export default function CrewAIPage() {
                   : 'bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 shadow-2xl shadow-blue-500/50'
               }
               disabled:opacity-50 disabled:cursor-not-allowed
+              cursor-pointer
             `}
             whileHover={{ 
               scale: backendStatus === 'online' ? 1.08 : 1,
@@ -859,7 +1140,7 @@ export default function CrewAIPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="text-lg text-gray-400 mb-4 tracking-wide"
+          className="text-lg text-gray-400 mt-14 mb-4 tracking-wide"
         >
           Speak naturally or choose an agent below
         </motion.p>
@@ -876,7 +1157,7 @@ export default function CrewAIPage() {
         )}
       </motion.section>
 
-      {/* Agent Cards */}
+      {/* Agent Cards - Horizontal Swiper */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -888,17 +1169,53 @@ export default function CrewAIPage() {
           <h2 className="text-2xl font-bold text-white text-center tracking-wide">Specialized Agents</h2>
           <div className="glow-line flex-1 max-w-[120px]" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start overflow-hidden">
-          {agents.map((agent, index) => (
-            <AgentCard
-              key={agent.id}
-              agent={agent}
-              isActive={currentAgent === agent.id}
-              isDisabled={backendStatus !== 'online'}
-              onExampleClick={handleExampleClick}
-              delay={index * 0.1}
-            />
-          ))}
+
+        {/* Swiper container with navigation */}
+        <div className="relative group/swiper">
+          {/* Left arrow */}
+          <button
+            onClick={() => scrollSwiper('left')}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/swiper:opacity-100 transition-opacity duration-300 hover:bg-white/20 cursor-pointer -ml-2"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          {/* Right arrow */}
+          <button
+            onClick={() => scrollSwiper('right')}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/swiper:opacity-100 transition-opacity duration-300 hover:bg-white/20 cursor-pointer -mr-2"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+
+          {/* Wider fade edges for smooth card disappearing */}
+          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[#050508] via-[#050508]/80 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[#050508] via-[#050508]/80 to-transparent z-10 pointer-events-none" />
+
+          {/* Scrollable cards — 5 visible at a time, no duplication */}
+          <div
+            ref={swiperRef}
+            className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 px-10 snap-x snap-mandatory"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {agents.map((agent, index) => (
+              <div
+                key={agent.id}
+                className="snap-start"
+                style={{ flex: '0 0 calc((100% - 4 * 1rem) / 5)' }}
+              >
+                <AgentCard
+                  agent={agent}
+                  isActive={currentAgent === agent.id}
+                  isDisabled={backendStatus !== 'online'}
+                  onExampleClick={handleExampleClick}
+                  delay={Math.min(index, 4) * 0.1}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </motion.section>
 
@@ -912,10 +1229,10 @@ export default function CrewAIPage() {
         <div className="glow-line mb-10" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
           {[
-            { value: '13+', label: 'AI Agents', icon: '🤖', color: 'from-blue-500/20 to-indigo-500/20' },
-            { value: '65+', label: 'App Launchers', icon: '🚀', color: 'from-purple-500/20 to-violet-500/20' },
-            { value: '15+', label: 'Quick Access Sites', icon: '🌐', color: 'from-cyan-500/20 to-teal-500/20' },
-            { value: '11', label: 'System Controls', icon: '⚙️', color: 'from-orange-500/20 to-amber-500/20' },
+            { value: `${dynamicStats.agentCount || '13'}+`, label: 'AI Agents', icon: '🤖', color: 'from-blue-500/20 to-indigo-500/20' },
+            { value: `${dynamicStats.appLaunchers}+`, label: 'App Launchers', icon: '🚀', color: 'from-purple-500/20 to-violet-500/20' },
+            { value: `${dynamicStats.quickSites}+`, label: 'Quick Access Sites', icon: '🌐', color: 'from-cyan-500/20 to-teal-500/20' },
+            { value: `${dynamicStats.systemControls}`, label: 'System Controls', icon: '⚙️', color: 'from-orange-500/20 to-amber-500/20' },
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
@@ -1089,7 +1406,7 @@ export default function CrewAIPage() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl relative"
+              className="bg-[#0d0d14] border border-white/10 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl shadow-black/50 relative"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close button */}
@@ -1099,7 +1416,7 @@ export default function CrewAIPage() {
                   e.stopPropagation();
                   setShowWhatsAppPopup(false);
                 }}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-200 transition-colors p-1 rounded-full hover:bg-white/10"
                 aria-label="Close popup"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1108,28 +1425,28 @@ export default function CrewAIPage() {
               </button>
 
               <div className="text-center">
-                <div className="mx-auto flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-                  <MessageCircle className="w-8 h-8 text-green-600" />
+                <div className="mx-auto flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 mb-4">
+                  <MessageCircle className="w-8 h-8 text-green-400" />
                 </div>
 
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-xl font-semibold text-white mb-2">
                   WhatsApp Message Ready!
                 </h3>
 
                 {lastResult.agent_used && (
-                  <div className="mb-3 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full inline-block">
+                  <div className="mb-3 px-3 py-1 bg-blue-500/20 text-blue-300 text-sm rounded-full inline-block">
                     🤖 {lastResult.agent_used} Agent
                   </div>
                 )}
 
-                <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+                <p className="text-sm text-gray-400 mb-6 leading-relaxed">
                   Your WhatsApp message has been processed successfully. Click below to open WhatsApp and send your message.
                 </p>
 
                 {lastResult.message && (
-                  <div className="mb-6 p-3 bg-gray-50 rounded-lg text-left">
+                  <div className="mb-6 p-3 bg-white/5 border border-white/10 rounded-lg text-left">
                     <p className="text-xs text-gray-500 mb-1">Message Details:</p>
-                    <p className="text-sm text-gray-700 line-clamp-3">{lastResult.message}</p>
+                    <p className="text-sm text-gray-300 line-clamp-3">{lastResult.message}</p>
                   </div>
                 )}
 
@@ -1140,7 +1457,7 @@ export default function CrewAIPage() {
                       e.stopPropagation();
                       setShowWhatsAppPopup(false);
                     }}
-                    className="flex-1 px-4 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium"
+                    className="flex-1 px-4 py-3 text-gray-300 bg-white/10 hover:bg-white/20 rounded-lg transition-colors font-medium cursor-pointer"
                   >
                     Not Now
                   </button>
@@ -1150,7 +1467,7 @@ export default function CrewAIPage() {
                       e.stopPropagation();
                       shareToWhatsApp();
                     }}
-                    className="flex-1 px-4 py-3 text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors font-medium flex items-center justify-center space-x-2"
+                    className="flex-1 px-4 py-3 text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors font-medium flex items-center justify-center space-x-2 cursor-pointer"
                   >
                     <MessageCircle className="w-4 h-4" />
                     <span>Open WhatsApp</span>
