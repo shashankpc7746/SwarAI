@@ -49,10 +49,13 @@ export function AgentCard({
       onMouseLeave={() => setShowExamples(false)}
     >
       {/* Background gradient */}
-      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${agent.color} opacity-20 group-hover:opacity-30 transition-opacity duration-500`} />
+      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${agent.color} opacity-15 group-hover:opacity-25 transition-opacity duration-700`} />
+
+      {/* Subtle top-edge gradient line */}
+      <div className={`absolute top-0 left-4 right-4 h-[1px] bg-gradient-to-r ${agent.color} opacity-40 group-hover:opacity-70 transition-opacity duration-500 rounded-full`} />
 
       {/* Glass effect */}
-      <div className="relative p-6 rounded-2xl border border-white/20 glass backdrop-blur-lg group-hover:border-white/30 transition-all duration-500">
+      <div className="relative p-6 rounded-2xl border border-white/10 glass backdrop-blur-lg group-hover:border-white/20 transition-all duration-500">
         {/* Active indicator */}
         {isActive && (
           <motion.div
