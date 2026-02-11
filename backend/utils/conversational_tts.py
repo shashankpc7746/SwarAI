@@ -41,8 +41,11 @@ except ImportError:
 # Audio playback
 try:
     import pygame
-    pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=512)
-    PYGAME_AVAILABLE = True
+    try:
+        pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=512)
+        PYGAME_AVAILABLE = True
+    except Exception:
+        PYGAME_AVAILABLE = False
 except ImportError:
     PYGAME_AVAILABLE = False
 
