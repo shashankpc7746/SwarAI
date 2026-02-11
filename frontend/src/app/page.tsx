@@ -1143,7 +1143,7 @@ export default function CrewAIPage() {
         </div>
 
         {/* Swiper container with navigation */}
-        <div className="relative group/swiper overflow-visible pt-0">
+        <div className="relative group/swiper overflow-visible pt-8">
           {/* Left arrow - fixed position */}
           <button
             onClick={() => scrollSwiper('left')}
