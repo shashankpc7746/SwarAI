@@ -1143,46 +1143,48 @@ export default function CrewAIPage() {
         </div>
 
         {/* Swiper container with navigation */}
-        <div className="relative group/swiper overflow-visible pt-8">
-          {/* Left arrow - fixed position */}
-          <button
-            onClick={() => scrollSwiper('left')}
-            className="absolute left-0 top-[124px] z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/swiper:opacity-100 transition-opacity duration-300 hover:bg-white/20 cursor-pointer -ml-5"
-            aria-label="Scroll left"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
+        <div className="overflow-visible pt-8">
+          <div className="relative">
+            {/* Left arrow - fixed position */}
+            <button
+              onClick={() => scrollSwiper('left')}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white transition-opacity duration-300 hover:bg-white/20 cursor-pointer -ml-5"
+              aria-label="Scroll left"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
 
-          {/* Right arrow - fixed position */}
-          <button
-            onClick={() => scrollSwiper('right')}
-            className="absolute right-0 top-[124px] z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/swiper:opacity-100 transition-opacity duration-300 hover:bg-white/20 cursor-pointer -mr-5"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
+            {/* Right arrow - fixed position */}
+            <button
+              onClick={() => scrollSwiper('right')}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white transition-opacity duration-300 hover:bg-white/20 cursor-pointer -mr-5"
+              aria-label="Scroll right"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
 
-          {/* Scrollable cards — 5 visible at a time, no duplication */}
-          <div
-            ref={swiperRef}
-            className="flex gap-4 overflow-x-auto scrollbar-hide pt-2 pb-2 snap-x snap-mandatory"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {agents.map((agent, index) => (
-              <div
-                key={agent.id}
-                className="snap-start flex-shrink-0"
-                style={{ width: 'calc((100% - 4 * 1rem) / 5)' }}
-              >
-                <AgentCard
-                  agent={agent}
-                  isActive={currentAgent === agent.id}
-                  isDisabled={backendStatus !== 'online'}
-                  onExampleClick={handleExampleClick}
-                  delay={Math.min(index, 4) * 0.1}
-                />
-              </div>
-            ))}
+            {/* Scrollable cards — 5 visible at a time, no duplication */}
+            <div
+              ref={swiperRef}
+              className="flex gap-4 overflow-x-auto scrollbar-hide pt-2 pb-2 snap-x snap-mandatory"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {agents.map((agent, index) => (
+                <div
+                  key={agent.id}
+                  className="snap-start flex-shrink-0"
+                  style={{ width: 'calc((100% - 4 * 1rem) / 5)' }}
+                >
+                  <AgentCard
+                    agent={agent}
+                    isActive={currentAgent === agent.id}
+                    isDisabled={backendStatus !== 'online'}
+                    onExampleClick={handleExampleClick}
+                    delay={Math.min(index, 4) * 0.1}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </motion.section>
