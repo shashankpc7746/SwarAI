@@ -76,7 +76,7 @@
 - 🧠 **Smart Intent Detection** with AI Enhancement Layer (auto-fixes typos and improves clarity)
 - 🔄 **Multi-Agent Orchestration** using CrewAI for complex workflows
 - 🌐 **Modern Web Interface** with dynamic animations, login system, and profile settings
-- 🔐 **Authentication** with JWT tokens and protected routes
+- 🔐 **Authentication** with JWT tokens, Google OAuth, and protected routes
 - 🚀 **FastAPI Backend** with WebSocket support and real-time processing
 - 💾 **Conversation Memory** with MongoDB (optional)
 
@@ -305,7 +305,10 @@ npm run dev
    ```env
    # Required
    GROQ_API_KEY=your_groq_api_key_here
-   GROQ_MODEL=llama-3.1-70b-versatile
+   GROQ_MODEL=llama-3.3-70b-versatile
+   
+   # Google OAuth (Get from https://console.cloud.google.com/apis/credentials)
+   GOOGLE_CLIENT_ID=your_google_client_id_here.apps.googleusercontent.com
 
    # Optional
    MONGODB_URL=mongodb://localhost:27017
@@ -323,10 +326,21 @@ npm run dev
    npm install --legacy-peer-deps
    ```
 
-2. **Configure environment (optional):**
+2. **Configure environment variables:**
+   
+   Create `frontend/.env.local` file:
    ```bash
-   # Create .env.local if needed
-   echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
+   # Create .env.local
+   cp .env.example .env.local
+   ```
+   
+   Edit `.env.local` and add:
+   ```env
+   # Backend API URL
+   NEXT_PUBLIC_API_URL=http://localhost:8000
+   
+   # Google OAuth (Get from https://console.cloud.google.com/apis/credentials)
+   NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id_here.apps.googleusercontent.com
    ```
 
 ### Optional Dependencies
@@ -376,6 +390,19 @@ pip install screen-brightness-control
 | `MONGODB_URL`               | MongoDB connection string | `mongodb://localhost:27017` |
 | `MONGODB_DATABASE`          | Database name             | `swarai_assistant`          |
 | `CONVERSATION_MEMORY_LIMIT` | Max conversation history  | `50`                        |
+
+#### Authentication
+
+| Variable              | Description                                                | Default | Required |
+| --------------------- | ---------------------------------------------------------- | ------- | -------- |
+| `GOOGLE_CLIENT_ID`    | Google OAuth 2.0 Client ID (backend)                       | -       | ✅ Yes   |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth 2.0 Client ID (frontend)          | -       | ✅ Yes   |
+
+> **Get Google Client ID**: https://console.cloud.google.com/apis/credentials
+> - Create OAuth 2.0 Client ID
+> - Application type: Web application
+> - Authorized JavaScript origins: `http://localhost:3000`
+> - Authorized redirect URIs: `http://localhost:3000/auth/callback`
 
 #### Agent Configuration
 
@@ -915,7 +942,42 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🎉 Recent Improvements & New Features
 
-### Version 3.0 - Auth, UI Overhaul & Animations (Latest)
+### Version 3.1 - Google OAuth & UI Refinements (February 2026)
+
+#### 🔐 Full Google OAuth Integration
+
+- **Google Sign-In** fully implemented with `google-auth` library
+- Backend token verification with Google API
+- Automatic user creation from Google account (name + email)
+- Profile picture syncing from Google accounts
+- Seamless login experience with popup flow
+- Secure JWT token generation after OAuth validation
+
+**Setup**: Requires `GOOGLE_CLIENT_ID` in both backend and frontend `.env` files
+
+#### ✨ Starfield Background System
+
+**Removed**: Large aurora gradient orbs that made background feel crowded
+
+**Added**:
+- **50 moving star particles** - drift across screen in random directions
+- **40 static twinkling stars** - pulse in/out with varying brightness
+- 4 color variants (indigo, lavender, white, sky blue) with glow effects
+- Optimized animations with `useMemo` for performance
+
+**Result**: Clean, spacious night-sky aesthetic with subtle motion
+
+#### 🎨 UI/UX Polish
+
+- **Smaller cursor glow effect** - 250px/400px (was 500px/700px) for less distraction
+- **Agent card hover overlay** - Examples appear as dark overlay inside card (fixed clipping issues)
+- **Tap to Speak ambient glow** - Dual-layer animated color rings (indigo ↔ purple)
+- **Swiper fixes** - Exactly 5 cards visible, centered 3rd card under voice button
+- Fixed hover cut-off by adding internal padding to scrollable container
+
+---
+
+### Version 3.0 - Auth, UI Overhaul & Animations
 
 #### 🔐 Authentication System
 
@@ -923,7 +985,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - JWT-based session management with 7-day expiry
 - Protected routes — main app requires authentication
 - Profile settings modal (replaces dummy settings button)
-- Google OAuth placeholder (ready for integration)
+- Google OAuth integration (frontend + backend)
 
 #### 🎙️ Dynamic Voice Button Animations
 

@@ -6,11 +6,49 @@
 Simply double-click `start-swarai.bat` to start both backend and frontend servers!
 
 The script will:
-1. Install required Python packages (PyJWT, python-jose, passlib)
+1. Install required Python packages (google-auth, PyJWT, python-jose, passlib)
 2. Start the backend server (http://localhost:8000)
 3. Install Node.js packages (if needed)
 4. Start the frontend server (http://localhost:3000)
 5. Open the login page in your browser
+
+## ⚙️ First-Time Setup
+
+Before running SwarAI for the first time, configure your environment variables:
+
+### 1. Backend Configuration
+
+Edit `backend/.env`:
+
+```env
+# Required: Get from https://console.groq.com/
+GROQ_API_KEY=your_groq_api_key_here
+
+# Required: Get from https://console.cloud.google.com/apis/credentials
+GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+```
+
+### 2. Frontend Configuration
+
+Create `frontend/.env.local`:
+
+```env
+# Required: Same Google Client ID as backend
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+
+# Required: Backend API URL
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+### 3. Get Google OAuth Client ID
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create OAuth 2.0 Client ID
+3. Add authorized origins: `http://localhost:3000`
+4. Add redirect URIs: `http://localhost:3000/auth/callback`
+5. Copy your Client ID
+
+📚 **Detailed guide**: See `documentation/backend/AUTHENTICATION_GUIDE.md`
 
 ## 📋 Manual Start
 
@@ -45,20 +83,32 @@ npm run dev
 
 ## 🎯 First Time Login
 
-1. The login page will show with "Welcome to Swar AI" animation
-2. Fill in your details:
+You have two options to log in:
+
+### Option A: Sign in with Google (Recommended)
+
+1. Click the **"Sign in with Google"** button
+2. Select your Google account in the popup
+3. Grant permissions
+4. You're in! Start using SwarAI
+
+### Option B: Manual Login
+
+1. Fill in your details:
    - **Name**: Your full name
    - **Gmail**: Your email address
    - **Age**: Your age (13-120)
-3. Click "Sign In"
-4. You're in! Start using Swar AI Voice Assistant
+2. Click "Sign In"
+3. You're in! Start using SwarAI
 
 ## 🔑 Authentication Flow
 
 ```
-Browser → Login Page → Enter Details → Backend Authentication
+Browser → Login Page → Choose Login Method
    ↓
-JWT Token Generated
+Manual Login OR Google OAuth
+   ↓
+JWT Token Generated (7-day expiry)
    ↓
 Token Stored in LocalStorage
    ↓
@@ -74,21 +124,46 @@ After login, you can:
 - ✅ Send WhatsApp messages
 - ✅ Draft emails
 - ✅ Manage tasks
+- ✅ Control system (volume, brightness, etc.)
+- ✅ Launch applications
 - ✅ And more!
 
 ## 🔄 Logout
 
-Click the logout icon in the top-right corner to log out.
+Click your profile icon in the top-right corner, then click **Logout** to end your session.
 
 ## 💡 Tips
 
-- Your session persists for 7 days
+- Your session persists for **7 days**
 - You can close and reopen the browser without logging in again
+- Google OAuth is the fastest way to log in
+- Your profile picture from Google will be displayed (if using Google login)
 - Use the logout button to end your session securely
+
+## 🐛 Troubleshooting
+
+### "Missing required parameter: client_id"
+- Make sure you created `frontend/.env.local` with `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
+- Restart the frontend server after creating the file
+
+### "Google OAuth requires google-auth library"
+- Run: `pip install google-auth google-auth-oauthlib google-auth-httplib2`
+- Restart the backend server
+
+### Backend Not Starting
+- Verify `GROQ_API_KEY` is set in `backend/.env`
+- Check Python version (requires 3.10+)
+- Activate virtual environment: `venv\Scripts\activate`
+
+### Frontend Not Building
+- Run: `npm install --legacy-peer-deps`
+- Delete `node_modules` and `.next` folders, then reinstall
 
 ## 📚 More Information
 
-See `AUTHENTICATION_GUIDE.md` for detailed documentation.
+- **Authentication Guide**: `documentation/backend/AUTHENTICATION_GUIDE.md`
+- **Full README**: `README.md`
+- **Backend Fixes**: `documentation/backend/BACKEND_FIXES.md`
 
 ---
 
