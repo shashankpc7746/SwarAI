@@ -1,4 +1,4 @@
-```markdown
+````markdown
 # SwarAI Quick Start Guide
 
 ## 🚀 Quick Start (Windows)
@@ -6,6 +6,7 @@
 Simply double-click `start-swarai.bat` to start both backend and frontend servers!
 
 The script will:
+
 1. Install required Python packages (google-auth, PyJWT, python-jose, passlib)
 2. Start the backend server (http://localhost:8000)
 3. Install Node.js packages (if needed)
@@ -27,6 +28,7 @@ GROQ_API_KEY=your_groq_api_key_here
 # Required: Get from https://console.cloud.google.com/apis/credentials
 GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
 ```
+````
 
 ### 2. Frontend Configuration
 
@@ -55,19 +57,21 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 ### Option 1: Backend First
 
 1. **Start Backend**:
+
 ```bash
 cd backend
 python main.py
 ```
 
 2. **Start Frontend** (in a new terminal):
+
 ```bash
 cd frontend
 npm run dev
 ```
 
 3. **Open Browser**:
-Navigate to http://localhost:3000
+   Navigate to http://localhost:3000
 
 ### Option 2: PowerShell
 
@@ -76,7 +80,7 @@ Navigate to http://localhost:3000
 cd backend
 python main.py
 
-# Terminal 2 - Frontend  
+# Terminal 2 - Frontend
 cd frontend
 npm run dev
 ```
@@ -118,6 +122,7 @@ Main Page Loads → Protected Content Accessible
 ## 📱 Features Available
 
 After login, you can:
+
 - ✅ Use voice commands
 - ✅ Chat with AI agents
 - ✅ Search files
@@ -143,19 +148,23 @@ Click your profile icon in the top-right corner, then click **Logout** to end yo
 ## 🐛 Troubleshooting
 
 ### "Missing required parameter: client_id"
+
 - Make sure you created `frontend/.env.local` with `NEXT_PUBLIC_GOOGLE_CLIENT_ID`
 - Restart the frontend server after creating the file
 
 ### "Google OAuth requires google-auth library"
+
 - Run: `pip install google-auth google-auth-oauthlib google-auth-httplib2`
 - Restart the backend server
 
 ### Backend Not Starting
+
 - Verify `GROQ_API_KEY` is set in `backend/.env`
 - Check Python version (requires 3.10+)
 - Activate virtual environment: `venv\Scripts\activate`
 
 ### Frontend Not Building
+
 - Run: `npm install --legacy-peer-deps`
 - Delete `node_modules` and `.next` folders, then reinstall
 
@@ -168,5 +177,7 @@ Click your profile icon in the top-right corner, then click **Logout** to end yo
 ---
 
 **Enjoy using SwarAI! 🎉**
+
+```
 
 ```

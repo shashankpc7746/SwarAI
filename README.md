@@ -306,7 +306,7 @@ npm run dev
    # Required
    GROQ_API_KEY=your_groq_api_key_here
    GROQ_MODEL=llama-3.3-70b-versatile
-   
+
    # Google OAuth (Get from https://console.cloud.google.com/apis/credentials)
    GOOGLE_CLIENT_ID=your_google_client_id_here.apps.googleusercontent.com
 
@@ -327,18 +327,20 @@ npm run dev
    ```
 
 2. **Configure environment variables:**
-   
+
    Create `frontend/.env.local` file:
+
    ```bash
    # Create .env.local
    cp .env.example .env.local
    ```
-   
+
    Edit `.env.local` and add:
+
    ```env
    # Backend API URL
    NEXT_PUBLIC_API_URL=http://localhost:8000
-   
+
    # Google OAuth (Get from https://console.cloud.google.com/apis/credentials)
    NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id_here.apps.googleusercontent.com
    ```
@@ -393,12 +395,13 @@ pip install screen-brightness-control
 
 #### Authentication
 
-| Variable              | Description                                                | Default | Required |
-| --------------------- | ---------------------------------------------------------- | ------- | -------- |
-| `GOOGLE_CLIENT_ID`    | Google OAuth 2.0 Client ID (backend)                       | -       | ✅ Yes   |
-| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth 2.0 Client ID (frontend)          | -       | ✅ Yes   |
+| Variable                       | Description                           | Default | Required |
+| ------------------------------ | ------------------------------------- | ------- | -------- |
+| `GOOGLE_CLIENT_ID`             | Google OAuth 2.0 Client ID (backend)  | -       | ✅ Yes   |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth 2.0 Client ID (frontend) | -       | ✅ Yes   |
 
 > **Get Google Client ID**: https://console.cloud.google.com/apis/credentials
+>
 > - Create OAuth 2.0 Client ID
 > - Application type: Web application
 > - Authorized JavaScript origins: `http://localhost:3000`
@@ -960,6 +963,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Removed**: Large aurora gradient orbs that made background feel crowded
 
 **Added**:
+
 - **50 moving star particles** - drift across screen in random directions
 - **40 static twinkling stars** - pulse in/out with varying brightness
 - 4 color variants (indigo, lavender, white, sky blue) with glow effects

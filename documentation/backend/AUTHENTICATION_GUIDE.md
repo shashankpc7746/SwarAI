@@ -19,37 +19,40 @@ The SwarAI application includes a complete authentication system with:
 ## 🔐 Authentication Flow
 
 ### 1. **Manual Login (Name + Email + Age)**
-
 ```
+
 User fills form → POST /api/auth/login → Backend validates
-   ↓
+↓
 JWT Token Generated (7-day expiry)
-   ↓
+↓
 Token + User Data stored in localStorage
-   ↓
+↓
 Redirect to Main Page
+
 ```
 
 ### 2. **Google OAuth Login**
 
 ```
+
 User clicks "Sign in with Google" → Google OAuth popup
-   ↓
+↓
 Google returns credential token
-   ↓
+↓
 Frontend sends token to POST /api/auth/google
-   ↓
+↓
 Backend verifies token with Google API
-   ↓
+↓
 Extract name & email from verified token
-   ↓
+↓
 Create/Update user in database
-   ↓
+↓
 Generate JWT token
-   ↓
+↓
 Token + User Data stored in localStorage
-   ↓
+↓
 Redirect to Main Page
+
 ```
 
 ---
@@ -70,15 +73,19 @@ Redirect to Main Page
    - Developer contact: your email
 7. Application type: **Web application**
 8. Add Authorized JavaScript origins:
-   ```
-   http://localhost:3000
-   http://127.0.0.1:3000
-   ```
+```
+
+http://localhost:3000
+http://127.0.0.1:3000
+
+```
 9. Add Authorized redirect URIs:
-   ```
-   http://localhost:3000/auth/callback
-   http://127.0.0.1:3000/auth/callback
-   ```
+```
+
+http://localhost:3000/auth/callback
+http://127.0.0.1:3000/auth/callback
+
+````
 10. Click **Create**
 11. Copy your **Client ID** (format: `xxxx.apps.googleusercontent.com`)
 
@@ -89,7 +96,7 @@ Edit `backend/.env`:
 ```env
 # Google OAuth Configuration
 GOOGLE_CLIENT_ID=1029594596579-fmnju53fveb24fjl45kculli6g5i5tnf.apps.googleusercontent.com
-```
+````
 
 ### Step 3: Configure Frontend
 
@@ -197,6 +204,7 @@ Token is signed with `SECRET_KEY` from environment (defaults to random key if no
 ```
 
 Stored in:
+
 - **Backend**: In-memory dictionary (`auth_db`)
 - **Frontend**: localStorage as `swarai_user` (JSON string)
 
@@ -220,6 +228,7 @@ Stored in:
 **Cause**: `NEXT_PUBLIC_GOOGLE_CLIENT_ID` not set in `frontend/.env.local`
 
 **Fix**:
+
 ```bash
 cd frontend
 echo "NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_client_id.apps.googleusercontent.com" > .env.local
@@ -231,6 +240,7 @@ echo "NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_client_id.apps.googleusercontent.com" > 
 **Cause**: `google-auth` not installed in backend virtual environment
 
 **Fix**:
+
 ```bash
 cd backend
 pip install google-auth google-auth-oauthlib google-auth-httplib2
@@ -240,11 +250,13 @@ pip install google-auth google-auth-oauthlib google-auth-httplib2
 ### Error: "Invalid Google token"
 
 **Causes**:
+
 1. Client ID mismatch between frontend and backend
 2. Client ID not authorized in Google Console
 3. Token expired
 
 **Fix**:
+
 1. Verify both frontend and backend have the same `GOOGLE_CLIENT_ID`
 2. Check Google Console authorized origins/redirects
 3. Try logging in again (tokens expire after ~1 hour)
@@ -254,6 +266,7 @@ pip install google-auth google-auth-oauthlib google-auth-httplib2
 **Cause**: CORS issues or backend not running
 
 **Fix**:
+
 1. Check backend is running on http://localhost:8000
 2. Verify `NEXT_PUBLIC_API_URL` in `frontend/.env.local`
 3. Check browser console for network errors
@@ -269,6 +282,7 @@ pip install google-auth google-auth-oauthlib google-auth-httplib2
    - Use Vercel Secrets, AWS Secrets Manager, etc.
 
 2. **Update Authorized Origins/Redirects**:
+
    ```
    https://yourdomain.com
    https://yourdomain.com/auth/callback
@@ -282,6 +296,7 @@ pip install google-auth google-auth-oauthlib google-auth-httplib2
      ```
 
 4. **Set Strong SECRET_KEY in backend**:
+
    ```env
    SECRET_KEY=your_very_long_random_secret_key_here
    ```
@@ -299,6 +314,7 @@ pip install google-auth google-auth-oauthlib google-auth-httplib2
 Manual login with email, name, age.
 
 **Request**:
+
 ```json
 {
   "name": "John Doe",
@@ -308,6 +324,7 @@ Manual login with email, name, age.
 ```
 
 **Response**:
+
 ```json
 {
   "user": { ...user object... },
@@ -320,6 +337,7 @@ Manual login with email, name, age.
 Google OAuth login.
 
 **Request**:
+
 ```json
 {
   "credential": "eyJhbGciOiJSUzI1NiIsImtpZCI6..."
@@ -327,6 +345,7 @@ Google OAuth login.
 ```
 
 **Response**:
+
 ```json
 {
   "user": { ...user object... },
@@ -339,6 +358,7 @@ Google OAuth login.
 Logout endpoint (client-side token removal).
 
 **Response**:
+
 ```json
 {
   "message": "Logged out successfully"
@@ -350,6 +370,7 @@ Logout endpoint (client-side token removal).
 Verify JWT token and return user info.
 
 **Response**:
+
 ```json
 {
   "user": { ...user object... }
@@ -387,5 +408,7 @@ Verify JWT token and return user info.
 ---
 
 **Last Updated**: February 12, 2026
+
+```
 
 ```
