@@ -114,8 +114,13 @@ export function useSound() {
 
   const stopSpeaking = useCallback(() => {
     try {
-      window.speechSynthesis.cancel();
-      console.log('🔊 Stopped SwarAI speech');
+      // Cancel immediately
+      if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+        window.speechSynthesis.cancel();
+        // Force a second cancel to ensure it stops
+        setTimeout(() => window.speechSynthesis.cancel(), 50);
+        console.log('🔊 Stopped SwarAI speech (forced)');
+      }
     } catch (error) {
       console.error('Error stopping speech:', error);
     }

@@ -53,6 +53,9 @@ class ContactSearchTool(BaseTool):
         "karthikeya": "+919876543218",
         "gitanjali": "+919876543219",
         "gitanjali mam": "+919876543219",
+        "shashank":"+917977305279",
+        "shivam 2":"+918928013540",
+        "vijay":"+919321781905"
     }
     
     def _fuzzy_match(self, search_name: str) -> Optional[str]:
@@ -191,11 +194,38 @@ class WhatsAppAgent:
                     print(f"[DEBUG] Pattern 5 match: {recipient} -> {message}")
                 
                 if recipient and message:
+                    # Clean the message - remove quotes and filler words
+                    message_clean = message.strip()
+                    
+                    # Remove surrounding quotes
+                    if (message_clean.startswith('"') and message_clean.endswith('"')) or \
+                       (message_clean.startswith("'") and message_clean.endswith("'")):
+                        message_clean = message_clean[1:-1]
+                    
+                    # Remove filler words
+                    filler_patterns = [
+                        r'^saying\s+',
+                        r'^that\s+',
+                        r'^to say\s+',
+                        r'^tell them\s+',
+                        r'^tell him\s+',
+                        r'^tell her\s+',
+                    ]
+                    
+                    for pattern in filler_patterns:
+                        message_clean = re.sub(pattern, '', message_clean, flags=re.IGNORECASE)
+                    
+                    # Remove quotes within message
+                    message_clean = message_clean.replace('"', '').replace("'", '')
+                    
+                    # Clean whitespace
+                    message_clean = ' '.join(message_clean.split())
+                    
                     state['parsed_command'] = {
                         "recipient": recipient.strip(),
-                        "message": message.strip()
+                        "message": message_clean
                     }
-                    print(f"[DEBUG] Regex parsing success: {recipient} -> {message}")
+                    print(f"[DEBUG] Regex parsing success: {recipient} -> {message_clean}")
                     return state
                 
                 print(f"[DEBUG] Regex parsing failed, trying LLM parsing...")
@@ -253,16 +283,100 @@ class WhatsAppAgent:
                     state['error'] = f"Could not extract recipient and message. Please try formats like: 'WhatsApp to [name] [message]' or 'Send WhatsApp to [name]: [message]'"
                     return state
                 
+                # Clean the message - remove quotes and filler words
+                message_clean = message.strip()
+                
+                # Remove surrounding quotes (single or double)
+                if (message_clean.startswith('"') and message_clean.endswith('"')) or \
+                   (message_clean.startswith("'") and message_clean.endswith("'")):
+                    message_clean = message_clean[1:-1]
+                
+                # Remove filler words at the start
+                filler_patterns = [
+                    r'^saying\s+',
+                    r'^that\s+',
+                    r'^to say\s+',
+                    r'^tell them\s+',
+                    r'^tell him\s+',
+                    r'^tell her\s+',
+                ]
+                
+                for pattern in filler_patterns:
+                    message_clean = re.sub(pattern, '', message_clean, flags=re.IGNORECASE)
+                
+                # Remove any remaining quotes within the message
+                message_clean = message_clean.replace('"', '').replace("'", '')
+                
+                # Clean up extra whitespace
+                message_clean = ' '.join(message_clean.split())
+                
                 state['parsed_command'] = {
                     "recipient": recipient,
-                    "message": message
+                    "message": message_clean
                 }
                 
-                print(f"[DEBUG] LLM parsing success: {recipient} -> {message}")
+                print(f"[DEBUG] LLM parsing success: {recipient} -> {message_clean}")
                 return state
                 
             except Exception as e:
                 state['error'] = f"Error parsing command: {str(e)}"
+                return state
+        
+        def improve_grammar_node(state: AgentState) -> AgentState:
+            """Improve message grammar, capitalization, and punctuation using AI"""
+            if state.get('error'):
+                return state
+            
+            try:
+                message = state.get('parsed_command', {}).get('message', '')
+                
+                if not message:
+                    return state
+                
+                # Use LLM to improve grammar
+                system_prompt = """You are a grammar correction assistant. Your job is to improve the grammar, capitalization, and punctuation of messages while keeping the original meaning and tone.
+                
+                Rules:
+                1. Capitalize the first letter of the sentence
+                2. Add proper punctuation at the end (. ? !)
+                3. Fix any obvious grammar mistakes
+                4. Keep the message natural and conversational
+                5. Don't change the meaning or add extra words
+                6. Keep informal language if it's intentional (like "gonna", "wanna")
+                7. If the message is already perfect, return it as-is
+                
+                Examples:
+                - "how are you" -> "How are you?"
+                - "i am coming home" -> "I am coming home."
+                - "meeting at 5" -> "Meeting at 5."
+                - "can we talk" -> "Can we talk?"
+                - "thanks for the help" -> "Thanks for the help!"
+                - "where are you" -> "Where are you?"
+                
+                Return ONLY the corrected message, nothing else."""
+                
+                messages = [
+                    SystemMessage(content=system_prompt),
+                    HumanMessage(content=f"Correct this message: {message}")
+                ]
+                
+                response = self.llm.invoke(messages)
+                corrected_message = response.content.strip()
+                
+                # Remove any quotes that the LLM might have added
+                if (corrected_message.startswith('"') and corrected_message.endswith('"')) or \
+                   (corrected_message.startswith("'") and corrected_message.endswith("'")):
+                    corrected_message = corrected_message[1:-1]
+                
+                # Update the message in parsed_command
+                state['parsed_command']['message'] = corrected_message
+                
+                print(f"[DEBUG] Grammar correction: '{message}' -> '{corrected_message}'")
+                return state
+                
+            except Exception as e:
+                # If grammar correction fails, just continue with original message
+                print(f"[DEBUG] Grammar correction failed: {str(e)}")
                 return state
         
         def search_contact_node(state: AgentState) -> AgentState:
@@ -321,6 +435,7 @@ class WhatsAppAgent:
         
         # Add nodes
         workflow.add_node("parse_command", parse_command_node)
+        workflow.add_node("improve_grammar", improve_grammar_node)
         workflow.add_node("search_contact", search_contact_node)
         workflow.add_node("generate_url", generate_whatsapp_url_node)
         workflow.add_node("handle_error", error_handler_node)
@@ -329,6 +444,11 @@ class WhatsAppAgent:
         workflow.set_entry_point("parse_command")
         
         def should_continue(state: AgentState) -> str:
+            if state.get('error'):
+                return "handle_error"
+            return "improve_grammar"
+        
+        def should_search_contact(state: AgentState) -> str:
             if state.get('error'):
                 return "handle_error"
             return "search_contact"
@@ -342,6 +462,7 @@ class WhatsAppAgent:
             return END
         
         workflow.add_conditional_edges("parse_command", should_continue)
+        workflow.add_conditional_edges("improve_grammar", should_search_contact)
         workflow.add_conditional_edges("search_contact", should_generate_url)
         workflow.add_edge("generate_url", "handle_error")
         workflow.add_edge("handle_error", END)

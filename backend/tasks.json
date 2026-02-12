@@ -1,1 +1,31 @@
-{"tasks": []}
+{
+  "tasks": [
+    {
+      "id": "task_1_20260211172458",
+      "title": "to buy groceries",
+      "description": "Add task to buy groceries",
+      "due_date": null,
+      "priority": "medium",
+      "completed": false,
+      "created_at": "2026-02-11T17:24:58.945264"
+    },
+    {
+      "id": "task_2_20260211172459",
+      "title": "to buy groceries",
+      "description": "add task to buy groceries",
+      "due_date": null,
+      "priority": "medium",
+      "completed": false,
+      "created_at": "2026-02-11T17:24:59.838052"
+    },
+    {
+      "id": "task_3_20260211172502",
+      "title": "to buy groceries",
+      "description": "Add task to buy groceries",
+      "due_date": null,
+      "priority": "medium",
+      "completed": false,
+      "created_at": "2026-02-11T17:25:02.388118"
+    }
+  ]
+}

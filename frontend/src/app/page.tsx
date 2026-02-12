@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Mic,
@@ -14,7 +14,17 @@ import {
   Wifi,
   WifiOff,
   History,
-  X
+  X,
+  User,
+  Phone,
+  CreditCard,
+  AppWindow,
+  Globe,
+  ListTodo,
+  Camera,
+  Monitor,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import useVoiceRecognition from '@/hooks/useVoiceRecognition';
 import { useCrewAI } from '@/hooks/useCrewAI';
@@ -23,6 +33,81 @@ import { VoiceVisualization } from '@/components/VoiceVisualization';
 import { AgentCard } from '@/components/AgentCard';
 import { ResultDisplay } from '@/components/ResultDisplay';
 import { StatusIndicator } from '@/components/StatusIndicator';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { ProfileSettings } from '@/components/ProfileSettings';
+import { useAuth } from '@/context/AuthContext';
+
+// === Cursor-following glow component ===
+function CursorGlow() {
+  const glowRef = useRef<HTMLDivElement>(null);
+  const trailRef = useRef<HTMLDivElement>(null);
+  const mousePos = useRef({ x: 0, y: 0 });
+  const currentPos = useRef({ x: 0, y: 0 });
+  const trailPos = useRef({ x: 0, y: 0 });
+  const rafId = useRef<number>(0);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mousePos.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const animate = () => {
+      // Smooth interpolation for main glow
+      currentPos.current.x += (mousePos.current.x - currentPos.current.x) * 0.08;
+      currentPos.current.y += (mousePos.current.y - currentPos.current.y) * 0.08;
+
+      // Even slower trailing glow
+      trailPos.current.x += (mousePos.current.x - trailPos.current.x) * 0.03;
+      trailPos.current.y += (mousePos.current.y - trailPos.current.y) * 0.03;
+
+      if (glowRef.current) {
+        glowRef.current.style.transform = `translate(${currentPos.current.x - 125}px, ${currentPos.current.y - 125}px)`;
+      }
+      if (trailRef.current) {
+        trailRef.current.style.transform = `translate(${trailPos.current.x - 200}px, ${trailPos.current.y - 200}px)`;
+      }
+
+      rafId.current = requestAnimationFrame(animate);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    rafId.current = requestAnimationFrame(animate);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(rafId.current);
+    };
+  }, []);
+
+  return (
+    <>
+      {/* Primary cursor glow — smaller */}
+      <div
+        ref={glowRef}
+        className="fixed pointer-events-none -z-10"
+        style={{
+          width: 250,
+          height: 250,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.05) 40%, transparent 70%)',
+          willChange: 'transform',
+        }}
+      />
+      {/* Trailing secondary glow — smaller */}
+      <div
+        ref={trailRef}
+        className="fixed pointer-events-none -z-10"
+        style={{
+          width: 400,
+          height: 400,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(168, 85, 247, 0.08) 0%, rgba(168, 85, 247, 0.02) 40%, transparent 70%)',
+          willChange: 'transform',
+        }}
+      />
+    </>
+  );
+}
 
 export default function CrewAIPage() {
   const [currentAgent, setCurrentAgent] = useState<string | null>(null);
@@ -36,6 +121,46 @@ export default function CrewAIPage() {
     result?: any;
   }>>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [showProfileSettings, setShowProfileSettings] = useState(false);
+  const [dynamicStats, setDynamicStats] = useState({
+    agentCount: 0,
+    appLaunchers: 65,
+    quickSites: 15,
+    systemControls: 11,
+  });
+  const swiperRef = useRef<HTMLDivElement>(null);
+
+  // Moving star particles — drift across the screen
+  const particleData = useMemo(() =>
+    Array.from({ length: 50 }, (_, i) => ({
+      size: Math.random() * 4 + 3,
+      startX: Math.random() * 100,
+      startY: Math.random() * 100,
+      duration: Math.random() * 12 + 8,
+      delay: Math.random() * 8,
+      yRange: (Math.random() - 0.5) * 250,
+      xRange: (Math.random() - 0.5) * 250,
+      colorIndex: i % 4,
+      glowIndex: i % 3,
+    })),
+    []
+  );
+
+  // Static twinkling stars — stay in place, fade in/out
+  const twinkleStars = useMemo(() =>
+    Array.from({ length: 40 }, () => ({
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1.5,
+      duration: Math.random() * 3 + 1.5,
+      delay: Math.random() * 4,
+      brightness: Math.random() * 0.7 + 0.3,
+    })),
+    []
+  );
+
+  const { user } = useAuth();
 
   const {
     backendStatus,
@@ -50,11 +175,50 @@ export default function CrewAIPage() {
   const { playSound, speak, stopSpeaking } = useSound();
   const { isListening: voiceListening, startVoiceRecognition } = useVoiceRecognition();
 
+  // Set mounted state for client-side rendering
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Stop speech on page refresh or unmount
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      stopSpeaking();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Cleanup on unmount
+    return () => {
+      stopSpeaking();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [stopSpeaking]);
+
   useEffect(() => {
     checkStatus();
     const interval = setInterval(checkStatus, 10000);
     return () => clearInterval(interval);
   }, []);
+
+  // Fetch dynamic stats from backend
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/agents');
+        if (res.ok) {
+          const data = await res.json();
+          setDynamicStats(prev => ({
+            ...prev,
+            agentCount: data.count || prev.agentCount,
+          }));
+        }
+      } catch {
+        // Silently fail - keep defaults
+      }
+    };
+    fetchStats();
+  }, [backendStatus]);
 
   // Handle WebSocket results with natural conversation flow
   useEffect(() => {
@@ -118,6 +282,12 @@ export default function CrewAIPage() {
       // Remove URLs (they sound terrible when spoken)
       speechText = speechText.replace(/https?:\/\/[^\s]+/g, '');
 
+      // Remove file paths (C:\Users\... or /home/... etc.)
+      speechText = speechText.replace(/[A-Z]:\\[^\s]+/g, ''); // Windows paths
+      speechText = speechText.replace(/\/[^\s]+\/[^\s]+/g, ''); // Unix paths  
+      speechText = speechText.replace(/Path: [^\s]+/gi, ''); // "Path: ..." patterns
+      speechText = speechText.replace(/� [^\s]+/g, ''); // Remove � symbols with paths
+
       // Remove technical patterns
       speechText = speechText.replace(/wa\.me\/[^\s]+/g, '');
       speechText = speechText.replace(/\+\d{10,}/g, ''); // Remove phone numbers
@@ -138,11 +308,21 @@ export default function CrewAIPage() {
         }
       }
 
-      // For file operations, keep it concise
-      if (result.agent_used === 'filesearch' && speechText.toLowerCase().includes('successfully opened')) {
-        const fileMatch = speechText.match(/Successfully opened: ([^�]+)/i);
-        if (fileMatch) {
-          speechText = `Opened ${fileMatch[1]}`;
+      // For file operations, keep it concise and remove paths
+      if (result.agent_used === 'filesearch') {
+        // Handle successful file opening
+        if (speechText.toLowerCase().includes('successfully opened')) {
+          const fileMatch = speechText.match(/Successfully opened: ([^�\s]+)/i);
+          if (fileMatch) {
+            // Extract just the filename without path
+            const fileName = fileMatch[1].split('\\').pop()?.split('/').pop() || fileMatch[1];
+            speechText = `Opened ${fileName}`;
+          }
+        }
+        // Handle file not found errors - remove paths
+        else if (speechText.toLowerCase().includes('no files found') ||
+          speechText.toLowerCase().includes('not found')) {
+          speechText = 'File not found. Please try a different search.';
         }
       }
 
@@ -158,17 +338,18 @@ export default function CrewAIPage() {
         if (result.agent_used === 'whatsapp' ||
           result.agent_used === 'filesearch' ||
           result.agent_used === 'email' ||
-          result.agent_used === 'payment') {
+          result.agent_used === 'payment' ||
+          result.agent_used === 'screenshot') {
           maxLength = 100; // Brief confirmations
         }
         // For conversations and information, allow full speech
         else if (result.agent_used === 'conversation' ||
           result.agent_used === 'websearch') {
-          maxLength = 1000; // Full responses for learning/conversation
+          maxLength = 2000; // Increased limit for full responses
         }
 
         const finalSpeech = speechText.length > maxLength
-          ? speechText.substring(0, maxLength) + '...'
+          ? speechText.substring(0, speechText.lastIndexOf('.', maxLength) || maxLength) + '.'
           : speechText;
         speak(finalSpeech);
       }
@@ -209,8 +390,10 @@ export default function CrewAIPage() {
   const handleVoiceStart = async () => {
     if (backendStatus !== 'online') return;
 
-    // Stop any current speech and play start sound
+    // Force stop any current speech immediately
     stopSpeaking();
+    // Small delay to ensure speech is stopped before starting new recognition
+    await new Promise(resolve => setTimeout(resolve, 100));
     playSound('start');
 
     // Use real voice recognition
@@ -219,8 +402,11 @@ export default function CrewAIPage() {
         console.log('🎤 Voice transcript received:', transcript);
         addToHistory('user', transcript);
 
-        // Immediate acknowledgment - brief and natural
-        speak("Got it!");
+        // Skip "Got it!" for greetings - let the actual response speak
+        const isGreeting = /^(hi|hello|hey|good morning|good afternoon|good evening|greetings)/i.test(transcript.trim());
+        if (!isGreeting) {
+          speak("Got it!");
+        }
 
         playSound('processing');
 
@@ -235,17 +421,13 @@ export default function CrewAIPage() {
     );
   };
 
-  const handleAgentSelect = async (agentType: string, command: string) => {
-    setCurrentAgent(agentType);
-
-    // Add to history and acknowledge
+  const handleExampleClick = async (command: string) => {
+    // Add to history (no speech - let backend handle it)
     addToHistory('user', command);
-    speak("I'll help you with that right away.");
 
-    const result = await executeWorkflow(agentType, { command });
-    if (result) {
-      handleNaturalResult(result, command);
-    }
+    // Execute the command naturally
+    console.log('✅ Executing example command:', command);
+    await executeCommand(command);
   };
 
   const shareToWhatsApp = async () => {
@@ -340,14 +522,19 @@ export default function CrewAIPage() {
     setShowWhatsAppPopup(false);
   };
 
-  const agents = [
+  const agents = useMemo(() => [
     {
       id: 'whatsapp',
       name: 'WhatsApp Agent',
       description: 'Send messages and create shareable links',
       icon: MessageCircle,
       color: 'from-green-500 to-emerald-600',
-      command: 'Send WhatsApp message'
+      command: 'Try me!',
+      examples: [
+        'Send WhatsApp to Mom saying hello',
+        'Message Jay about the meeting',
+        'WhatsApp Sarah good morning'
+      ]
     },
     {
       id: 'file_management',
@@ -355,33 +542,235 @@ export default function CrewAIPage() {
       description: 'Search, open, and organize your files',
       icon: FileText,
       color: 'from-blue-500 to-cyan-600',
-      command: 'Find and manage files'
+      command: 'Try me!',
+      examples: [
+        'Open the latest PDF',
+        'Find my project files',
+        'Search for resume'
+      ]
     },
     {
-      id: 'calendar',
-      name: 'Calendar Agent',
-      description: 'Schedule events and set reminders',
+      id: 'email',
+      name: 'Email Agent',
+      description: 'Draft and send professional emails',
       icon: Calendar,
       color: 'from-purple-500 to-violet-600',
-      command: 'Schedule appointment'
+      command: 'Try me!',
+      examples: [
+        'Draft email to boss about meeting',
+        'Compose email to HR',
+        'Email Jay regarding project update'
+      ]
     },
     {
-      id: 'research',
-      name: 'Research Agent',
-      description: 'Find information and conduct research',
+      id: 'conversation',
+      name: 'Chat Agent',
+      description: 'Have natural conversations and get answers',
       icon: Sparkles,
       color: 'from-orange-500 to-red-600',
-      command: 'Research information'
+      command: 'Try me!',
+      examples: [
+        'Who are you?',
+        'Tell me about AI',
+        'What can you do?'
+      ]
+    },
+    {
+      id: 'phone',
+      name: 'Phone Agent',
+      description: 'Make calls and dial contacts instantly',
+      icon: Phone,
+      color: 'from-teal-500 to-green-600',
+      command: 'Try me!',
+      examples: [
+        'Call Mom',
+        'Phone Jay',
+        'Dial +1234567890'
+      ]
+    },
+    {
+      id: 'payment',
+      name: 'Payment Agent',
+      description: 'Send money via PayPal, UPI or Google Pay',
+      icon: CreditCard,
+      color: 'from-yellow-500 to-orange-600',
+      command: 'Try me!',
+      examples: [
+        'Pay $50 to John via PayPal',
+        'Send 100 rupees via GPay',
+        'Transfer money to Jay'
+      ]
+    },
+    {
+      id: 'app_launcher',
+      name: 'App Launcher',
+      description: 'Open any application or program',
+      icon: AppWindow,
+      color: 'from-indigo-500 to-blue-600',
+      command: 'Try me!',
+      examples: [
+        'Open Chrome',
+        'Launch Calculator',
+        'Start VS Code'
+      ]
+    },
+    {
+      id: 'websearch',
+      name: 'Web Search',
+      description: 'Search Google, YouTube and the web',
+      icon: Globe,
+      color: 'from-sky-500 to-blue-600',
+      command: 'Try me!',
+      examples: [
+        'Search for Python tutorials',
+        'Google best restaurants near me',
+        'YouTube funny cats'
+      ]
+    },
+    {
+      id: 'task',
+      name: 'Task Manager',
+      description: 'Manage to-do lists and reminders',
+      icon: ListTodo,
+      color: 'from-pink-500 to-rose-600',
+      command: 'Try me!',
+      examples: [
+        'Add task: buy groceries',
+        'List my tasks',
+        'Complete task 1'
+      ]
+    },
+    {
+      id: 'screenshot',
+      name: 'Screenshot Agent',
+      description: 'Capture and analyze your screen',
+      icon: Camera,
+      color: 'from-fuchsia-500 to-purple-600',
+      command: 'Try me!',
+      examples: [
+        'Take a screenshot',
+        'Capture my screen',
+        'Screenshot this'
+      ]
+    },
+    {
+      id: 'system_control',
+      name: 'System Control',
+      description: 'Volume, brightness, battery & power controls',
+      icon: Monitor,
+      color: 'from-slate-500 to-gray-600',
+      command: 'Try me!',
+      examples: [
+        'Increase volume',
+        'Set brightness to 50%',
+        'Check battery status'
+      ]
+    },
+  ], []);
+
+  // Swiper scroll handlers
+  const scrollSwiper = useCallback((direction: 'left' | 'right') => {
+    if (swiperRef.current) {
+      // Scroll by one card width (container / 5) + gap
+      const containerWidth = swiperRef.current.clientWidth;
+      const scrollAmount = Math.round(containerWidth / 5) + 16;
+      swiperRef.current.scrollBy({
+        left: direction === 'right' ? scrollAmount : -scrollAmount,
+        behavior: 'smooth',
+      });
     }
-  ];
+  }, []);
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
+    <ProtectedRoute>
+      <div className="min-h-screen p-4 md:p-8 relative overflow-hidden">
+        {/* === ENHANCED PROFESSIONAL BACKGROUND === */}
+        {/* Base dark gradient */}
+        <div className="fixed inset-0 -z-20 bg-[#050508]" />
+
+        {/* Aurora orbs removed — replaced by particle starfield */}
+
+        {/* Noise texture */}
+        <div className="noise-overlay" />
+
+        {/* Cursor-following glow effect */}
+        {isMounted && (
+          <CursorGlow />
+        )}
+
+        {/* Starfield — moving particles + static twinkling stars */}
+        <div className="fixed inset-0 overflow-hidden -z-10">
+          {/* Moving star particles */}
+          {isMounted && particleData.map((p, i) => (
+            <motion.div
+              key={`m-${i}`}
+              className="absolute rounded-full"
+              style={{
+                width: p.size,
+                height: p.size,
+                left: `${p.startX}%`,
+                top: `${p.startY}%`,
+                background: p.colorIndex === 0
+                  ? 'rgba(165, 180, 252, 0.7)'
+                  : p.colorIndex === 1
+                    ? 'rgba(196, 181, 253, 0.6)'
+                    : p.colorIndex === 2
+                      ? 'rgba(255, 255, 255, 0.5)'
+                      : 'rgba(147, 197, 253, 0.55)',
+                boxShadow: `0 0 ${p.size * 4}px ${p.colorIndex === 0
+                  ? 'rgba(165, 180, 252, 0.5)'
+                  : p.colorIndex === 1
+                    ? 'rgba(196, 181, 253, 0.4)'
+                    : 'rgba(255, 255, 255, 0.35)'}`,
+                willChange: 'transform, opacity',
+              }}
+              animate={{
+                y: [0, p.yRange, 0],
+                x: [0, p.xRange, 0],
+                opacity: [0.1, 0.9, 0.1],
+                scale: [0.6, 1.3, 0.6],
+              }}
+              transition={{
+                duration: p.duration,
+                repeat: Infinity,
+                delay: p.delay,
+                ease: 'easeInOut',
+              }}
+            />
+          ))}
+
+          {/* Static twinkling stars */}
+          {isMounted && twinkleStars.map((s, i) => (
+            <motion.div
+              key={`t-${i}`}
+              className="absolute rounded-full"
+              style={{
+                width: s.size,
+                height: s.size,
+                left: `${s.x}%`,
+                top: `${s.y}%`,
+                background: `rgba(255, 255, 255, ${s.brightness})`,
+                boxShadow: `0 0 ${s.size * 3}px rgba(255, 255, 255, ${s.brightness * 0.6})`,
+              }}
+              animate={{
+                opacity: [0.1, s.brightness, 0.1],
+                scale: [0.8, 1.2, 0.8],
+              }}
+              transition={{
+                duration: s.duration,
+                repeat: Infinity,
+                delay: s.delay,
+                ease: 'easeInOut',
+              }}
+            />
+          ))}
+        </div>
+
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex justify-between items-center mb-8"
+        className="flex justify-between items-center mb-6"
       >
         <div className="flex items-center space-x-4">
           <motion.div
@@ -395,9 +784,10 @@ export default function CrewAIPage() {
               className="w-full h-full object-contain rounded-xl"
             />
           </motion.div>
+
           <div>
             <h1 className="text-3xl font-bold text-white">SwarAI</h1>
-            <p className="text-gray-300">Multi-Agent AI System</p>
+            <p className="text-gray-400 text-sm tracking-wider">Multi-Agent AI System</p>
           </div>
         </div>
 
@@ -410,7 +800,7 @@ export default function CrewAIPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowHistory(true)}
-            className="glass p-3 rounded-xl text-white hover:bg-white/20 transition-all relative"
+            className="glass p-3 rounded-xl text-white hover:bg-white/20 transition-all relative cursor-pointer"
             title="View conversation history"
           >
             <History className="w-6 h-6" />
@@ -421,9 +811,21 @@ export default function CrewAIPage() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="glass p-3 rounded-xl text-white hover:bg-white/20 transition-all"
+            onClick={() => setShowProfileSettings(true)}
+            className="glass p-3 rounded-xl hover:bg-white/20 transition-all cursor-pointer"
+            title="Profile & Settings"
           >
-            <Settings className="w-6 h-6" />
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+              {user?.profilePicture ? (
+                <img
+                  src={user.profilePicture}
+                  alt={user.name}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                <User className="w-4 h-4 text-white" />
+              )}
+            </div>
           </motion.button>
         </div>
       </motion.header>
@@ -438,35 +840,163 @@ export default function CrewAIPage() {
           className="relative mx-auto mb-8"
           style={{ width: 'fit-content' }}
         >
+          {/* Orbital rings */}
+          {!voiceListening && !isProcessing && (
+            <>
+              <motion.div
+                className="absolute inset-0 w-48 h-48 rounded-full border-2 border-blue-400/30"
+                style={{ left: '50%', top: '50%', x: '-50%', y: '-50%' }}
+                animate={{ rotate: 360, scale: [1, 1.1, 1] }}
+                transition={{ rotate: { duration: 8, repeat: Infinity, ease: "linear" }, scale: { duration: 3, repeat: Infinity } }}
+              />
+              <motion.div
+                className="absolute inset-0 w-56 h-56 rounded-full border-2 border-purple-400/20"
+                style={{ left: '50%', top: '50%', x: '-50%', y: '-50%' }}
+                animate={{ rotate: -360, scale: [1, 1.15, 1] }}
+                transition={{ rotate: { duration: 12, repeat: Infinity, ease: "linear" }, scale: { duration: 4, repeat: Infinity } }}
+              />
+              <motion.div
+                className="absolute inset-0 w-64 h-64 rounded-full border border-cyan-400/10"
+                style={{ left: '50%', top: '50%', x: '-50%', y: '-50%' }}
+                animate={{ rotate: 360, scale: [1, 1.2, 1] }}
+                transition={{ rotate: { duration: 15, repeat: Infinity, ease: "linear" }, scale: { duration: 5, repeat: Infinity } }}
+              />
+            </>
+          )}
+
+          {/* Floating particles */}
+          {!voiceListening && !isProcessing && isMounted && [...Array(8)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-2 h-2 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"
+              style={{
+                left: '50%',
+                top: '50%',
+              }}
+              animate={{
+                x: [0, Math.cos(i * Math.PI / 4) * 120],
+                y: [0, Math.sin(i * Math.PI / 4) * 120],
+                opacity: [0, 1, 0],
+                scale: [0, 1, 0],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                delay: i * 0.2,
+                ease: "easeOut"
+              }}
+            />
+          ))}
+
+          {/* Ambient color glow around the button */}
+          <motion.div
+            className="absolute w-72 h-72 rounded-full blur-3xl"
+            style={{ left: '50%', top: '50%', x: '-50%', y: '-50%' }}
+            animate={{
+              background: [
+                'radial-gradient(circle, rgba(99,102,241,0.35) 0%, rgba(168,85,247,0.15) 40%, transparent 70%)',
+                'radial-gradient(circle, rgba(168,85,247,0.35) 0%, rgba(59,130,246,0.15) 40%, transparent 70%)',
+                'radial-gradient(circle, rgba(99,102,241,0.35) 0%, rgba(168,85,247,0.15) 40%, transparent 70%)',
+              ],
+              scale: [1, 1.3, 1],
+            }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          {/* Inner pulsing glow */}
+          <motion.div
+            className="absolute w-56 h-56 rounded-full blur-2xl"
+            style={{ left: '50%', top: '50%', x: '-50%', y: '-50%' }}
+            animate={{
+              background: [
+                'radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%)',
+                'radial-gradient(circle, rgba(168,85,247,0.4) 0%, transparent 70%)',
+                'radial-gradient(circle, rgba(59,130,246,0.4) 0%, transparent 70%)',
+              ],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          />
+
           <motion.button
             onClick={handleVoiceStart}
             disabled={backendStatus !== 'online' || voiceListening || isProcessing}
             className={`
-              relative w-48 h-48 rounded-full transition-all duration-300 transform
+              relative w-48 h-48 rounded-full transition-all duration-500 transform overflow-hidden
               ${voiceListening
-                ? 'bg-red-500 shadow-2xl scale-110 animate-pulse'
+                ? 'bg-gradient-to-br from-red-500 via-pink-500 to-red-600 shadow-2xl shadow-red-500/50'
                 : isProcessing
-                  ? 'bg-yellow-500 shadow-xl animate-bounce'
-                  : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-xl hover:shadow-2xl hover:scale-105'
+                  ? 'bg-gradient-to-br from-yellow-400 via-orange-500 to-yellow-600 shadow-2xl shadow-yellow-500/50'
+                  : 'bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 shadow-2xl shadow-blue-500/50'
               }
               disabled:opacity-50 disabled:cursor-not-allowed
-              glass-strong voice-ripple ${voiceListening ? 'active' : ''}
+              cursor-pointer
             `}
-            whileHover={{ scale: backendStatus === 'online' ? 1.05 : 1 }}
-            whileTap={{ scale: backendStatus === 'online' ? 0.95 : 1 }}
+            whileHover={{ 
+              scale: backendStatus === 'online' ? 1.08 : 1,
+              rotate: [0, -2, 2, -2, 0],
+              transition: { rotate: { duration: 0.5 } }
+            }}
+            whileTap={{ scale: backendStatus === 'online' ? 0.92 : 1 }}
+            animate={{
+              boxShadow: voiceListening 
+                ? [
+                    '0 0 30px rgba(239, 68, 68, 0.5)',
+                    '0 0 50px rgba(239, 68, 68, 0.8)',
+                    '0 0 30px rgba(239, 68, 68, 0.5)',
+                  ]
+                : isProcessing
+                  ? [
+                      '0 0 30px rgba(234, 179, 8, 0.5)',
+                      '0 0 50px rgba(234, 179, 8, 0.8)',
+                      '0 0 30px rgba(234, 179, 8, 0.5)',
+                    ]
+                  : [
+                      '0 0 30px rgba(59, 130, 246, 0.5)',
+                      '0 0 50px rgba(168, 85, 247, 0.5)',
+                      '0 0 30px rgba(59, 130, 246, 0.5)',
+                    ]
+            }}
+            transition={{ boxShadow: { duration: 2, repeat: Infinity } }}
           >
-            <div className="absolute inset-4 rounded-full bg-white/20 flex items-center justify-center">
+            {/* Animated background gradient */}
+            <motion.div
+              className="absolute inset-0 opacity-50"
+              animate={{
+                background: [
+                  'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)',
+                  'radial-gradient(circle at 80% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)',
+                  'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.2) 0%, transparent 50%)',
+                ],
+              }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            />
+
+            <div className="absolute inset-3 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/20">
               <AnimatePresence mode="wait">
                 {voiceListening ? (
                   <motion.div
                     key="listening"
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
+                    initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
                     className="flex flex-col items-center"
+                    transition={{ type: "spring", damping: 15 }}
                   >
-                    <Mic className="w-16 h-16 text-white animate-pulse" />
-                    <span className="text-white text-sm font-bold mt-2">Listening...</span>
+                    <motion.div
+                      animate={{ 
+                        scale: [1, 1.2, 1],
+                      }}
+                      transition={{ duration: 0.8, repeat: Infinity }}
+                    >
+                      <Mic className="w-16 h-16 text-white drop-shadow-lg" />
+                    </motion.div>
+                    <motion.span 
+                      className="text-white text-sm font-bold mt-2"
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      Listening...
+                    </motion.span>
                   </motion.div>
                 ) : isProcessing ? (
                   <motion.div
@@ -477,42 +1007,100 @@ export default function CrewAIPage() {
                     className="flex flex-col items-center"
                   >
                     <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      animate={{ 
+                        rotate: 360,
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{ 
+                        rotate: { duration: 2, repeat: Infinity, ease: "linear" },
+                        scale: { duration: 1, repeat: Infinity }
+                      }}
                     >
-                      <Zap className="w-16 h-16 text-white" />
+                      <Zap className="w-16 h-16 text-white drop-shadow-lg" />
                     </motion.div>
                     <span className="text-white text-sm font-bold mt-2">Processing...</span>
                   </motion.div>
                 ) : (
                   <motion.div
                     key="ready"
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
                     className="flex flex-col items-center"
+                    transition={{ type: "spring", damping: 10 }}
                   >
-                    <Mic className="w-16 h-16 text-white group-hover:scale-110 transition-transform" />
-                    <span className="text-white text-lg font-bold mt-2">TAP TO SPEAK</span>
+                    <motion.div
+                      animate={{ 
+                        y: [0, -8, 0],
+                      }}
+                      transition={{ 
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      <Mic className="w-16 h-16 text-white drop-shadow-lg" />
+                    </motion.div>
+                    <motion.span 
+                      className="text-white text-lg font-bold mt-2 tracking-wider"
+                      animate={{
+                        textShadow: [
+                          '0 0 10px rgba(255,255,255,0.5)',
+                          '0 0 20px rgba(255,255,255,0.8)',
+                          '0 0 10px rgba(255,255,255,0.5)',
+                        ]
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      TAP TO SPEAK
+                    </motion.span>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Ripple effect */}
+            {/* Multiple ripple effects */}
             {(voiceListening || isProcessing) && (
-              <motion.div
-                className="absolute inset-0 rounded-full border-4 border-white"
-                animate={{
-                  scale: [1, 1.2, 1],
-                  opacity: [0.8, 0, 0.8]
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
+              <>
+                <motion.div
+                  className="absolute inset-0 rounded-full border-4 border-white/60"
+                  animate={{
+                    scale: [1, 1.3],
+                    opacity: [0.6, 0]
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeOut"
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-0 rounded-full border-4 border-white/40"
+                  animate={{
+                    scale: [1, 1.5],
+                    opacity: [0.4, 0]
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                    delay: 0.5
+                  }}
+                />
+                <motion.div
+                  className="absolute inset-0 rounded-full border-2 border-white/20"
+                  animate={{
+                    scale: [1, 1.8],
+                    opacity: [0.2, 0]
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeOut",
+                    delay: 1
+                  }}
+                />
+              </>
             )}
           </motion.button>
 
@@ -524,7 +1112,7 @@ export default function CrewAIPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="text-xl text-gray-300 mb-4"
+          className="text-lg text-gray-400 mt-14 mb-4 tracking-wide"
         >
           Speak naturally or choose an agent below
         </motion.p>
@@ -541,24 +1129,129 @@ export default function CrewAIPage() {
         )}
       </motion.section>
 
-      {/* Agent Cards */}
+      {/* Agent Cards - Horizontal Swiper */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
+        className="mb-12 mt-4"
+      >
+        <div className="flex items-center justify-center gap-4 mb-8">
+          <div className="glow-line flex-1 max-w-[120px]" />
+          <h2 className="text-2xl font-bold text-white text-center tracking-wide">Specialized Agents</h2>
+          <div className="glow-line flex-1 max-w-[120px]" />
+        </div>
+
+        {/* Swiper container with navigation */}
+        <div className="relative group/swiper overflow-visible pt-8">
+          {/* Left arrow - fixed position */}
+          <button
+            onClick={() => scrollSwiper('left')}
+            className="absolute left-0 top-[124px] z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/swiper:opacity-100 transition-opacity duration-300 hover:bg-white/20 cursor-pointer -ml-5"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          {/* Right arrow - fixed position */}
+          <button
+            onClick={() => scrollSwiper('right')}
+            className="absolute right-0 top-[124px] z-20 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/swiper:opacity-100 transition-opacity duration-300 hover:bg-white/20 cursor-pointer -mr-5"
+            aria-label="Scroll right"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+
+          {/* Scrollable cards — 5 visible at a time, no duplication */}
+          <div
+            ref={swiperRef}
+            className="flex gap-4 overflow-x-auto scrollbar-hide pt-2 pb-2 snap-x snap-mandatory"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {agents.map((agent, index) => (
+              <div
+                key={agent.id}
+                className="snap-start flex-shrink-0"
+                style={{ width: 'calc((100% - 4 * 1rem) / 5)' }}
+              >
+                <AgentCard
+                  agent={agent}
+                  isActive={currentAgent === agent.id}
+                  isDisabled={backendStatus !== 'online'}
+                  onExampleClick={handleExampleClick}
+                  delay={Math.min(index, 4) * 0.1}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.section>
+
+      {/* === INTERACTIVE STATS SECTION === */}
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
         className="mb-12"
       >
-        <h2 className="text-2xl font-bold text-white text-center mb-8">Specialized Agents</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {agents.map((agent, index) => (
-            <AgentCard
-              key={agent.id}
-              agent={agent}
-              isActive={currentAgent === agent.id}
-              isDisabled={backendStatus !== 'online'}
-              onClick={() => handleAgentSelect(agent.id, agent.command)}
-              delay={index * 0.1}
-            />
+        <div className="glow-line mb-10" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+          {[
+            { value: `${dynamicStats.agentCount || '13'}+`, label: 'AI Agents', icon: '🤖', color: 'from-blue-500/20 to-indigo-500/20' },
+            { value: `${dynamicStats.appLaunchers}+`, label: 'App Launchers', icon: '🚀', color: 'from-purple-500/20 to-violet-500/20' },
+            { value: `${dynamicStats.quickSites}+`, label: 'Quick Access Sites', icon: '🌐', color: 'from-cyan-500/20 to-teal-500/20' },
+            { value: `${dynamicStats.systemControls}`, label: 'System Controls', icon: '⚙️', color: 'from-orange-500/20 to-amber-500/20' },
+          ].map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 + index * 0.1 }}
+              whileHover={{ scale: 1.05, y: -4 }}
+              className="stat-card rounded-2xl p-5 text-center cursor-default"
+            >
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center mx-auto mb-3 text-lg`}>
+                {stat.icon}
+              </div>
+              <motion.div
+                className="text-2xl font-bold text-white mb-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.9 + index * 0.1 }}
+              >
+                {stat.value}
+              </motion.div>
+              <div className="text-xs text-gray-400 font-medium uppercase tracking-wider">{stat.label}</div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.section>
+
+      {/* === TECH STACK MARQUEE === */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.9 }}
+        className="mb-8 overflow-hidden relative"
+      >
+        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#050508] to-transparent z-10" />
+        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#050508] to-transparent z-10" />
+        <div className="flex animate-marquee whitespace-nowrap py-3">
+          {[...Array(2)].map((_, setIndex) => (
+            <div key={setIndex} className="flex items-center gap-8 mr-8">
+              {[
+                'CrewAI', 'LangChain', 'Groq LLM', 'FastAPI', 'Next.js', 'WebSocket',
+                'Voice Recognition', 'Whisper AI', 'MongoDB', 'JWT Auth', 'Real-time Processing',
+                'Multi-Agent System', 'Smart Intent Detection', 'TTS Engine'
+              ].map((tech) => (
+                <span
+                  key={`${setIndex}-${tech}`}
+                  className="text-[11px] font-medium text-gray-500 tracking-widest uppercase px-4 py-1.5 rounded-full border border-white/[0.06] bg-white/[0.02] flex-shrink-0"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
           ))}
         </div>
       </motion.section>
@@ -578,7 +1271,7 @@ export default function CrewAIPage() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] mx-4 shadow-2xl relative overflow-hidden"
+              className="bg-[#0d0d14] border border-white/10 rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] mx-4 shadow-2xl shadow-black/50 relative overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
@@ -588,13 +1281,14 @@ export default function CrewAIPage() {
                     <History className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">Conversation History</h3>
-                    <p className="text-sm text-gray-500">{conversationHistory.length} interactions</p>
+                    <h3 className="text-xl font-bold text-white">Conversation History</h3>
+                    <p className="text-sm text-gray-400">{conversationHistory.length} interactions</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowHistory(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-100"
+                  className="text-gray-400 hover:text-gray-200 transition-colors p-2 rounded-full hover:bg-white/10"
+                  aria-label="Close conversation history"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -604,15 +1298,15 @@ export default function CrewAIPage() {
               <div className="overflow-y-auto max-h-96 space-y-4">
                 {conversationHistory.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
-                    <Bot className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                    <p>No conversations yet. Start talking to SwarAI!</p>
+                    <Bot className="w-12 h-12 mx-auto mb-3 text-gray-600" />
+                    <p className="text-gray-400">No conversations yet. Start talking to SwarAI!</p>
                   </div>
                 ) : (
                   conversationHistory.map((entry, index) => (
                     <div key={index} className={`flex ${entry.type === 'user' ? 'justify-end' : 'justify-start'}`}>
                       <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${entry.type === 'user'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-100 text-gray-900'
+                        ? 'bg-blue-500/80 text-white'
+                        : 'bg-white/5 border border-white/10 text-gray-200'
                         }`}>
                         <div className="flex items-center space-x-2 mb-1">
                           {entry.type === 'user' ? (
@@ -646,13 +1340,13 @@ export default function CrewAIPage() {
                     setConversationHistory([]);
                     setShowHistory(false);
                   }}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  className="px-4 py-2 text-gray-400 hover:text-gray-200 transition-colors"
                 >
                   Clear History
                 </button>
                 <button
                   onClick={() => setShowHistory(false)}
-                  className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  className="px-6 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 border border-white/10 transition-colors"
                 >
                   Close
                 </button>
@@ -680,7 +1374,7 @@ export default function CrewAIPage() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
               transition={{ type: "spring", duration: 0.5 }}
-              className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl relative"
+              className="bg-[#0d0d14] border border-white/10 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl shadow-black/50 relative"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close button */}
@@ -690,7 +1384,7 @@ export default function CrewAIPage() {
                   e.stopPropagation();
                   setShowWhatsAppPopup(false);
                 }}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-200 transition-colors p-1 rounded-full hover:bg-white/10"
                 aria-label="Close popup"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -699,28 +1393,28 @@ export default function CrewAIPage() {
               </button>
 
               <div className="text-center">
-                <div className="mx-auto flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-                  <MessageCircle className="w-8 h-8 text-green-600" />
+                <div className="mx-auto flex items-center justify-center w-16 h-16 rounded-full bg-green-500/20 mb-4">
+                  <MessageCircle className="w-8 h-8 text-green-400" />
                 </div>
 
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-xl font-semibold text-white mb-2">
                   WhatsApp Message Ready!
                 </h3>
 
                 {lastResult.agent_used && (
-                  <div className="mb-3 px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full inline-block">
+                  <div className="mb-3 px-3 py-1 bg-blue-500/20 text-blue-300 text-sm rounded-full inline-block">
                     🤖 {lastResult.agent_used} Agent
                   </div>
                 )}
 
-                <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+                <p className="text-sm text-gray-400 mb-6 leading-relaxed">
                   Your WhatsApp message has been processed successfully. Click below to open WhatsApp and send your message.
                 </p>
 
                 {lastResult.message && (
-                  <div className="mb-6 p-3 bg-gray-50 rounded-lg text-left">
+                  <div className="mb-6 p-3 bg-white/5 border border-white/10 rounded-lg text-left">
                     <p className="text-xs text-gray-500 mb-1">Message Details:</p>
-                    <p className="text-sm text-gray-700 line-clamp-3">{lastResult.message}</p>
+                    <p className="text-sm text-gray-300 line-clamp-3">{lastResult.message}</p>
                   </div>
                 )}
 
@@ -731,7 +1425,7 @@ export default function CrewAIPage() {
                       e.stopPropagation();
                       setShowWhatsAppPopup(false);
                     }}
-                    className="flex-1 px-4 py-3 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors font-medium"
+                    className="flex-1 px-4 py-3 text-gray-300 bg-white/10 hover:bg-white/20 rounded-lg transition-colors font-medium cursor-pointer"
                   >
                     Not Now
                   </button>
@@ -741,7 +1435,7 @@ export default function CrewAIPage() {
                       e.stopPropagation();
                       shareToWhatsApp();
                     }}
-                    className="flex-1 px-4 py-3 text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors font-medium flex items-center justify-center space-x-2"
+                    className="flex-1 px-4 py-3 text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors font-medium flex items-center justify-center space-x-2 cursor-pointer"
                   >
                     <MessageCircle className="w-4 h-4" />
                     <span>Open WhatsApp</span>
@@ -752,6 +1446,13 @@ export default function CrewAIPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Profile Settings Modal */}
+      <ProfileSettings
+        isOpen={showProfileSettings}
+        onClose={() => setShowProfileSettings(false)}
+      />
     </div>
+    </ProtectedRoute>
   );
 }

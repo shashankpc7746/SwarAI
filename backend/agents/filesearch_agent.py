@@ -755,24 +755,74 @@ class FileSearchAgent:
                         state['response_message'] = result_text
                 
                 elif operation == 'open':
-                    # First search for the file
-                    results = self.search_tool._run(query, max_results=5)
+                    # Check if this is a generic file type query (e.g., "open pdf", "open word")
+                    is_generic_query = query.lower().strip() in ['.pdf', 'pdf', '.docx', 'docx', 'word', '.xlsx', 'xlsx', 'excel', '.pptx', 'pptx', 'powerpoint']
                     
-                    if not results:
-                        state['response_message'] = f"❌ File '{query}' not found. Try searching first with 'Find {query}'"
-                    else:
-                        # Use the best match
-                        best_match = results[0]
-                        file_path = best_match['file_info']['path']
+                    if is_generic_query:
+                        # User wants to open latest file of this type from Downloads
+                        print(f"[DEBUG] Generic file type query detected: {query}")
                         
-                        # Open the file
-                        open_result = self.open_tool._run(file_path)
+                        # Get Downloads folder
+                        user_profile = os.environ.get('USERPROFILE', '')
+                        downloads_folder = os.path.join(user_profile, 'Downloads')
                         
-                        if open_result['success']:
-                            state['response_message'] = f"✅ {open_result['message']}\n📂 Path: {file_path}"
-                            state['selected_file'] = best_match['file_info']
+                        # Map query to extension
+                        ext_map = {
+                            'pdf': '.pdf', '.pdf': '.pdf',
+                            'docx': '.docx', 'word': '.docx', '.docx': '.docx',
+                            'xlsx': '.xlsx', 'excel': '.xlsx', '.xlsx': '.xlsx',
+                            'pptx': '.pptx', 'powerpoint': '.pptx', '.pptx': '.pptx'
+                        }
+                        target_ext = ext_map.get(query.lower().strip(), query)
+                        
+                        # Find all files with this extension in Downloads
+                        matching_files = []
+                        try:
+                            for file in os.listdir(downloads_folder):
+                                if file.lower().endswith(target_ext):
+                                    file_path = os.path.join(downloads_folder, file)
+                                    if os.path.isfile(file_path):
+                                        mod_time = os.path.getmtime(file_path)
+                                        matching_files.append((file_path, mod_time))
+                        except Exception as e:
+                            print(f"[DEBUG] Error scanning Downloads: {e}")
+                        
+                        if matching_files:
+                            # Sort by modification time (newest first)
+                            matching_files.sort(key=lambda x: x[1], reverse=True)
+                            latest_file = matching_files[0][0]
+                            
+                            # Open the latest file
+                            open_result = self.open_tool._run(latest_file)
+                            
+                            if open_result['success']:
+                                file_name = os.path.basename(latest_file)
+                                mod_date = datetime.fromtimestamp(matching_files[0][1]).strftime('%Y-%m-%d %H:%M')
+                                state['response_message'] = f"✅ Opened latest {target_ext} file: {file_name}\n📂 From Downloads\n🕒 Modified: {mod_date}"
+                                state['selected_file'] = {'path': latest_file, 'name': file_name}
+                            else:
+                                state['response_message'] = f"❌ {open_result['message']}"
                         else:
-                            state['response_message'] = f"❌ {open_result['message']}"
+                            state['response_message'] = f"❌ No {target_ext} files found in Downloads folder."
+                    else:
+                        # Normal file search - First search for the file
+                        results = self.search_tool._run(query, max_results=5)
+                        
+                        if not results:
+                            state['response_message'] = f"❌ File '{query}' not found. Try searching first with 'Find {query}'"
+                        else:
+                            # Use the best match
+                            best_match = results[0]
+                            file_path = best_match['file_info']['path']
+                            
+                            # Open the file
+                            open_result = self.open_tool._run(file_path)
+                            
+                            if open_result['success']:
+                                state['response_message'] = f"✅ {open_result['message']}\n📂 Path: {file_path}"
+                                state['selected_file'] = best_match['file_info']
+                            else:
+                                state['response_message'] = f"❌ {open_result['message']}"
                 
                 elif operation == 'share':
                     # First search for the file

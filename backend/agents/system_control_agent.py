@@ -105,55 +105,64 @@ class SystemControlTool(BaseTool):
             }
     
     def _windows_volume_control(self, action: str) -> Dict[str, Any]:
-        """Windows volume control - FIXED VERSION"""
+        """Windows volume control - FIXED VERSION with COM initialization"""
         try:
             if PYCAW_AVAILABLE:
-                # Use pycaw - ACTUALLY WORKS!
-                devices = AudioUtilities.GetSpeakers()
-                interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-                volume = cast(interface, POINTER(IAudioEndpointVolume))
+                # Initialize COM for this thread
+                import comtypes
+                comtypes.CoInitialize()
                 
-                if action == "volume_up":
-                    current = volume.GetMasterVolumeLevelScalar()
-                    new_volume = min(1.0, current + 0.1)  # +10%
-                    volume.SetMasterVolumeLevelScalar(new_volume, None)
-                    percent = int(new_volume * 100)
-                    return {
-                        "success": True,
-                        "message": f"✅ Volume increased to {percent}%",
-                        "action": action,
-                        "method": "pycaw"
-                    }
+                try:
+                    # Use pycaw - ACTUALLY WORKS!
+                    devices = AudioUtilities.GetSpeakers()
+                    interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+                    volume = cast(interface, POINTER(IAudioEndpointVolume))
+                    
+                    if action == "volume_up":
+                        current = volume.GetMasterVolumeLevelScalar()
+                        new_volume = min(1.0, current + 0.1)  # +10%
+                        volume.SetMasterVolumeLevelScalar(new_volume, None)
+                        percent = int(new_volume * 100)
+                        return {
+                            "success": True,
+                            "message": f"✅ Volume increased to {percent}%",
+                            "action": action,
+                            "method": "pycaw"
+                        }
+                    
+                    elif action == "volume_down":
+                        current = volume.GetMasterVolumeLevelScalar()
+                        new_volume = max(0.0, current - 0.1)  # -10%
+                        volume.SetMasterVolumeLevelScalar(new_volume, None)
+                        percent = int(new_volume * 100)
+                        return {
+                            "success": True,
+                            "message": f"✅ Volume decreased to {percent}%",
+                            "action": action,
+                            "method": "pycaw"
+                        }
+                    
+                    elif action == "mute":
+                        volume.SetMute(1, None)
+                        return {
+                            "success": True,
+                            "message": "✅ System muted",
+                            "action": action,
+                            "method": "pycaw"
+                        }
+                    
+                    elif action == "unmute":
+                        volume.SetMute(0, None)
+                        return {
+                            "success": True,
+                            "message": "✅ System unmuted",
+                            "action": action,
+                            "method": "pycaw"
+                        }
                 
-                elif action == "volume_down":
-                    current = volume.GetMasterVolumeLevelScalar()
-                    new_volume = max(0.0, current - 0.1)  # -10%
-                    volume.SetMasterVolumeLevelScalar(new_volume, None)
-                    percent = int(new_volume * 100)
-                    return {
-                        "success": True,
-                        "message": f"✅ Volume decreased to {percent}%",
-                        "action": action,
-                        "method": "pycaw"
-                    }
-                
-                elif action == "mute":
-                    volume.SetMute(1, None)
-                    return {
-                        "success": True,
-                        "message": "✅ System muted",
-                        "action": action,
-                        "method": "pycaw"
-                    }
-                
-                elif action == "unmute":
-                    volume.SetMute(0, None)
-                    return {
-                        "success": True,
-                        "message": "✅ System unmuted",
-                        "action": action,
-                        "method": "pycaw"
-                    }
+                finally:
+                    # Cleanup COM
+                    comtypes.CoUninitialize()
             
             else:
                 # Fallback: Try nircmd if available
@@ -457,20 +466,28 @@ class SystemControlAgent:
             """Parse system control command"""
             try:
                 user_input = state['user_input'].lower()
+                print(f"\n[SYSTEM_CONTROL] Parsing command: '{user_input}'")
                 
-                # Map user input to actions
+                # Map user input to actions (order matters - check specific phrases first)
                 action_mapping = {
-                    # Volume controls
-                    "volume up": "volume_up",
+                    # Volume controls (check specific phrases first)
                     "increase volume": "volume_up",
-                    "louder": "volume_up",
                     "raise volume": "volume_up",
-                    "volume down": "volume_down",
+                    "turn up volume": "volume_up",
+                    "make it louder": "volume_up",
+                    "volume up": "volume_up",
+                    "louder": "volume_up",
+                    "up": "volume_up",
                     "decrease volume": "volume_down",
-                    "quieter": "volume_down",
                     "lower volume": "volume_down",
+                    "turn down volume": "volume_down",
+                    "make it quieter": "volume_down",
+                    "volume down": "volume_down",
+                    "quieter": "volume_down",
+                    "down": "volume_down",
                     "mute": "mute",
                     "unmute": "unmute",
+                    "silence": "mute",
                     
                     # Brightness controls
                     "brightness up": "brightness_up",
@@ -505,19 +522,25 @@ class SystemControlAgent:
                     "hibernate": "sleep"
                 }
                 
-                # Find matching action
+                # Find matching action - use word boundaries to avoid partial matches (e.g., "lock" in "clock")
+                import re
                 detected_action = None
                 for phrase, action in action_mapping.items():
-                    if phrase in user_input:
+                    # Use word boundaries to match whole phrases only
+                    pattern = r'\b' + re.escape(phrase) + r'\b'
+                    if re.search(pattern, user_input):
                         detected_action = action
+                        print(f"[SYSTEM_CONTROL] Matched phrase: '{phrase}' -> action: '{action}'")
                         break
                 
                 if detected_action:
                     state['action_type'] = detected_action
                     state['action_value'] = None
                     state['error'] = None
+                    print(f"[SYSTEM_CONTROL] Detected action: {detected_action}")
                 else:
                     state['error'] = "Could not identify system action"
+                    print(f"[SYSTEM_CONTROL] No action detected for: '{user_input}'")
                 
             except Exception as e:
                 state['error'] = f"Failed to parse command: {str(e)}"
@@ -528,12 +551,17 @@ class SystemControlAgent:
             """Execute the system action"""
             try:
                 if state.get('error'):
+                    print(f"[SYSTEM_CONTROL] Skipping execution due to error: {state['error']}")
                     return state
                 
                 action = state.get('action_type')
                 value = state.get('action_value')
                 
+                print(f"[SYSTEM_CONTROL] Executing action: {action} (value: {value})")
+                
                 result = self.system_tool._run(action, value)
+                
+                print(f"[SYSTEM_CONTROL] Result: {result}")
                 
                 if result['success']:
                     state['response_message'] = result['message']

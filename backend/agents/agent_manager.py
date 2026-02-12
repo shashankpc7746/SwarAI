@@ -97,17 +97,26 @@ class AgentManager:
 Your job is to understand what the user REALLY wants to do, even if they speak casually or make typos.
 
 ENHANCEMENT RULES:
-1. Fix typos and spacing in emails/names (e.g., "7819 Vijay sharma@gmail.com" → "7819Vijaysharma@gmail.com")
-2. Clarify vague requests (e.g., "find that apple thing" → "find apple.pdf file")
-3. Expand abbreviated commands (e.g., "msg Jay" → "send WhatsApp message to Jay")
-4. Preserve all important details (names, numbers, subjects, context)
-5. Make commands more specific and actionable
-6. Keep the intent clear (email, call, search, etc.)
-7. Add missing context when obvious (e.g., "send to Jay" → identify what to send)
+1. Fix typos and spacing - but PRESERVE word order as spoken
+2. For email addresses with "at the rate", convert to @ symbol and keep name-number order:
+   - "shashank gupta 7746 at the rate gmail.com" → "shashankgupta7746@gmail.com" (lowercase, no spaces)
+   - "john 123 at rate test.com" → "john123@test.com"
+   - NEVER reorder: "shashank 7746" stays "shashank7746", NOT "7746shashank"
+3. Clarify vague requests (e.g., "find that apple thing" → "find apple.pdf file")
+4. Expand abbreviated commands (e.g., "msg Jay" → "send WhatsApp message to Jay")
+5. Preserve all important details (names, numbers, subjects, context)
+6. Make commands more specific and actionable
+7. Keep the intent clear (email, call, search, etc.)
+8. Add missing context when obvious (e.g., "send to Jay" → identify what to send)
+9. For system control commands (volume, brightness, battery, time), preserve them EXACTLY as spoken - DO NOT change or add words
+10. For information questions about people or topics (who is, tell me about), DO NOT convert to file search - keep as information query
 
 EXAMPLES:
-Input: "send email to Jay his email is 7819 Vijay sharma@gmail.com subject internship give details from graph api"
-Output: "send email to 7819Vijaysharma@gmail.com with subject 'application for internship' and include details about the Graph API project"
+Input: "send mail to Shashank Gupta 7746 at the rate gmail.com wishing happy birthday"
+Output: "send email to shashankgupta7746@gmail.com with subject 'Happy Birthday' and write a birthday wish"
+
+Input: "send email to Jay his email is john 123 at rate example.com subject internship"
+Output: "send email to john123@example.com with subject 'internship application'"
 
 Input: "call jay"
 Output: "call Jay"
@@ -127,12 +136,52 @@ Output: "open apple.pdf file"
 Input: "search for cats on youtube"
 Output: "search for cats on YouTube"
 
+Input: "increase volume"
+Output: "increase volume"
+
+Input: "volume up"
+Output: "volume up"
+
+Input: "make it louder"
+Output: "increase volume"
+
+Input: "check battery"
+Output: "battery status"
+
+Input: "who is Jay"
+Output: "who is Jay"
+
+Input: "tell me about Shashank"
+Output: "tell me about Shashank"
+
+Input: "open ko pilot"
+Output: "open Copilot"
+
+Input: "open co pilot"
+Output: "open Copilot"
+
+Input: "open anti gravity"
+Output: "open Antigravity"
+
+Input: "open antigravity"
+Output: "open Antigravity"
+
+Input: "what do you know about John"
+Output: "what do you know about John"
+
+Input: "send my recent whatsapp chat to"
+Output: "send WhatsApp message about recent conversation to"
+
+Input: "share the conversation we had"
+Output: "send WhatsApp message about our conversation"
+
 IMPORTANT:
 - Return ONLY the enhanced command, no explanations
 - Keep it natural and conversational
 - Don't over-complicate simple commands
-- Preserve the user's intent exactly""")
-                
+- Preserve the user's intent exactly
+- System control commands should remain simple and clear
+- Information queries should stay as questions, not file searches""")                
                 human_msg = HumanMessage(content=f"Enhance this command: {original_input}")
                 
                 try:
@@ -198,7 +247,7 @@ IMPORTANT:
                 file_keywords = ["find", "search", "open", "file", "document", "folder", "pdf", "doc", "excel", "photo", "video", "music", "ownership", "report", "presentation"]
                 whatsapp_keywords = ["whatsapp", "message", "send to", "text", "tell", "let know", "inform", "send whatsapp", "whatsapp to", "message to", "share"]
                 email_keywords = ["email", "send email", "compose email", "draft email", "mail to"]
-                calendar_keywords = ["calendar", "schedule", "meeting", "appointment", "event", "remind me at"]
+                calendar_keywords = ["calendar", "schedule", "schedule meeting", "create event", "add event", "appointment", "set reminder at", "remind me at"]
                 phone_keywords = ["call", "phone", "dial", "ring", "make a call"]
                 payment_keywords = ["pay", "payment", "send money", "transfer", "paypal", "googlepay", "paytm", "phonepe"]
                 app_keywords = ["open", "launch", "start", "run", "chrome", "browser", "notepad", "calculator"]
@@ -210,15 +259,35 @@ IMPORTANT:
                 # Detect file intent with better distinction
                 file_keywords = ["find", "search", "open", "ownership", "folder", "photo", "video", "pdf", "doc", "docx", "excel", "presentation", "report"]
                 
-                # Questions about capabilities (should go to conversation)
-                capability_questions = ["can you", "are you able", "do you", "what can", "how do", "tell me about", "what is", "explain", "why", "how"]
+                # Information queries about people or topics (should go to conversation)
+                information_questions = ["who is", "who's", "tell me about", "what do you know about", "information about", "details about", "tell me more about", "what is", "what's", "explain", "describe"]
+                capability_questions = ["can you", "are you able", "do you", "what can", "how do", "why", "how"]
                 general_questions = ["what", "how", "why", "when", "where", "who", "?"]
+                
+                # Check if it's an information query about a person/topic
+                is_information_query = any(phrase in user_input_lower for phrase in information_questions)
                 is_capability_question = any(phrase in user_input_lower for phrase in capability_questions)
                 is_general_question = any(word in user_input_lower for word in general_questions) and not any(op_word in user_input_lower for op_word in ["find", "search", "open", "send"])
                 
                 # Actual file operations (should go to filesearch)
+                # Must have file-related context AND operation keywords
+                file_extensions = [".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt", ".jpg", ".png", ".mp4", ".mp3"]
+                file_context = ["file", "document", "folder", "pdf", "doc", "excel", "photo", "video", "music", "ownership", "report", "presentation"]
                 file_operation_keywords = ["find", "search", "open", "locate", "show me"]
-                has_file_operation = any(keyword in user_input_lower for keyword in file_operation_keywords) and not is_capability_question
+                
+                # Specific app names that should go to app_launcher (not filesearch)
+                app_names = ["file manager", "file explorer", "explorer", "notepad", "calculator", "calc", "paint", "settings", 
+                             "setting", "control panel", "controlpanel", "task manager", "taskmanager", "device manager", 
+                             "devicemanager", "recycle bin", "recyclebin", "chrome", "google chrome", "firefox", "edge", "opera", "brave", "browser", "copilot", 
+                             "github desktop", "githubdesktop", "github", "anydesk", "antigravity", "google antigravity", 
+                             "word", "excel", "powerpoint", "outlook", "onenote", "one note", "vscode", "code", "spotify", "discord", "teams", "zoom", "skype", 
+                             "cmd", "powershell", "terminal", "vlc", "vlc media", "vlc player", "camera", "clock", "alarms", "calendar", "clipchamp", "store", "microsoft store", "truecaller"]
+                
+                # Check if this is an app launch command (open/launch/start + app name)
+                is_app_launch = any(f"{verb} {app}" in user_input_lower for verb in ["open", "launch", "start", "run"] for app in app_names)
+                
+                has_file_context = any(ctx in user_input_lower for ctx in file_context) or any(ext in user_input_lower for ext in file_extensions)
+                has_file_operation = any(keyword in user_input_lower for keyword in file_operation_keywords) and has_file_context and not is_information_query and not is_capability_question and not is_app_launch
                 
                 # Multi-agent detection (file + communication)
                 has_whatsapp_intent = any(keyword in user_input_lower for keyword in whatsapp_keywords)
@@ -226,11 +295,23 @@ IMPORTANT:
                 has_calendar_intent = any(keyword in user_input_lower for keyword in calendar_keywords)
                 has_phone_intent = any(keyword in user_input_lower for keyword in phone_keywords)
                 has_payment_intent = any(keyword in user_input_lower for keyword in payment_keywords)
-                has_app_intent = any(keyword in user_input_lower for keyword in app_keywords)
-                has_search_intent = any(keyword in user_input_lower for keyword in search_keywords)
+                has_app_intent = any(keyword in user_input_lower for keyword in app_keywords) or is_app_launch
+                has_search_intent = any(keyword in user_input_lower for keyword in search_keywords) and not is_app_launch
                 has_task_intent = any(keyword in user_input_lower for keyword in task_keywords)
                 has_screenshot_intent = any(keyword in user_input_lower for keyword in screenshot_keywords)
-                has_system_control_intent = any(keyword in user_input_lower for keyword in system_control_keywords)
+                
+                # System control with word boundaries for "lock" to avoid matching "clock"
+                import re
+                has_system_control_intent = False
+                for keyword in system_control_keywords:
+                    if keyword == "lock":
+                        # Use word boundary for "lock" to avoid matching "clock"
+                        if re.search(r'\block\b', user_input_lower):
+                            has_system_control_intent = True
+                            break
+                    elif keyword in user_input_lower:
+                        has_system_control_intent = True
+                        break
                 
                 # Special handling for multi-agent patterns
                 multi_agent_patterns = ["send * to", "share * with", "find * and send", "send the * file"]
@@ -240,8 +321,10 @@ IMPORTANT:
                 whatsapp_patterns = ["send whatsapp", "whatsapp to", "message to", "text to"]
                 is_whatsapp_command = any(pattern in user_input_lower for pattern in whatsapp_patterns)
                 
+                print(f"[DEBUG] Is information query: {is_information_query}")
                 print(f"[DEBUG] Is capability question: {is_capability_question}")
                 print(f"[DEBUG] Is general question: {is_general_question}")
+                print(f"[DEBUG] Has file context: {has_file_context}")
                 print(f"[DEBUG] Has file operation: {has_file_operation}")
                 print(f"[DEBUG] Has WhatsApp intent: {has_whatsapp_intent}")
                 print(f"[DEBUG] Has Email intent: {has_email_intent}")
@@ -257,8 +340,17 @@ IMPORTANT:
                 print(f"[DEBUG] Is multi-agent command: {is_multi_agent_command}")
                 
                 # Priority routing: Check for specific agent intents first
+                
+                # Information queries about people/topics (HIGH PRIORITY - before file search)
+                if is_information_query and not has_file_context:
+                    state['detected_intent'] = "conversation"
+                    state['agent_name'] = "conversation"
+                    print(f"[DEBUG] Routed to: conversation (information query)")
+                    return state
+                
                 # System control commands (high priority - specific actions)
-                if has_system_control_intent:
+                # BUT exclude app launch commands (e.g., "open clock" should go to app_launcher)
+                if has_system_control_intent and not is_app_launch:
                     state['detected_intent'] = "system_control"
                     state['agent_name'] = "system_control"
                     print(f"[DEBUG] Routed to: system_control")
@@ -285,8 +377,24 @@ IMPORTANT:
                     print(f"[DEBUG] Routed to: phone")
                     return state
                 
-                # Calendar commands
-                elif has_calendar_intent:
+                # WhatsApp commands (MOVED UP - higher priority than calendar)
+                # This prevents "message" keyword from triggering calendar
+                elif is_whatsapp_command or (has_whatsapp_intent and not has_file_operation and not is_capability_question):
+                    state['detected_intent'] = "whatsapp"
+                    state['agent_name'] = "whatsapp"
+                    print(f"[DEBUG] Routed to: whatsapp")
+                    return state
+                
+                # Multi-agent commands (file + communication)
+                elif is_multi_agent_command or (has_file_operation and has_whatsapp_intent):
+                    state['detected_intent'] = "multi_agent"
+                    state['agent_name'] = "multi_agent"
+                    print(f"[DEBUG] Routed to: multi_agent (file + whatsapp)")
+                    return state
+                
+                # Calendar commands (moved down to avoid conflicts with WhatsApp)
+                # Exclude simple app launch commands like "open calendar"
+                elif has_calendar_intent and not has_whatsapp_intent and not is_app_launch:
                     state['detected_intent'] = "calendar"
                     state['agent_name'] = "calendar"
                     print(f"[DEBUG] Routed to: calendar")
@@ -318,20 +426,6 @@ IMPORTANT:
                     state['detected_intent'] = "app_launcher"
                     state['agent_name'] = "app_launcher"
                     print(f"[DEBUG] Routed to: app_launcher")
-                    return state
-                
-                # Multi-agent commands first
-                elif is_multi_agent_command or (has_file_operation and has_whatsapp_intent):
-                    state['detected_intent'] = "multi_agent"
-                    state['agent_name'] = "multi_agent"
-                    print(f"[DEBUG] Routed to: multi_agent (file + whatsapp)")
-                    return state
-                
-                # WhatsApp commands override conversational detection
-                elif is_whatsapp_command or (has_whatsapp_intent and not has_file_operation and not is_capability_question):
-                    state['detected_intent'] = "whatsapp"
-                    state['agent_name'] = "whatsapp"
-                    print(f"[DEBUG] Routed to: whatsapp")
                     return state
                 
                 # File operations (actual operations, not capability questions)
