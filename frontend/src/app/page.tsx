@@ -1323,7 +1323,7 @@ export default function CrewAIPage() {
                             {entry.timestamp.toLocaleTimeString()}
                           </span>
                         </div>
-                        <p className="text-sm">{entry.message}</p>
+                        <p className="text-sm break-words whitespace-pre-wrap">{entry.message}</p>
                         {entry.result?.agent_used && (
                           <div className="mt-1 text-xs opacity-75">
                             via {entry.result.agent_used} agent

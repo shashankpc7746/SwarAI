@@ -1,11 +1,31 @@
 ﻿'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import useSoundHook from 'use-sound';
 
 type SoundType = 'start' | 'success' | 'error' | 'processing' | 'notification';
 
 export function useSound() {
+  // Pre-cache voices so they're ready when speak() is called
+  const cachedVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
+  const voicesLoadedRef = useRef(false);
+
+  useEffect(() => {
+    const loadVoices = () => {
+      const voices = window.speechSynthesis?.getVoices() || [];
+      if (voices.length > 0) {
+        cachedVoiceRef.current = voices.find(v =>
+          v.lang.startsWith('en-') &&
+          (v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Karen'))
+        ) || voices.find(v => v.lang.startsWith('en-')) || null;
+        voicesLoadedRef.current = true;
+      }
+    };
+    loadVoices();
+    window.speechSynthesis?.addEventListener('voiceschanged', loadVoices);
+    return () => window.speechSynthesis?.removeEventListener('voiceschanged', loadVoices);
+  }, []);
+
   // In a real implementation, you would load actual sound files
   // For now, we'll use Web Audio API for simple beeps
 
@@ -81,15 +101,9 @@ export function useSound() {
       utterance.pitch = options.pitch || 1.0;
       utterance.volume = options.volume || 0.8;
 
-      // Try to use a good English voice
-      const voices = window.speechSynthesis.getVoices();
-      const englishVoice = voices.find(voice =>
-        voice.lang.startsWith('en-') &&
-        (voice.name.includes('Female') || voice.name.includes('Samantha') || voice.name.includes('Karen'))
-      ) || voices.find(voice => voice.lang.startsWith('en-'));
-
-      if (englishVoice) {
-        utterance.voice = englishVoice;
+      // Use pre-cached voice for instant playback
+      if (cachedVoiceRef.current) {
+        utterance.voice = cachedVoiceRef.current;
       }
 
       // Add event listeners for debugging
@@ -102,8 +116,8 @@ export function useSound() {
         }
       };
 
-      // Speak the text
-      window.speechSynthesis.speak(utterance);
+      // Speak with minimal delay — use setTimeout(0) to avoid Chrome's post-cancel delay
+      setTimeout(() => window.speechSynthesis.speak(utterance), 0);
       return true;
 
     } catch (error) {
