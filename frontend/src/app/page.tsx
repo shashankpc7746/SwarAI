@@ -35,6 +35,7 @@ import { ResultDisplay } from '@/components/ResultDisplay';
 import { StatusIndicator } from '@/components/StatusIndicator';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { ProfileSettings } from '@/components/ProfileSettings';
+import { Footer } from '@/components/Footer';
 import { useAuth } from '@/context/AuthContext';
 
 // === Cursor-following glow component ===
@@ -1257,6 +1258,9 @@ export default function CrewAIPage() {
           ))}
         </div>
       </motion.section>
+
+      {/* === FOOTER === */}
+      <Footer />
 
       {/* History Modal */}
       <AnimatePresence>
