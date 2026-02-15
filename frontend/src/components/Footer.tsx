@@ -1,56 +1,32 @@
 'use client';
 
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Bot,
   Github,
-  Linkedin,
-  Twitter,
-  Mail,
   Heart,
   ExternalLink,
   ChevronUp,
-  Sparkles,
-  Cpu,
-  Globe,
-  Shield,
-  Zap,
-  MessageCircle,
 } from 'lucide-react';
 
-const footerLinks = {
-  product: [
-    { label: 'Voice Assistant', href: '#voice' },
-    { label: 'AI Agents', href: '#agents' },
-    { label: 'System Control', href: '#system' },
-    { label: 'App Launcher', href: '#launcher' },
-  ],
-  technology: [
-    { label: 'CrewAI', href: 'https://www.crewai.com/', external: true },
-    { label: 'LangChain', href: 'https://www.langchain.com/', external: true },
-    { label: 'Groq LLM', href: 'https://groq.com/', external: true },
-    { label: 'Next.js', href: 'https://nextjs.org/', external: true },
-  ],
-  resources: [
-    { label: 'Documentation', href: '#docs' },
-    { label: 'Quick Start', href: '#quickstart' },
-    { label: 'API Reference', href: '#api' },
-    { label: 'GitHub', href: 'https://github.com/shashankpc7746/SwarAI', external: true },
-  ],
-};
+const techStack = [
+  { label: 'CrewAI', href: 'https://www.crewai.com/' },
+  { label: 'LangChain', href: 'https://www.langchain.com/' },
+  { label: 'Groq LLM', href: 'https://groq.com/' },
+  { label: 'FastAPI', href: 'https://fastapi.tiangolo.com/' },
+  { label: 'Next.js', href: 'https://nextjs.org/' },
+];
 
-const techBadges = [
-  { name: 'Python', icon: Cpu, color: 'text-yellow-400' },
-  { name: 'FastAPI', icon: Zap, color: 'text-teal-400' },
-  { name: 'Next.js', icon: Globe, color: 'text-white' },
-  { name: 'WebSocket', icon: MessageCircle, color: 'text-blue-400' },
-  { name: 'JWT Auth', icon: Shield, color: 'text-green-400' },
-  { name: 'Groq AI', icon: Sparkles, color: 'text-purple-400' },
+const features = [
+  'Voice Assistant',
+  'AI Agents',
+  'System Control',
+  'App Launcher',
+  'Web Search',
+  'File Manager',
 ];
 
 export function Footer() {
-  const [hoveredTech, setHoveredTech] = useState<string | null>(null);
   const currentYear = new Date().getFullYear();
 
   const scrollToTop = () => {
@@ -58,11 +34,11 @@ export function Footer() {
   };
 
   return (
-    <footer className="relative mt-16 border-t border-white/[0.06] bg-gradient-to-b from-transparent via-white/[0.01] to-white/[0.03]">
+    <footer className="relative mt-20 border-t border-white/[0.06]">
       {/* Decorative top glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
 
-      {/* Scroll to top button */}
+      {/* Scroll to top */}
       <div className="flex justify-center -mt-5">
         <motion.button
           onClick={scrollToTop}
@@ -75,13 +51,13 @@ export function Footer() {
         </motion.button>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        {/* Main footer grid */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 mb-12">
-          {/* Brand column */}
-          <div className="md:col-span-4">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+      <div className="max-w-7xl mx-auto px-8 pt-16 pb-10">
+        {/* Top section — Brand + Columns */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-14">
+          {/* Brand */}
+          <div>
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
                 <Bot className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -89,88 +65,62 @@ export function Footer() {
                 <p className="text-[11px] text-gray-500 font-medium tracking-wider uppercase">Multi-Agent AI System</p>
               </div>
             </div>
-            <p className="text-sm text-gray-400 leading-relaxed mb-5 max-w-xs">
-              Advanced AI assistant powered by CrewAI and Groq LLM. Voice-controlled automation with 13+ specialized agents.
+            <p className="text-sm text-gray-400 leading-relaxed mb-6">
+              An advanced multi-agent AI assistant powered by CrewAI, LangChain, and Groq LLM with voice recognition and intelligent automation.
             </p>
-
-            {/* Social links */}
-            <div className="flex items-center gap-2">
-              {[
-                { icon: Github, href: 'https://github.com/shashankpc7746/SwarAI', label: 'GitHub' },
-                { icon: Linkedin, href: '#', label: 'LinkedIn' },
-                { icon: Twitter, href: '#', label: 'Twitter' },
-                { icon: Mail, href: 'mailto:contact@swarai.dev', label: 'Email' },
-              ].map((social) => (
-                <motion.a
-                  key={social.label}
-                  href={social.href}
-                  target={social.href.startsWith('http') ? '_blank' : undefined}
-                  rel={social.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                  whileHover={{ y: -2, scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-9 h-9 rounded-lg bg-white/[0.05] border border-white/[0.08] flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/[0.1] hover:border-white/[0.15] transition-all duration-200"
-                  aria-label={social.label}
-                >
-                  <social.icon className="w-4 h-4" />
-                </motion.a>
-              ))}
-            </div>
+            <motion.a
+              href="https://github.com/shashankpc7746/SwarAI"
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ y: -2, scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.05] border border-white/[0.1] text-gray-400 hover:text-white hover:bg-white/[0.1] hover:border-white/[0.18] transition-all duration-200 text-sm"
+            >
+              <Github className="w-4 h-4" />
+              View on GitHub
+              <ExternalLink className="w-3 h-3 opacity-60" />
+            </motion.a>
           </div>
 
-          {/* Links columns */}
-          {Object.entries(footerLinks).map(([category, links]) => (
-            <div key={category} className="md:col-span-2">
-              <h4 className="text-xs font-semibold text-gray-300 uppercase tracking-widest mb-4">
-                {category}
-              </h4>
-              <ul className="space-y-2.5">
-                {links.map((link) => (
-                  <li key={link.label}>
-                    <a
-                      href={link.href}
-                      target={(link as any).external ? '_blank' : undefined}
-                      rel={(link as any).external ? 'noopener noreferrer' : undefined}
-                      className="text-sm text-gray-500 hover:text-white transition-colors duration-200 flex items-center gap-1.5 group"
-                    >
-                      {link.label}
-                      {(link as any).external && (
-                        <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      )}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-
-          {/* Tech badges column */}
-          <div className="md:col-span-2">
-            <h4 className="text-xs font-semibold text-gray-300 uppercase tracking-widest mb-4">
-              Built With
+          {/* Features */}
+          <div>
+            <h4 className="text-xs font-semibold text-gray-300 uppercase tracking-widest mb-5">
+              Features
             </h4>
-            <div className="flex flex-wrap gap-2">
-              {techBadges.map((tech) => (
-                <motion.div
-                  key={tech.name}
-                  onMouseEnter={() => setHoveredTech(tech.name)}
-                  onMouseLeave={() => setHoveredTech(null)}
-                  whileHover={{ scale: 1.08 }}
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border transition-all duration-200 cursor-default ${
-                    hoveredTech === tech.name
-                      ? 'bg-white/[0.08] border-white/[0.15]'
-                      : 'bg-white/[0.03] border-white/[0.06]'
-                  }`}
-                >
-                  <tech.icon className={`w-3 h-3 ${tech.color}`} />
-                  <span className="text-[11px] font-medium text-gray-400">{tech.name}</span>
-                </motion.div>
+            <ul className="space-y-3">
+              {features.map((feature) => (
+                <li key={feature} className="text-sm text-gray-500">
+                  {feature}
+                </li>
               ))}
-            </div>
+            </ul>
+          </div>
+
+          {/* Tech Stack */}
+          <div>
+            <h4 className="text-xs font-semibold text-gray-300 uppercase tracking-widest mb-5">
+              Technology
+            </h4>
+            <ul className="space-y-3">
+              {techStack.map((tech) => (
+                <li key={tech.label}>
+                  <a
+                    href={tech.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-gray-500 hover:text-white transition-colors duration-200 inline-flex items-center gap-1.5 group"
+                  >
+                    {tech.label}
+                    <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mb-6" />
+        <div className="h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mb-8" />
 
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -182,15 +132,7 @@ export function Footer() {
             >
               <Heart className="w-3 h-3 text-red-500 fill-red-500 inline" />
             </motion.span>
-            by{' '}
-            <a
-              href="https://github.com/shashankpc7746"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-400 hover:text-white transition-colors font-medium"
-            >
-              SwarAI Team
-            </a>
+            by the SwarAI Team
           </p>
 
           <div className="flex items-center gap-4 text-[11px] text-gray-600">
