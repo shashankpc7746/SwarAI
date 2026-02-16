@@ -50,9 +50,9 @@ export function Footer() {
         </motion.button>
       </div>
 
-      <div className="max-w-5xl mx-auto px-8 pt-16 pb-12">
+      <div className="max-w-5xl mx-auto px-8 pt-16 pb-6">
         {/* Top section — Brand + Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 mb-16 mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 lg:gap-24 mb-16 mx-auto">
           {/* Brand */}
           <div className="flex flex-col items-center md:items-start">
             <div className="flex items-center gap-3 mb-6">
@@ -89,11 +89,11 @@ export function Footer() {
           </div>
 
           {/* Features */}
-          <div className="flex flex-col items-center md:items-start mx-auto">
-            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-6">
+          <div className="flex flex-col items-center mx-auto">
+            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-6 text-center w-full">
               Features
             </h4>
-            <ul className="space-y-3.5">
+            <ul className="space-y-3.5 text-center">
               {features.map((feature) => (
                 <li key={feature} className="text-[15px] text-gray-500">
                   {feature}
@@ -104,10 +104,10 @@ export function Footer() {
 
           {/* Tech Stack */}
           <div className="flex flex-col items-center md:items-start">
-            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-6">
+            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-6 text-center w-full">
               Technology
             </h4>
-            <ul className="space-y-3.5">
+            <ul className="space-y-3.5 text-center md:text-left w-full">
               {techStack.map((tech) => (
                 <li key={tech.label}>
                   <a
