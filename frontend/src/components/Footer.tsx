@@ -50,11 +50,11 @@ export function Footer() {
         </motion.button>
       </div>
 
-      <div className="max-w-7xl mx-auto px-8 pt-16 pb-12">
+      <div className="max-w-6xl mx-auto px-8 pt-16 pb-12">
         {/* Top section — Brand + Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-20 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 lg:gap-20 mb-16 justify-items-center md:justify-items-start">
           {/* Brand */}
-          <div className="flex flex-col items-center md:items-start text-center md:text-left">
+          <div className="flex flex-col items-center md:items-start max-w-md">
             <div className="flex items-center gap-3 mb-6">
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -71,7 +71,7 @@ export function Footer() {
                 <p className="text-xs text-gray-500 font-medium tracking-wider uppercase">Multi-Agent AI System</p>
               </div>
             </div>
-            <p className="text-[15px] text-gray-400 leading-relaxed mb-7 max-w-sm">
+            <p className="text-[15px] text-gray-400 leading-relaxed mb-7 text-justify">
               An advanced multi-agent AI assistant powered by CrewAI, LangChain, and Groq LLM with voice recognition and intelligent automation.
             </p>
             <motion.a
@@ -90,10 +90,10 @@ export function Footer() {
 
           {/* Features */}
           <div className="flex flex-col items-center md:items-start">
-            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-6 text-center md:text-left">
+            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-6">
               Features
             </h4>
-            <ul className="space-y-3.5 text-center md:text-left">
+            <ul className="space-y-3.5">
               {features.map((feature) => (
                 <li key={feature} className="text-[15px] text-gray-500">
                   {feature}
@@ -104,10 +104,10 @@ export function Footer() {
 
           {/* Tech Stack */}
           <div className="flex flex-col items-center md:items-start">
-            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-6 text-center md:text-left">
+            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-6">
               Technology
             </h4>
-            <ul className="space-y-3.5 text-center md:text-left">
+            <ul className="space-y-3.5">
               {techStack.map((tech) => (
                 <li key={tech.label}>
                   <a
