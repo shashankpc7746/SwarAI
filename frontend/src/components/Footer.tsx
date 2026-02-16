@@ -50,11 +50,11 @@ export function Footer() {
         </motion.button>
       </div>
 
-      <div className="max-w-6xl mx-auto px-8 pt-16 pb-12">
+      <div className="max-w-5xl mx-auto px-8 pt-16 pb-12">
         {/* Top section — Brand + Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 lg:gap-20 mb-16 justify-items-center md:justify-items-start">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 mb-16 mx-auto">
           {/* Brand */}
-          <div className="flex flex-col items-center md:items-start max-w-md">
+          <div className="flex flex-col items-center md:items-start">
             <div className="flex items-center gap-3 mb-6">
               <motion.div
                 whileHover={{ scale: 1.05 }}
@@ -71,7 +71,7 @@ export function Footer() {
                 <p className="text-xs text-gray-500 font-medium tracking-wider uppercase">Multi-Agent AI System</p>
               </div>
             </div>
-            <p className="text-[15px] text-gray-400 leading-relaxed mb-7 text-justify">
+            <p className="text-[15px] text-gray-400 leading-relaxed mb-7 text-justify max-w-xs">
               An advanced multi-agent AI assistant powered by CrewAI, LangChain, and Groq LLM with voice recognition and intelligent automation.
             </p>
             <motion.a
@@ -89,7 +89,7 @@ export function Footer() {
           </div>
 
           {/* Features */}
-          <div className="flex flex-col items-center md:items-start">
+          <div className="flex flex-col items-center md:items-start mx-auto">
             <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-6">
               Features
             </h4>
