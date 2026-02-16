@@ -50,12 +50,12 @@ export function Footer() {
         </motion.button>
       </div>
 
-      <div className="max-w-5xl mx-auto px-8 pt-16 pb-6">
+      <div className="max-w-5xl mx-auto px-8 pt-10 pb-6">
         {/* Top section — Brand + Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 lg:gap-24 mb-16 mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 lg:gap-24 mb-10 mx-auto">
           {/* Brand */}
           <div className="flex flex-col items-center md:items-start">
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 mb-5">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center overflow-hidden p-1.5"
@@ -71,7 +71,7 @@ export function Footer() {
                 <p className="text-xs text-gray-500 font-medium tracking-wider uppercase">Multi-Agent AI System</p>
               </div>
             </div>
-            <p className="text-[15px] text-gray-400 leading-relaxed mb-7 text-justify max-w-xs">
+            <p className="text-[15px] text-gray-400 leading-snug mb-5 text-justify max-w-xs">
               An advanced multi-agent AI assistant powered by CrewAI, LangChain, and Groq LLM with voice recognition and intelligent automation.
             </p>
             <motion.a
@@ -90,10 +90,10 @@ export function Footer() {
 
           {/* Features */}
           <div className="flex flex-col items-center mx-auto">
-            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-6 text-center w-full">
+            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-5 text-center w-full">
               Features
             </h4>
-            <ul className="space-y-3.5 text-center">
+            <ul className="space-y-2.5 text-center">
               {features.map((feature) => (
                 <li key={feature} className="text-[15px] text-gray-500">
                   {feature}
@@ -104,10 +104,10 @@ export function Footer() {
 
           {/* Tech Stack */}
           <div className="flex flex-col items-center md:items-start">
-            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-6 text-center w-full">
+            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-5 text-center w-full">
               Technology
             </h4>
-            <ul className="space-y-3.5 text-center md:text-left w-full">
+            <ul className="space-y-2.5 text-center w-full">
               {techStack.map((tech) => (
                 <li key={tech.label}>
                   <a
