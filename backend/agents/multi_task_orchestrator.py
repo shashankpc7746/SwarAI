@@ -51,44 +51,55 @@ class MultiTaskOrchestrator:
         """
         user_input_lower = user_input.lower()
         
-        # Patterns indicating multi-task workflows
+        # VERY SPECIFIC patterns indicating multi-task workflows
+        # Only trigger on explicit file+send combinations
         multi_task_patterns = [
-            # File + Communication
-            r"(find|search|open|get).*(?:file|document|pdf|photo).*(?:send|share|email|whatsapp)",
-            r"(send|share|email|whatsapp).*(file|document|pdf|photo)",
+            # File + Communication (MUST have both file term AND send term)
+            r"(find|search|locate).*(?:file|document|pdf|photo|ownership|report).*(?:and\s+)?(send|share|email)",
+            r"(send|share).*(?:file|document|pdf|photo|ownership|report).*(?:to|via|on|using)\s+\w+",
             
-            # Screenshot + Communication
-            r"(take|capture).*screenshot.*(?:send|share|email|whatsapp)",
-            r"screenshot.*(?:and|then).*(?:send|share|email)",
-            
-            # Sequential actions with "and then" or "and"
-            r".*\s+and\s+(then\s+)?(?:send|email|call|message|whatsapp)",
-            
-            # Multiple actions explicitly stated
-            r"(first|then|after that|next)",
+            # Screenshot + Communication (MUST be explicit)
+            r"(take|capture)\s+screenshot.*(?:and\s+)?(send|share|email)",
+            r"screenshot.*(?:and\s+then\s+)?(?:send|share|email)",
         ]
         
-        # Check patterns
+        # Check patterns with stricter matching
+        pattern_matched = False
         for pattern in multi_task_patterns:
             if re.search(pattern, user_input_lower):
-                return True
+                pattern_matched = True
+                print(f"[DEBUG] Multi-task pattern matched: {pattern}")
+                break
         
-        # Check for multiple agent keywords
+        if not pattern_matched:
+            return False
+        
+        # Additional validation: Check for multiple agent keywords
+        # Require BOTH file-related AND communication-related terms
         agent_keywords = {
-            "filesearch": ["find", "search", "file", "document", "pdf", "photo"],
-            "whatsapp": ["whatsapp", "message", "send message"],
-            "email": ["email", "send email", "mail"],
-            "screenshot": ["screenshot", "capture screen", "take screenshot"],
-            "phone": ["call", "phone", "dial"],
+            "filesearch": ["file", "document", "pdf", "photo", "ownership", "report", "presentation"],
+            "whatsapp": ["whatsapp", "message to"],
+            "email": ["email to", "mail to"],
+            "screenshot": ["screenshot", "capture screen"],
         }
         
-        detected_agents = []
-        for agent, keywords in agent_keywords.items():
-            if any(keyword in user_input_lower for keyword in keywords):
-                detected_agents.append(agent)
+        # Check which agent categories are present
+        has_file_keywords = any(keyword in user_input_lower for keyword in agent_keywords["filesearch"])
+        has_whatsapp_keywords = any(keyword in user_input_lower for keyword in agent_keywords["whatsapp"])
+        has_email_keywords = any(keyword in user_input_lower for keyword in agent_keywords["email"])
+        has_screenshot_keywords = any(keyword in user_input_lower for keyword in agent_keywords["screenshot"])
         
-        # If 2+ agents detected, it's multi-task
-        return len(detected_agents) >= 2
+        has_communication = has_whatsapp_keywords or has_email_keywords
+        has_content = has_file_keywords or has_screenshot_keywords
+        
+        # MUST have both content (file/screenshot) AND communication (whatsapp/email)
+        # AND must have matched a pattern above
+        result = pattern_matched and has_content and has_communication
+        
+        if result:
+            print(f"[DEBUG] Multi-task confirmed: content={has_content}, communication={has_communication}")
+        
+        return result
     
     def parse_workflow(self, user_input: str) -> List[Dict[str, Any]]:
         """
@@ -227,11 +238,17 @@ Rules:
             # Parse into tasks
             tasks = self.parse_workflow(user_input)
             
+            # If no tasks could be parsed, fallback to single agent
             if not tasks:
+                print("[WARNING] Multi-task workflow: No tasks extracted, falling back to single agent routing")
+                
+                # Try to extract the main action and route normally
+                # This prevents the workflow from completely failing
                 return {
                     "success": False,
-                    "message": "Could not parse multi-task workflow",
-                    "error": "No tasks extracted"
+                    "message": "I'll handle that for you. Let me process your request...",
+                    "error": "No tasks extracted - should fallback to normal routing",
+                    "fallback_required": True  # Signal to agent manager to re-route
                 }
             
             print(f"\n[WORKFLOW] Starting {len(tasks)}-task workflow:")
@@ -280,10 +297,19 @@ Rules:
                     if not result.get('success'):
                         return {
                             "success": False,
-                            "message": f"Workflow failed at task {i+1}: {result.get('message')}",
+                            "message": f"I tried to complete the workflow, but encountered an issue at step {i+1}: {result.get('message')}",
                             "completed_tasks": i,
                             "task_results": task_results
                         }
+                else:
+                    # Agent not found
+                    return {
+                        "success": False,
+                        "message": f"I couldn't find the right agent for step {i+1}. Please try a simpler command.",
+                        "completed_tasks": i,
+                        "task_results": task_results,
+                        "error": f"Agent '{agent_name}' not found"
+                    }
             
             # All tasks completed successfully
             return {
@@ -294,10 +320,12 @@ Rules:
             }
             
         except Exception as e:
+            print(f"[ERROR] Workflow execution error: {str(e)}")
             return {
                 "success": False,
-                "message": f"Workflow execution error: {str(e)}",
-                "error": str(e)
+                "message": f"I encountered an issue processing your request: {str(e)}. Please try rephrasing your command.",
+                "error": str(e),
+                "fallback_required": True  # Signal to fallback to normal routing
             }
 
 # Note: This orchestrator will be initialized by AgentManager with self reference

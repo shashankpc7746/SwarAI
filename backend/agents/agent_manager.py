@@ -228,12 +228,14 @@ IMPORTANT:
                 
                 user_input = state['user_input']
                 
-                # Check for multi-task workflows FIRST (highest priority)
+                # Check for multi-task workflows FIRST - but with stricter detection
+                # Only trigger if VERY confident this needs multiple agents
                 if self.orchestrator.detect_multi_task(user_input):
+                    print(f"[DEBUG] Multi-task workflow detected (strict matching)")
                     state['detected_intent'] = "multi_task"
                     state['agent_name'] = "multi_task"
-                    print(f"[DEBUG] Multi-task workflow detected")
                     return state
+                
                 user_input_lower = user_input.lower()
                 
                 print(f"\n[DEBUG] Intent Detection:")
@@ -385,12 +387,13 @@ IMPORTANT:
                     print(f"[DEBUG] Routed to: whatsapp")
                     return state
                 
-                # Multi-agent commands (file + communication)
-                elif is_multi_agent_command or (has_file_operation and has_whatsapp_intent):
-                    state['detected_intent'] = "multi_agent"
-                    state['agent_name'] = "multi_agent"
-                    print(f"[DEBUG] Routed to: multi_agent (file + whatsapp)")
-                    return state
+                # DEPRECATED: Old multi-agent routing (now handled by multi_task at top)
+                # Commented out to prevent conflicts with new multi_task system
+                # elif is_multi_agent_command or (has_file_operation and has_whatsapp_intent):
+                #     state['detected_intent'] = "multi_agent"
+                #     state['agent_name'] = "multi_agent"
+                #     print(f"[DEBUG] Routed to: multi_agent (file + whatsapp)")
+                #     return state
                 
                 # Calendar commands (moved down to avoid conflicts with WhatsApp)
                 # Exclude simple app launch commands like "open calendar"
@@ -492,34 +495,29 @@ IMPORTANT:
                   * Patterns: "find file", "open document", "search for", "locate", "show me files"
                   * Natural: "where is my report", "open that presentation", "find my photos"
                   
-                - conversation: Conversational interactions, greetings, help
-                  * Patterns: "hello", "help", "what can you do", "who are you", "thanks"
-                  * Natural: "hi there", "I need help", "goodbye", "thank you"
-                  
-                - multi_agent: Complex tasks requiring multiple agents (FILE + COMMUNICATION)
-                  * Patterns: "send [file] to [contact]", "find and share", "search and message"
-                  * Natural: "send my report to boss on whatsapp", "find photo and share with mom"
-                  * Key indicators: file words + communication words together
+                - conversation: Conversational interactions, greetings, help, questions
+                  * Patterns: "hello", "help", "what can you do", "who are you", "thanks", "what", "how", "why"
+                  * Natural: "hi there", "I need help", "goodbye", "who is Jay", "tell me about something"
                 
                 CLASSIFICATION RULES:
-                1. If command contains BOTH file operations AND communication -> multi_agent
-                2. If contains file words (document, file, report, ownership, photo, etc.) AND send/share/message words -> multi_agent
-                3. If clear WhatsApp/messaging intent only -> whatsapp  
-                4. If clear file operation intent only -> filesearch
-                5. If conversational/greeting -> conversation
-                6. If unclear -> conversation (SwarAI will ask for clarification)
+                1. Information questions (who is, what is, tell me about) -> conversation
+                2. Greetings and casual chat -> conversation
+                3. Questions without clear action -> conversation
+                4. If command is unclear or ambiguous -> conversation (I'll ask for clarification)
+                5. File operations only (no sending) -> filesearch
+                6. Communication only (no files) -> whatsapp/email/phone
+                7. Complex multi-step tasks (file + send) are handled separately by multi_task system
                 
                 Examples:
-                - "Send report.pdf to boss on WhatsApp" -> multi_agent
-                - "Send the ownership file to jay" -> multi_agent (file + send)
-                - "Find ownership document and send to jay" -> multi_agent
-                - "Share my presentation with team" -> multi_agent
-                - "Tell Sarah I'm running late" -> whatsapp
+                - "who is Jay" -> conversation
+                - "Send whatsapp to Jay" -> whatsapp
                 - "Find my Excel files" -> filesearch
                 - "Open presentation.pptx" -> filesearch
-                - "Send hello to mom" -> whatsapp
+                - "Tell mom I'm late" -> whatsapp
                 - "Hi, what can you do?" -> conversation
                 - "Where are my documents?" -> filesearch
+                - "What time is it" -> conversation
+                - "Tell me about AI" -> conversation
                 
                 Return ONLY the agent name. Nothing else."""
                 
@@ -534,7 +532,7 @@ IMPORTANT:
                 print(f"[DEBUG] LLM detected intent: '{intent}'")
                 
                 # Enhanced intent validation with fallbacks
-                if intent in self.agents or intent == "multi_agent":
+                if intent in self.agents:
                     state['detected_intent'] = intent
                     state['agent_name'] = intent
                     print(f"[DEBUG] Final routing: {intent}")
@@ -562,7 +560,17 @@ IMPORTANT:
                 
                 # Handle multi-task workflows
                 if agent_name == "multi_task":
-                    state['agent_response'] = self.orchestrator.execute_workflow(user_input)
+                    workflow_result = self.orchestrator.execute_workflow(user_input)
+                    
+                    # Check if fallback is required (workflow couldn't parse command)
+                    if workflow_result.get('fallback_required'):
+                        print(f"[DEBUG] Multi-task workflow requested fallback, routing to conversation agent")
+                        # Fallback to conversation agent for natural handling
+                        state['agent_name'] = "conversation"
+                        state['agent_response'] = self.agents["conversation"].process_conversation(user_input)
+                    else:
+                        state['agent_response'] = workflow_result
+                    
                     return state
                 
                 # Handle old multi-agent workflows (deprecated, use multi_task instead)
