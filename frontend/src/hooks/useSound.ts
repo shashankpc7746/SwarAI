@@ -5,6 +5,19 @@ import useSoundHook from 'use-sound';
 
 type SoundType = 'start' | 'success' | 'error' | 'processing' | 'notification';
 
+// Global force stop function that works even after component unmounts
+if (typeof window !== 'undefined') {
+  (window as any).__forceSpeechStop = () => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      setTimeout(() => window.speechSynthesis?.cancel(), 10);
+      setTimeout(() => window.speechSynthesis?.cancel(), 50);
+      setTimeout(() => window.speechSynthesis?.cancel(), 100);
+      console.log('🔊 Global force speech stop executed');
+    }
+  };
+}
+
 export function useSound() {
   // Pre-cache voices so they're ready when speak() is called
   const cachedVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
@@ -91,8 +104,9 @@ export function useSound() {
         return false;
       }
 
-      // Stop any current speech
+      // FORCE stop any current speech - multiple cancels for reliability
       window.speechSynthesis.cancel();
+      setTimeout(() => window.speechSynthesis.cancel(), 10);
 
       const utterance = new SpeechSynthesisUtterance(text);
 
@@ -116,8 +130,13 @@ export function useSound() {
         }
       };
 
-      // Speak with minimal delay — use setTimeout(0) to avoid Chrome's post-cancel delay
-      setTimeout(() => window.speechSynthesis.speak(utterance), 0);
+      // Speak with minimal delay — use setTimeout(50) for better cancellation timing
+      setTimeout(() => {
+        // Double-check it wasn't cancelled in the meantime
+        if (window.speechSynthesis && !window.speechSynthesis.speaking) {
+          window.speechSynthesis.speak(utterance);
+        }
+      }, 50);
       return true;
 
     } catch (error) {
@@ -128,16 +147,45 @@ export function useSound() {
 
   const stopSpeaking = useCallback(() => {
     try {
-      // Cancel immediately
-      if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+      // AGGRESSIVE cancellation - multiple attempts to ensure it stops
+      if (window.speechSynthesis) {
+        // Cancel immediately
         window.speechSynthesis.cancel();
-        // Force a second cancel to ensure it stops
+        
+        // Force multiple cancels with delays (some browsers need this)
+        setTimeout(() => window.speechSynthesis.cancel(), 10);
         setTimeout(() => window.speechSynthesis.cancel(), 50);
-        console.log('🔊 Stopped SwarAI speech (forced)');
+        setTimeout(() => window.speechSynthesis.cancel(), 100);
+        
+        console.log('🔊 Stopped SwarAI speech (forced multi-cancel)');
       }
     } catch (error) {
       console.error('Error stopping speech:', error);
     }
+  }, []);
+
+  // Global cleanup - works even after component unmounts
+  useEffect(() => {
+    const forceStopSpeech = () => {
+      // Use global force stop if available
+      if ((window as any).__forceSpeechStop) {
+        (window as any).__forceSpeechStop();
+      } else if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        setTimeout(() => window.speechSynthesis?.cancel(), 0);
+      }
+    };
+
+    // Stop speech on page unload/refresh
+    window.addEventListener('beforeunload', forceStopSpeech);
+    window.addEventListener('pagehide', forceStopSpeech);
+    
+    // Cleanup on unmount
+    return () => {
+      forceStopSpeech();
+      window.removeEventListener('beforeunload', forceStopSpeech);
+      window.removeEventListener('pagehide', forceStopSpeech);
+    };
   }, []);
 
   // Legacy backend TTS (keeping for compatibility)

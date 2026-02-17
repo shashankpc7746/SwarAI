@@ -181,18 +181,33 @@ export default function CrewAIPage() {
     setIsMounted(true);
   }, []);
 
-  // Stop speech on page refresh or unmount
+  // Stop speech on page refresh or unmount - AGGRESSIVE cleanup
   useEffect(() => {
     const handleBeforeUnload = () => {
+      // Multiple stop calls for reliability
+      stopSpeaking();
       stopSpeaking();
     };
 
+    const handleVisibilityChange = () => {
+      // Stop speech when tab becomes hidden
+      if (document.hidden) {
+        stopSpeaking();
+      }
+    };
+
     window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     // Cleanup on unmount
     return () => {
+      // Multiple stop calls for reliability
+      stopSpeaking();
       stopSpeaking();
       window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [stopSpeaking]);
 
@@ -391,10 +406,13 @@ export default function CrewAIPage() {
   const handleVoiceStart = async () => {
     if (backendStatus !== 'online') return;
 
-    // Force stop any current speech immediately
+    // AGGRESSIVE stop - multiple calls to ensure speech stops
     stopSpeaking();
-    // Small delay to ensure speech is stopped before starting new recognition
-    await new Promise(resolve => setTimeout(resolve, 100));
+    stopSpeaking();
+    
+    // Slightly longer delay to ensure speech is fully stopped
+    await new Promise(resolve => setTimeout(resolve, 150));
+    
     playSound('start');
 
     // Use real voice recognition
