@@ -93,7 +93,7 @@ export function Footer() {
             <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-5 text-center w-full">
               Features
             </h4>
-            <ul className="space-y-2.5 text-center">
+            <ul className="space-y-2.5">
               {features.map((feature) => (
                 <li key={feature} className="text-[15px] text-gray-500">
                   {feature}
@@ -107,7 +107,7 @@ export function Footer() {
             <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-5 text-center w-full">
               Technology
             </h4>
-            <ul className="space-y-2.5 text-center w-full">
+            <ul className="space-y-2.5">
               {techStack.map((tech) => (
                 <li key={tech.label}>
                   <a

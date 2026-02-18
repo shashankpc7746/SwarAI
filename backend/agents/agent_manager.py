@@ -247,7 +247,7 @@ IMPORTANT:
                 
                 # Enhanced keyword detection with NLP patterns
                 file_keywords = ["find", "search", "open", "file", "document", "folder", "pdf", "doc", "excel", "photo", "video", "music", "ownership", "report", "presentation"]
-                whatsapp_keywords = ["whatsapp", "message", "send to", "text", "tell", "let know", "inform", "send whatsapp", "whatsapp to", "message to", "share"]
+                whatsapp_keywords = ["whatsapp", "send to", "let know", "inform", "send whatsapp", "whatsapp to", "message to"]
                 email_keywords = ["email", "send email", "compose email", "draft email", "mail to"]
                 calendar_keywords = ["calendar", "schedule", "schedule meeting", "create event", "add event", "appointment", "set reminder at", "remind me at"]
                 phone_keywords = ["call", "phone", "dial", "ring", "make a call"]
@@ -263,13 +263,13 @@ IMPORTANT:
                 
                 # Information queries about people or topics (should go to conversation)
                 information_questions = ["who is", "who's", "tell me about", "what do you know about", "information about", "details about", "tell me more about", "what is", "what's", "explain", "describe"]
-                capability_questions = ["can you", "are you able", "do you", "what can", "how do", "why", "how"]
-                general_questions = ["what", "how", "why", "when", "where", "who", "?"]
+                capability_questions = ["can you", "are you able", "do you", "what can", "how do", "how can", "how to"]
+                general_questions = ["what ", "how ", "why ", "when ", "where ", "who ", "?"]
                 
                 # Check if it's an information query about a person/topic
                 is_information_query = any(phrase in user_input_lower for phrase in information_questions)
                 is_capability_question = any(phrase in user_input_lower for phrase in capability_questions)
-                is_general_question = any(word in user_input_lower for word in general_questions) and not any(op_word in user_input_lower for op_word in ["find", "search", "open", "send"])
+                is_general_question = (any(user_input_lower.startswith(word) for word in general_questions) or "?" in user_input_lower) and not any(op_word in user_input_lower for op_word in ["find", "search", "open", "send"])
                 
                 # Actual file operations (should go to filesearch)
                 # Must have file-related context AND operation keywords
@@ -320,7 +320,7 @@ IMPORTANT:
                 is_multi_agent_command = any("send" in user_input_lower and keyword in user_input_lower for keyword in file_keywords)
                 
                 # Special handling for WhatsApp patterns
-                whatsapp_patterns = ["send whatsapp", "whatsapp to", "message to", "text to"]
+                whatsapp_patterns = ["send whatsapp", "whatsapp to", "message to"]
                 is_whatsapp_command = any(pattern in user_input_lower for pattern in whatsapp_patterns)
                 
                 print(f"[DEBUG] Is information query: {is_information_query}")
@@ -348,6 +348,13 @@ IMPORTANT:
                     state['detected_intent'] = "conversation"
                     state['agent_name'] = "conversation"
                     print(f"[DEBUG] Routed to: conversation (information query)")
+                    return state
+                
+                # General questions (HIGH PRIORITY - before action agents)
+                if is_general_question and not has_file_operation and not has_whatsapp_intent and not has_email_intent and not has_phone_intent and not has_payment_intent and not has_app_intent and not has_screenshot_intent and not has_system_control_intent:
+                    state['detected_intent'] = "conversation"
+                    state['agent_name'] = "conversation"
+                    print(f"[DEBUG] Routed to: conversation (general question - early route)")
                     return state
                 
                 # System control commands (high priority - specific actions)

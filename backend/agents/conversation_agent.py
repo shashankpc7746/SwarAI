@@ -161,7 +161,19 @@ class ConversationAgent:
                     return state
                 
                 elif intent in ['knowledge', 'discussion', 'clarification']:
+                    # Build conversation history context
+                    history_context = ""
+                    if self.context.get("conversation_history"):
+                        recent = self.context["conversation_history"][-5:]  # Last 5 exchanges
+                        history_lines = []
+                        for entry in recent:
+                            history_lines.append(f"User: {entry['user_input']}")
+                            history_lines.append(f"SwarAI: {entry['response']}")
+                        history_context = "\n".join(history_lines)
+                    
                     system_prompt = f"""You are SwarAI, an intelligent AI assistant with broad knowledge and conversational abilities.
+                    
+                    {f'PREVIOUS CONVERSATION CONTEXT:{chr(10)}{history_context}{chr(10)}' if history_context else ''}
                     
                     The user asked: "{user_input}"
                     
@@ -173,6 +185,7 @@ class ConversationAgent:
                     - If it relates to tasks you can perform, mention your capabilities naturally
                     - Keep responses concise but informative (2-5 sentences typically)
                     - Show that you're an intelligent AI, not just a command processor
+                    - Use conversation history for context if relevant
                     
                     Respond as the intelligent, helpful AI assistant that you are."""
                     
@@ -347,28 +360,33 @@ class ConversationAgent:
     
     def is_conversational_input(self, user_input: str) -> bool:
         """Determine if input is conversational rather than a task command"""
-        user_input_lower = user_input.lower()
+        user_input_lower = user_input.lower().strip()
         
         # First check if it's a WhatsApp or task command - these should NOT be conversational
         task_patterns = [
-            r'\b(send|message|text|whatsapp)\s+\w+\s+to\b',  # "send/message/text X to Y"
-            r'\b(send whatsapp|whatsapp to|message to|text to)\b',  # WhatsApp specific patterns
-            r'\b(find|search|open|locate)\s+\w+',  # File operations
+            r'\b(send|message|text)\s+.+\s+to\b',  # "send/message/text X to Y"
+            r'\b(send whatsapp|whatsapp to|message to)\b',  # WhatsApp specific patterns
+            r'\b(find|search|open|locate)\s+\w+\.\w+',  # File operations with extensions
             r'\b(share|send)\s+\w+\s+(via|on|through)\s+whatsapp\b',  # Sharing patterns
+            r'\b(pay|payment|call|dial|schedule|screenshot)\b',  # Other task commands
         ]
         
         # If it matches task patterns, it's NOT conversational
         if any(re.search(pattern, user_input_lower) for pattern in task_patterns):
             return False
         
-        # Now check for conversational patterns
+        # Now check for conversational patterns - be MORE inclusive
         conversational_patterns = [
-            r'^\s*(hi|hello|hey|good morning|good afternoon|good evening)\s*$',  # Pure greetings
-            r'^\s*(how are you|what\'s up|how\'s it going)\s*\??\s*$',  # Status questions
-            r'^\s*(who are you|what can you do|help|what are your capabilities)\s*\??\s*$',  # Help/intro
-            r'^\s*(thank you|thanks|appreciate)\s*$',  # Gratitude
-            r'^\s*(bye|goodbye|see you|exit|quit)\s*$',  # Farewells
+            r'^\s*(hi|hello|hey|good morning|good afternoon|good evening)',  # Greetings (prefix match)
+            r'^\s*(how are you|what\'s up|how\'s it going)',  # Status questions
+            r'^\s*(who are you|what can you do|help|what are your capabilities)',  # Help/intro
+            r'^\s*(thank you|thanks|appreciate)',  # Gratitude
+            r'^\s*(bye|goodbye|see you|exit|quit)',  # Farewells
             r'^\s*SwarAI\s*$',  # Just saying the name
+            r'^\s*(what|who|how|why|when|where)\s+',  # Questions starting with question words
+            r'^\s*(tell me|explain|describe|can you)',  # Information requests
+            r'^\s*(do you|are you|have you|will you)',  # Yes/no questions about AI
+            r'\?$',  # Anything ending with a question mark
         ]
         
         return any(re.search(pattern, user_input_lower) for pattern in conversational_patterns)
