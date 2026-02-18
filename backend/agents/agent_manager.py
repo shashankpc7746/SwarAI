@@ -110,6 +110,14 @@ ENHANCEMENT RULES:
 8. Add missing context when obvious (e.g., "send to Jay" → identify what to send)
 9. For system control commands (volume, brightness, battery, time), preserve them EXACTLY as spoken - DO NOT change or add words
 10. For information questions about people or topics (who is, tell me about), DO NOT convert to file search - keep as information query
+11. For WhatsApp messages: PRESERVE the user's actual message content EXACTLY as spoken - DO NOT translate, rephrase, or change perspective. Only structure the command format.
+    - If the message is in Hindi or any other language, keep it in the ORIGINAL language
+    - DO NOT translate Hindi to English or any language to another
+    - Only extract the recipient name and format the command, keep the message body VERBATIM
+12. For content generation requests like "send jokes", "send a funny message", "send a poem" via WhatsApp:
+    - Generate the ACTUAL content (jokes, poem, story, etc.) in the message body
+    - Do NOT just describe what to send - actually write it out
+    - Example: "send some jokes to Shivam" → "send WhatsApp to Shivam: Here are some jokes for you: 1) Why don't scientists trust atoms? Because they make up everything! 2) What do you call a fake noodle? An impasta! 3) Why did the scarecrow win an award? He was outstanding in his field!"
 
 EXAMPLES:
 Input: "send mail to Shashank Gupta 7746 at the rate gmail.com wishing happy birthday"
@@ -126,6 +134,18 @@ Output: "find ownership document file"
 
 Input: "msg mom about dinner"
 Output: "send WhatsApp message to Mom saying let's have dinner"
+
+Input: "Jay Sharma ko WhatsApp message bhejo ki aaj ka khana mat banaen Maine Bahar kha liya hai"
+Output: "send WhatsApp to Jay Sharma: aaj ka khana mat banaen Maine Bahar kha liya hai"
+
+Input: "Shivam ko bolna kal mat aana"
+Output: "send WhatsApp to Shivam: kal mat aana"
+
+Input: "send some jokes to Shivam"
+Output: "send WhatsApp to Shivam: Here are some jokes: 1) Why don't scientists trust atoms? Because they make up everything! 2) What do you call a fake noodle? An impasta! 3) Why did the scarecrow win an award? He was outstanding in his field!"
+
+Input: "send a funny message to Jay"
+Output: "send WhatsApp to Jay: Hey! Just wanted to brighten your day with a laugh - Why don't eggs tell jokes? They'd crack each other up! Have a great day!"
 
 Input: "pay 100 to jay paytm"
 Output: "send payment of Rs 100 to Jay using Paytm"
@@ -283,7 +303,8 @@ IMPORTANT:
                              "devicemanager", "recycle bin", "recyclebin", "chrome", "google chrome", "firefox", "edge", "opera", "brave", "browser", "copilot", 
                              "github desktop", "githubdesktop", "github", "anydesk", "antigravity", "google antigravity", 
                              "word", "excel", "powerpoint", "outlook", "onenote", "one note", "vscode", "code", "spotify", "discord", "teams", "zoom", "skype", 
-                             "cmd", "powershell", "terminal", "vlc", "vlc media", "vlc player", "camera", "clock", "alarms", "calendar", "clipchamp", "store", "microsoft store", "truecaller"]
+                             "cmd", "powershell", "terminal", "vlc", "vlc media", "vlc player", "camera", "clock", "alarms", "calendar", "clipchamp", "store", "microsoft store", "truecaller",
+                             "gemini", "google gemini", "bard", "perplexity", "deepseek", "grok", "chatgpt", "claude"]
                 
                 # Check if this is an app launch command (open/launch/start + app name)
                 is_app_launch = any(f"{verb} {app}" in user_input_lower for verb in ["open", "launch", "start", "run"] for app in app_names)

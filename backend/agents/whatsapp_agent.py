@@ -344,6 +344,8 @@ class WhatsAppAgent:
                 5. Don't change the meaning or add extra words
                 6. Keep informal language if it's intentional (like "gonna", "wanna")
                 7. If the message is already perfect, return it as-is
+                8. If the message is in Hindi, Hinglish, or any non-English language, return it EXACTLY as-is - do NOT translate or modify it
+                9. For mixed language messages (like Hinglish), preserve the original language mix
                 
                 Examples:
                 - "how are you" -> "How are you?"
@@ -352,6 +354,9 @@ class WhatsAppAgent:
                 - "can we talk" -> "Can we talk?"
                 - "thanks for the help" -> "Thanks for the help!"
                 - "where are you" -> "Where are you?"
+                - "aaj ka khana mat banaen" -> "aaj ka khana mat banaen"
+                - "kal mat aana" -> "kal mat aana"
+                - "kya haal hai bhai" -> "kya haal hai bhai"
                 
                 Return ONLY the corrected message, nothing else."""
                 
