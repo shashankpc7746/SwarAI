@@ -945,6 +945,67 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🎉 Recent Improvements & New Features
 
+### Version 3.2 - AI Content Generation + WhatsApp Multi-Agent Workflow (February 2026)
+
+#### 🤖 AI Content Generation Before Sending
+
+SwarAI can now **generate content on the fly** and send it automatically via WhatsApp — no manual copy-pasting required.
+
+**How it works:**
+
+When you say something like _"Send some jokes to Shivam"_, SwarAI chains two AI capabilities together:
+
+1. **Conversation AI** generates the actual content (jokes, poems, motivational messages, stories, etc.) using the Groq LLM
+2. **WhatsApp Agent** takes that generated content and sends it to the specified contact via WhatsApp
+
+**Example Commands:**
+
+```
+"Send some jokes to Shivam"
+"Send a funny message to Jay"
+"Send some motivational quotes to Mom"
+"Send a poem to Gitanjali"
+"Send a good morning message to Vijay"
+```
+
+**Example Flow:**
+
+```
+User: "Send some jokes to Shivam"
+  ↓
+Conversation AI generates:
+  "Here are some jokes: 1) Why don't scientists trust atoms?
+   Because they make up everything! 2) What do you call a fake noodle?
+   An impasta! 3) Why did the scarecrow win an award?
+   He was outstanding in his field!"
+  ↓
+WhatsApp Agent sends message to Shivam
+  ↓
+SwarAI: "✅ WhatsApp message ready for Shivam! Click the link to send."
+```
+
+**Supported Content Types:**
+
+| Content Type            | Example Command                           |
+| ----------------------- | ----------------------------------------- |
+| Jokes                   | "Send some jokes to Jay"                  |
+| Funny messages          | "Send a funny message to Mom"             |
+| Poems                   | "Send a poem to Gitanjali"                |
+| Motivational quotes     | "Send some motivational quotes to Shivam" |
+| Good morning/night      | "Send a good morning message to Vijay"    |
+| Custom creative content | "Send a short story about space to Dad"   |
+
+**Technical Details:**
+
+- The `AgentManager` LLM system prompt includes instructions for content generation before routing to WhatsApp
+- Generated content is embedded directly into the WhatsApp command as the message body
+- Fuzzy contact matching still applies — "Shivam clg", "Jay bro", etc. all work
+- Grammar correction layer cleans and formats the generated content before sending
+
+**Result:** SwarAI acts as both a creative AI assistant and a communication agent — generate and send in one voice command.
+
+---
+
 ### Version 3.1 - Google OAuth & UI Refinements (February 2026)
 
 #### 🔐 Full Google OAuth Integration
