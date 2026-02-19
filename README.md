@@ -964,7 +964,6 @@ When you say something like _"Send some jokes to Shivam"_, SwarAI chains two AI 
 "Send some jokes to Shivam"
 "Send a funny message to Jay"
 "Send some motivational quotes to Mom"
-"Send a poem to Gitanjali"
 "Send a good morning message to Vijay"
 ```
 
