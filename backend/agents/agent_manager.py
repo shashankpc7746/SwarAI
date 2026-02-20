@@ -233,8 +233,16 @@ IMPORTANT:
                     enhanced_input = response.content.strip()
                     
                     # Basic validation - if AI returns something weird, use original
-                    if len(enhanced_input) > len(original_input) * 3 or len(enhanced_input) < 3:
-                        print(f"[DEBUG] AI enhancement seems off, using original")
+                    # Content generation requests (jokes, poems, etc.) naturally produce much longer output
+                    # so allow higher multiplier for those cases
+                    content_gen_words = ["joke", "jokes", "poem", "story", "motivational", "funny", 
+                                        "good morning", "good night", "quote", "quotes", "riddle", 
+                                        "shayari", "birthday wish", "greeting"]
+                    is_content_gen_request = any(w in original_input.lower() for w in content_gen_words)
+                    max_length_multiplier = 20 if is_content_gen_request else 3
+                    
+                    if len(enhanced_input) > len(original_input) * max_length_multiplier or len(enhanced_input) < 3:
+                        print(f"[DEBUG] AI enhancement seems off (len={len(enhanced_input)}, max={len(original_input) * max_length_multiplier}), using original")
                         enhanced_input = original_input
                     
                     state['enhanced_input'] = enhanced_input

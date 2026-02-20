@@ -197,6 +197,9 @@ class WhatsAppAgent:
                     # Clean the message - remove quotes and filler words
                     message_clean = message.strip()
                     
+                    # Convert literal \n to actual newlines (from AI enhancement layer)
+                    message_clean = message_clean.replace('\\n', '\n')
+                    
                     # Remove surrounding quotes
                     if (message_clean.startswith('"') and message_clean.endswith('"')) or \
                        (message_clean.startswith("'") and message_clean.endswith("'")):
@@ -218,14 +221,16 @@ class WhatsAppAgent:
                     # Remove quotes within message
                     message_clean = message_clean.replace('"', '').replace("'", '')
                     
-                    # Clean whitespace
-                    message_clean = ' '.join(message_clean.split())
+                    # Clean extra whitespace but PRESERVE newlines for numbered lists
+                    lines = message_clean.split('\n')
+                    lines = [' '.join(line.split()) for line in lines]  # Clean each line individually
+                    message_clean = '\n'.join(line for line in lines if line)  # Rejoin, skip empty lines
                     
                     state['parsed_command'] = {
                         "recipient": recipient.strip(),
                         "message": message_clean
                     }
-                    print(f"[DEBUG] Regex parsing success: {recipient} -> {message_clean}")
+                    print(f"[DEBUG] Regex parsing success: {recipient} -> {message_clean[:100]}...")
                     return state
                 
                 print(f"[DEBUG] Regex parsing failed, trying LLM parsing...")
@@ -286,6 +291,9 @@ class WhatsAppAgent:
                 # Clean the message - remove quotes and filler words
                 message_clean = message.strip()
                 
+                # Convert literal \n to actual newlines (from AI enhancement layer)
+                message_clean = message_clean.replace('\\n', '\n')
+                
                 # Remove surrounding quotes (single or double)
                 if (message_clean.startswith('"') and message_clean.endswith('"')) or \
                    (message_clean.startswith("'") and message_clean.endswith("'")):
@@ -307,8 +315,10 @@ class WhatsAppAgent:
                 # Remove any remaining quotes within the message
                 message_clean = message_clean.replace('"', '').replace("'", '')
                 
-                # Clean up extra whitespace
-                message_clean = ' '.join(message_clean.split())
+                # Clean extra whitespace but PRESERVE newlines for numbered lists
+                lines = message_clean.split('\n')
+                lines = [' '.join(line.split()) for line in lines]  # Clean each line individually
+                message_clean = '\n'.join(line for line in lines if line)  # Rejoin, skip empty lines
                 
                 state['parsed_command'] = {
                     "recipient": recipient,
@@ -346,6 +356,8 @@ class WhatsAppAgent:
                 7. If the message is already perfect, return it as-is
                 8. If the message is in Hindi, Hinglish, or any non-English language, return it EXACTLY as-is - do NOT translate or modify it
                 9. For mixed language messages (like Hinglish), preserve the original language mix
+                10. PRESERVE all line breaks (\\n) and numbered list formatting EXACTLY - do NOT merge numbered items into a single paragraph
+                11. If the message contains a numbered list (1. 2. 3. etc.), keep each item on its own line
                 
                 Examples:
                 - "how are you" -> "How are you?"
@@ -357,6 +369,7 @@ class WhatsAppAgent:
                 - "aaj ka khana mat banaen" -> "aaj ka khana mat banaen"
                 - "kal mat aana" -> "kal mat aana"
                 - "kya haal hai bhai" -> "kya haal hai bhai"
+                - "Here are some jokes!\\n1. Why did the chicken cross the road? To get to the other side!\\n2. knock knock" -> Keep EXACTLY as-is with line breaks intact
                 
                 Return ONLY the corrected message, nothing else."""
                 
