@@ -1043,6 +1043,7 @@ SwarAI: "✅ WhatsApp message ready for Shivam! Click the link to send."
 
 ### Version 3.0 - Auth, UI Overhaul & Animations
 
+
 #### 🔐 Authentication System
 
 - Login page with name, email, age fields
