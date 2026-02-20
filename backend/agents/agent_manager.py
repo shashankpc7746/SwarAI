@@ -115,9 +115,15 @@ ENHANCEMENT RULES:
     - DO NOT translate Hindi to English or any language to another
     - Only extract the recipient name and format the command, keep the message body VERBATIM
 12. For content generation requests like "send jokes", "send a funny message", "send a poem" via WhatsApp:
-    - Generate the ACTUAL content (jokes, poem, story, etc.) in the message body
-    - Do NOT just describe what to send - actually write it out
-    - Example: "send some jokes to Shivam" → "send WhatsApp to Shivam: Here are some jokes for you: 1) Why don't scientists trust atoms? Because they make up everything! 2) What do you call a fake noodle? An impasta! 3) Why did the scarecrow win an award? He was outstanding in his field!"
+    - You MUST generate the ACTUAL content (jokes, poem, story, etc.) immediately in the message body
+    - Do NOT just describe what to send or say "generate jokes" - actually WRITE OUT the full content
+    - For FIRST NAME only - use first name as recipient ("Shivam" not "Shivam Patel")
+    - For list-type content (jokes, quotes, facts, riddles), ALWAYS use NUMBERED FORMAT with each item on a NEW LINE
+    - Use this exact format with line breaks between items:
+      "send WhatsApp to [FirstName]: [intro line]\n1. [item]\n2. [item]\n3. [item]\n4. [item]\n5. [item]"
+    - Generate at least 4-5 items for list content (jokes, quotes, etc.)
+    - Even if user says "on WhatsApp" or mentions full name, use ONLY first name and format as WhatsApp command
+    - Example: "send some jokes to Shivam" → "send WhatsApp to Shivam: Here are some jokes for you!\n1. Why don't scientists trust atoms? Because they make up everything!\n2. What do you call a fake noodle? An impasta!\n3. Why did the scarecrow win an award? He was outstanding in his field!\n4. What do you call a bear with no teeth? A gummy bear!\n5. Why don't eggs tell jokes? They'd crack each other up!"
 
 EXAMPLES:
 Input: "send mail to Shashank Gupta 7746 at the rate gmail.com wishing happy birthday"
@@ -142,10 +148,16 @@ Input: "Shivam ko bolna kal mat aana"
 Output: "send WhatsApp to Shivam: kal mat aana"
 
 Input: "send some jokes to Shivam"
-Output: "send WhatsApp to Shivam: Here are some jokes: 1) Why don't scientists trust atoms? Because they make up everything! 2) What do you call a fake noodle? An impasta! 3) Why did the scarecrow win an award? He was outstanding in his field!"
+Output: "send WhatsApp to Shivam: Here are some jokes for you!\n1. Why don't scientists trust atoms? Because they make up everything!\n2. What do you call a fake noodle? An impasta!\n3. Why did the scarecrow win an award? He was outstanding in his field!\n4. What do you call a bear with no teeth? A gummy bear!\n5. Why don't eggs tell jokes? They'd crack each other up!"
+
+Input: "send some jokes to Shivam Patel on WhatsApp"
+Output: "send WhatsApp to Shivam: Hey Shivam! Here are some fresh jokes for you!\n1. Why don't scientists trust atoms? Because they make up everything!\n2. What do you call a fake noodle? An impasta!\n3. Why did the scarecrow win an award? He was outstanding in his field!\n4. What do you call a bear with no teeth? A gummy bear!\n5. Why don't eggs tell jokes? They'd crack each other up!"
 
 Input: "send a funny message to Jay"
-Output: "send WhatsApp to Jay: Hey! Just wanted to brighten your day with a laugh - Why don't eggs tell jokes? They'd crack each other up! Have a great day!"
+Output: "send WhatsApp to Jay: Hey Jay! Just wanted to brighten your day with a laugh!\n1. Why don't eggs tell jokes? They'd crack each other up!\n2. What did the ocean say to the beach? Nothing, it just waved!\nHave a great day!"
+
+Input: "send a poem to Mom"
+Output: "send WhatsApp to Mom: Here's a little poem for you!\nRoses are red, violets are blue,\nNo one in the world is as wonderful as you.\nThrough every storm and sunny day,\nYour love lights up my way."
 
 Input: "pay 100 to jay paytm"
 Output: "send payment of Rs 100 to Jay using Paytm"
@@ -188,6 +200,18 @@ Output: "open Antigravity"
 
 Input: "what do you know about John"
 Output: "what do you know about John"
+
+Input: "open gemini website"
+Output: "open Gemini website"
+
+Input: "open chatgpt website"
+Output: "open ChatGPT website"
+
+Input: "open the gemini website"
+Output: "open Gemini website"
+
+Input: "open chatgpt site"
+Output: "open ChatGPT website"
 
 Input: "send my recent whatsapp chat to"
 Output: "send WhatsApp message about recent conversation to"
@@ -304,7 +328,10 @@ IMPORTANT:
                              "github desktop", "githubdesktop", "github", "anydesk", "antigravity", "google antigravity", 
                              "word", "excel", "powerpoint", "outlook", "onenote", "one note", "vscode", "code", "spotify", "discord", "teams", "zoom", "skype", 
                              "cmd", "powershell", "terminal", "vlc", "vlc media", "vlc player", "camera", "clock", "alarms", "calendar", "clipchamp", "store", "microsoft store", "truecaller",
-                             "gemini", "google gemini", "bard", "perplexity", "deepseek", "grok", "chatgpt", "claude"]
+                             "gemini", "google gemini", "bard", "perplexity", "deepseek", "grok", "chatgpt", "claude",
+                             "gemini website", "chatgpt website", "claude website", "perplexity website", "deepseek website", "grok website",
+                             "google website", "youtube website", "gmail website", "github website", "linkedin website", "facebook website",
+                             "twitter website", "instagram website", "netflix website", "amazon website", "wikipedia website"]
                 
                 # Check if this is an app launch command (open/launch/start + app name)
                 is_app_launch = any(f"{verb} {app}" in user_input_lower for verb in ["open", "launch", "start", "run"] for app in app_names)
@@ -376,6 +403,20 @@ IMPORTANT:
                     state['detected_intent'] = "conversation"
                     state['agent_name'] = "conversation"
                     print(f"[DEBUG] Routed to: conversation (general question - early route)")
+                    return state
+                
+                # Content generation + send patterns → WhatsApp (HIGH PRIORITY)
+                # Catches "send jokes to Shivam", "send a poem to Mom", etc. even without "WhatsApp" keyword
+                content_gen_keywords = ["joke", "jokes", "poem", "story", "motivational", "funny message", 
+                                       "good morning", "good night", "quote", "quotes", "riddle", "riddles", 
+                                       "shayari", "birthday wish", "greeting"]
+                has_content_gen = any(kw in user_input_lower for kw in content_gen_keywords)
+                has_send_to_person = bool(re.search(r'send\s+.+?\s+to\s+\w+', user_input_lower))
+                
+                if has_content_gen and has_send_to_person:
+                    state['detected_intent'] = "whatsapp"
+                    state['agent_name'] = "whatsapp"
+                    print(f"[DEBUG] Routed to: whatsapp (content generation + send to person)")
                     return state
                 
                 # System control commands (high priority - specific actions)

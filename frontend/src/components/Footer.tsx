@@ -103,7 +103,7 @@ export function Footer() {
           </div>
 
           {/* Tech Stack */}
-          <div className="flex flex-col items-center md:items-start">
+          <div className="flex flex-col items-center mx-auto">
             <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-widest mb-5 text-center w-full">
               Technology
             </h4>

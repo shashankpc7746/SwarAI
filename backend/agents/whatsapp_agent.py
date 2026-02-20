@@ -155,23 +155,23 @@ class WhatsAppAgent:
                 
                 # Pattern 1: "[Send] WhatsApp [message] to [name] [rest of message]"
                 pattern1 = r'(?:send\s+)?whatsapp\s+(?:message\s+)?to\s+(\w+)\s+(.+)'
-                match1 = re.search(pattern1, user_input, re.IGNORECASE)
+                match1 = re.search(pattern1, user_input, re.IGNORECASE | re.DOTALL)
                 
                 # Pattern 2: "[Send] WhatsApp to [name]: [message]"
                 pattern2 = r'(?:send\s+)?whatsapp\s+to\s+(\w+)\s*:\s*(.+)'
-                match2 = re.search(pattern2, user_input, re.IGNORECASE)
+                match2 = re.search(pattern2, user_input, re.IGNORECASE | re.DOTALL)
                 
                 # Pattern 3: "Send WhatsApp message to [name] [message]" (more specific)
                 pattern3 = r'send\s+whatsapp\s+message\s+to\s+(\w+)\s+(.+)'
-                match3 = re.search(pattern3, user_input, re.IGNORECASE)
+                match3 = re.search(pattern3, user_input, re.IGNORECASE | re.DOTALL)
                 
                 # Pattern 4: "Message [name] [message]"
                 pattern4 = r'(?:send\s+)?message\s+(\w+)\s+(.+)'
-                match4 = re.search(pattern4, user_input, re.IGNORECASE)
+                match4 = re.search(pattern4, user_input, re.IGNORECASE | re.DOTALL)
                 
                 # Pattern 5: "Text [name] [message]"
                 pattern5 = r'(?:send\s+)?text\s+(\w+)\s+(.+)'
-                match5 = re.search(pattern5, user_input, re.IGNORECASE)
+                match5 = re.search(pattern5, user_input, re.IGNORECASE | re.DOTALL)
                 
                 recipient = None
                 message = None

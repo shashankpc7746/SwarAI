@@ -384,10 +384,13 @@ class AppLauncherAgent:
         """Parse launch request to determine app name, type, and URL"""
         text_lower = text.lower()
         
+        # Detect if user explicitly mentioned "website" or "site"
+        is_website_request = any(kw in text_lower.split() for kw in ["website", "site"])
+        
         # Extract the app/site name after action verbs
         app_patterns = [
-            r'(?:open|launch|start|run)\s+([a-z\s]+?)(?:\s+application|\s+app|\s+browser|$)',
-            r'([a-z\s]+?)\s+(?:application|app|browser)$',
+            r'(?:open|launch|start|run)\s+([a-z\s]+?)(?:\s+application|\s+app|\s+browser|\s+website|\s+site|$)',
+            r'([a-z\s]+?)\s+(?:application|app|browser|website|site)$',
         ]
         
         extracted_name = ""
@@ -404,7 +407,7 @@ class AppLauncherAgent:
                 if word in ["open", "launch", "start", "run"] and i + 1 < len(words):
                     # Get the next word(s), but stop at certain keywords
                     remaining = words[i+1:]
-                    stop_words = ["application", "app", "browser", "in", "on"]
+                    stop_words = ["application", "app", "browser", "website", "site", "in", "on"]
                     app_words = []
                     for w in remaining:
                         if w in stop_words:
@@ -458,6 +461,21 @@ class AppLauncherAgent:
             site_name = normalized_name if normalized_name in self.launcher_tool.WEBSITES else extracted_name
             print(f"[APP_LAUNCHER] Found in WEBSITES: {site_name}")
             return (site_name, "website", None)
+        
+        # PRIORITY 3.5: If user said "website"/"site", try partial match in WEBSITES
+        if is_website_request:
+            for site_key in self.launcher_tool.WEBSITES.keys():
+                if normalized_name in site_key or site_key in normalized_name:
+                    print(f"[APP_LAUNCHER] Website partial match: '{normalized_name}' -> '{site_key}'")
+                    return (site_key, "website", None)
+            # Also try the original extracted name
+            for site_key in self.launcher_tool.WEBSITES.keys():
+                if extracted_name in site_key or site_key in extracted_name:
+                    print(f"[APP_LAUNCHER] Website partial match (extracted): '{extracted_name}' -> '{site_key}'")
+                    return (site_key, "website", None)
+            # Still not found but user wants a website — construct URL
+            print(f"[APP_LAUNCHER] User requested website, constructing URL for: {normalized_name}")
+            return (normalized_name, "website", f"https://www.{extracted_name.replace(' ', '')}.com")
         
         # PRIORITY 4: If nothing matched, treat as application and let Windows handle it
         print(f"[APP_LAUNCHER] Not found in known apps, trying as generic application: {normalized_name}")
