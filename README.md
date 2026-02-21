@@ -253,16 +253,24 @@ npm install --legacy-peer-deps
 
 ### 4. Run the Application
 
-**Terminal 1 - Backend:**
+**Option A — Single command (recommended):**
+
+From the project root, run both servers at once:
 
 ```bash
-cd backend
-python main.py
+npm run dev
 ```
 
-**Terminal 2 - Frontend:**
+This uses `concurrently` to start the backend and frontend in one terminal with color-coded output. Press **Ctrl+C once** to stop both.
+
+**Option B — Two separate terminals:**
 
 ```bash
+# Terminal 1 - Backend
+cd backend
+python main.py
+
+# Terminal 2 - Frontend
 cd frontend
 npm run dev
 ```

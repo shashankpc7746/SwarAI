@@ -1,9 +1,23 @@
 ````markdown
 # SwarAI Quick Start Guide
 
-## 🚀 Quick Start (Windows)
+## 🚀 Quick Start
 
-Simply double-click `start-swarai.bat` to start both backend and frontend servers!
+### ⚡ Recommended — Single Command
+
+From the project root, run both servers at once:
+
+```bash
+npm run dev
+```
+
+Color-coded output for backend and frontend in one terminal. **Ctrl+C** stops both.
+
+> First time? Make sure `node_modules` is installed: run `npm install` in the project root first.
+
+### 🖱️ Alternative — Double-click (Windows)
+
+Double-click `start-swarai.bat` to start both servers in separate windows.
 
 The script will:
 
@@ -54,28 +68,16 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ## 📋 Manual Start
 
-### Option 1: Backend First
-
-1. **Start Backend**:
+### Option 1: Single command (recommended)
 
 ```bash
-cd backend
-python main.py
-```
-
-2. **Start Frontend** (in a new terminal):
-
-```bash
-cd frontend
+# From project root
 npm run dev
 ```
 
-3. **Open Browser**:
-   Navigate to http://localhost:3000
+### Option 2: Two terminals
 
-### Option 2: PowerShell
-
-```powershell
+```bash
 # Terminal 1 - Backend
 cd backend
 python main.py
@@ -84,6 +86,8 @@ python main.py
 cd frontend
 npm run dev
 ```
+
+Open browser at http://localhost:3000
 
 ## 🎯 First Time Login
 
