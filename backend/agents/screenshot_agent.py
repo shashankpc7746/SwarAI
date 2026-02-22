@@ -308,7 +308,7 @@ screenshot_agent = ScreenshotAgent()
 
 # Print startup info
 if PIL_AVAILABLE:
-    print("[✅] Screenshot Agent: PIL ImageGrab available - screenshots will work!")
+    print("[OK] Screenshot Agent: PIL ImageGrab available - screenshots will work!")
 else:
-    print("[⚠️] Screenshot Agent: PIL not installed - using fallback methods")
-    print("[💡] For best results: pip install pillow")
+    print("[WARNING] Screenshot Agent: PIL not installed - using fallback methods")
+    print("[INFO] For best results: pip install pillow")

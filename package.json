@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "concurrently --kill-others-on-fail --names \"BACKEND,FRONTEND\" --prefix-colors \"cyan,magenta\" \"npm run backend\" \"npm run frontend\"",
-    "backend": "cd backend && ..\\venv\\Scripts\\python main.py",
+    "backend": "cmd /c \"set PYTHONIOENCODING=utf-8 && cd backend && ..\\venv\\Scripts\\python main.py\"",
     "frontend": "cd frontend && npm run dev"
   },
   "devDependencies": {
