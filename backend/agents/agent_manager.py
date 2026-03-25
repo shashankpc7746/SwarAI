@@ -108,11 +108,13 @@ ENHANCEMENT RULES:
 6. Make commands more specific and actionable
 7. Keep the intent clear (email, call, search, etc.)
 8. Add missing context when obvious (e.g., "send to Jay" → identify what to send)
+8.1. If command is in Hindi/Marathi, normalize only the ACTION part into clear English command form for routing (send/call/find/open/pay/search/etc.)
+     while preserving the user's content/message language exactly.
 9. For system control commands (volume, brightness, battery, time), preserve them EXACTLY as spoken - DO NOT change or add words
 10. For information questions about people or topics (who is, tell me about), DO NOT convert to file search - keep as information query
 11. For WhatsApp messages: PRESERVE the user's actual message content EXACTLY as spoken - DO NOT translate, rephrase, or change perspective. Only structure the command format.
-    - If the message is in Hindi or any other language, keep it in the ORIGINAL language
-    - DO NOT translate Hindi to English or any language to another
+    - If the message is in Hindi, Marathi, or any other language, keep it in the ORIGINAL language
+    - DO NOT translate the message body to English or any language to another
     - Only extract the recipient name and format the command, keep the message body VERBATIM
 12. For content generation requests like "send jokes", "send a funny message", "send a poem" via WhatsApp:
     - You MUST generate the ACTUAL content (jokes, poem, story, etc.) immediately in the message body
@@ -146,6 +148,15 @@ Output: "send WhatsApp to Jay Sharma: aaj ka khana mat banaen Maine Bahar kha li
 
 Input: "Shivam ko bolna kal mat aana"
 Output: "send WhatsApp to Shivam: kal mat aana"
+
+Input: "आईला व्हॉट्सअॅप मेसेज पाठव उद्या मी उशिरा येणार"
+Output: "send WhatsApp to आई: उद्या मी उशिरा येणार"
+
+Input: "राजला कॉल कर"
+Output: "call Raj"
+
+Input: "माझी report file शोध"
+Output: "find report file"
 
 Input: "send some jokes to Shivam"
 Output: "send WhatsApp to Shivam: Here are some jokes for you!\n1. Why don't scientists trust atoms? Because they make up everything!\n2. What do you call a fake noodle? An impasta!\n3. Why did the scarecrow win an award? He was outstanding in his field!\n4. What do you call a bear with no teeth? A gummy bear!\n5. Why don't eggs tell jokes? They'd crack each other up!"
@@ -309,9 +320,35 @@ IMPORTANT:
                 task_keywords = ["task", "todo", "remind me", "reminder", "add task", "create task", "list tasks"]
                 screenshot_keywords = ["screenshot", "capture screen", "screen capture", "take screenshot", "capture", "take a screenshot"]
                 system_control_keywords = ["volume", "mute", "unmute", "lock", "shutdown", "restart", "reboot", "sleep", "hibernate", "louder", "quieter", "volume up", "volume down", "increase volume", "decrease volume", "lock screen", "shut down", "turn off", "brightness", "brightness up", "brightness down", "brighter", "dimmer", "battery", "battery status", "battery level", "time", "what time", "current time", "what's the time"]
+
+                # Hindi/Marathi and Hinglish keyword support
+                multilingual_whatsapp_keywords = [
+                    "व्हॉट्सअॅप", "व्हाट्सएप", "व्हाट्सअप", "मेसेज", "संदेश", "भेज", "पाठव", "message bhej", "message bhejo"
+                ]
+                multilingual_file_keywords = [
+                    "फाइल", "फ़ाइल", "डॉक्यूमेंट", "दस्तावेज", "शोध", "ढूंढ", "खोज", "फोटो", "वीडियो", "file shodh", "file dhund"
+                ]
+                multilingual_phone_keywords = [
+                    "कॉल", "फोन", "लाव", "call kar", "call karo"
+                ]
+                multilingual_payment_keywords = [
+                    "पे", "भुगतान", "पैसे", "पैसा", "pay kar", "paise bhej"
+                ]
+                multilingual_search_keywords = [
+                    "सर्च", "खोजो", "शोधा", "ढूंढो", "google वर", "youtube वर"
+                ]
+                multilingual_task_keywords = [
+                    "काम", "टास्क", "याद", "रिमाइंड", "आठवण", "याद दिला", "remind kar"
+                ]
+                multilingual_screenshot_keywords = [
+                    "स्क्रीनशॉट", "स्क्रीन शॉट", "स्क्रीन कॅप्चर", "स्क्रीन कैप्चर"
+                ]
+                multilingual_system_control_keywords = [
+                    "आवाज", "वॉल्यूम", "बैटरी", "बॅटरी", "समय", "वेळ", "लॉक", "ब्राइटनेस", "उजेड", "dark"
+                ]
                 
                 # Detect file intent with better distinction
-                file_keywords = ["find", "search", "open", "ownership", "folder", "photo", "video", "pdf", "doc", "docx", "excel", "presentation", "report"]
+                file_keywords = ["find", "search", "open", "ownership", "folder", "photo", "video", "pdf", "doc", "docx", "excel", "presentation", "report", *multilingual_file_keywords]
                 
                 # Information queries about people or topics (should go to conversation)
                 information_questions = ["who is", "who's", "tell me about", "what do you know about", "information about", "details about", "tell me more about", "what is", "what's", "explain", "describe"]
@@ -326,8 +363,8 @@ IMPORTANT:
                 # Actual file operations (should go to filesearch)
                 # Must have file-related context AND operation keywords
                 file_extensions = [".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt", ".jpg", ".png", ".mp4", ".mp3"]
-                file_context = ["file", "document", "folder", "pdf", "doc", "excel", "photo", "video", "music", "ownership", "report", "presentation"]
-                file_operation_keywords = ["find", "search", "open", "locate", "show me"]
+                file_context = ["file", "document", "folder", "pdf", "doc", "excel", "photo", "video", "music", "ownership", "report", "presentation", *multilingual_file_keywords]
+                file_operation_keywords = ["find", "search", "open", "locate", "show me", "शोध", "ढूंढ", "खोज", "उघड", "खोल"]
                 
                 # Specific app names that should go to app_launcher (not filesearch)
                 app_names = ["file manager", "file explorer", "explorer", "notepad", "calculator", "calc", "paint", "settings", 
@@ -348,15 +385,15 @@ IMPORTANT:
                 has_file_operation = any(keyword in user_input_lower for keyword in file_operation_keywords) and has_file_context and not is_information_query and not is_capability_question and not is_app_launch
                 
                 # Multi-agent detection (file + communication)
-                has_whatsapp_intent = any(keyword in user_input_lower for keyword in whatsapp_keywords)
+                has_whatsapp_intent = any(keyword in user_input_lower for keyword in [*whatsapp_keywords, *multilingual_whatsapp_keywords])
                 has_email_intent = any(keyword in user_input_lower for keyword in email_keywords)
                 has_calendar_intent = any(keyword in user_input_lower for keyword in calendar_keywords)
-                has_phone_intent = any(keyword in user_input_lower for keyword in phone_keywords)
-                has_payment_intent = any(keyword in user_input_lower for keyword in payment_keywords)
+                has_phone_intent = any(keyword in user_input_lower for keyword in [*phone_keywords, *multilingual_phone_keywords])
+                has_payment_intent = any(keyword in user_input_lower for keyword in [*payment_keywords, *multilingual_payment_keywords])
                 has_app_intent = any(keyword in user_input_lower for keyword in app_keywords) or is_app_launch
-                has_search_intent = any(keyword in user_input_lower for keyword in search_keywords) and not is_app_launch
-                has_task_intent = any(keyword in user_input_lower for keyword in task_keywords)
-                has_screenshot_intent = any(keyword in user_input_lower for keyword in screenshot_keywords)
+                has_search_intent = any(keyword in user_input_lower for keyword in [*search_keywords, *multilingual_search_keywords]) and not is_app_launch
+                has_task_intent = any(keyword in user_input_lower for keyword in [*task_keywords, *multilingual_task_keywords])
+                has_screenshot_intent = any(keyword in user_input_lower for keyword in [*screenshot_keywords, *multilingual_screenshot_keywords])
                 
                 # System control with word boundaries for "lock" to avoid matching "clock"
                 import re
@@ -370,6 +407,8 @@ IMPORTANT:
                     elif keyword in user_input_lower:
                         has_system_control_intent = True
                         break
+                if not has_system_control_intent:
+                    has_system_control_intent = any(keyword in user_input_lower for keyword in multilingual_system_control_keywords)
                 
                 # Special handling for multi-agent patterns
                 multi_agent_patterns = ["send * to", "share * with", "find * and send", "send the * file"]
