@@ -29,6 +29,10 @@ class Config:
     # Speech Configuration
     SPEECH_TIMEOUT: int = int(os.getenv("SPEECH_TIMEOUT", "5"))
     SPEECH_PHRASE_TIME_LIMIT: int = int(os.getenv("SPEECH_PHRASE_TIME_LIMIT", "10"))
+    SPEECH_RECOGNITION_LANGUAGES: str = os.getenv(
+        "SPEECH_RECOGNITION_LANGUAGES",
+        "en-US,en-IN,en-GB,en-AU,hi-IN,mr-IN"
+    )
     
     # Agent Configuration
     AGENT_TEMPERATURE: float = float(os.getenv("AGENT_TEMPERATURE", "0.1"))

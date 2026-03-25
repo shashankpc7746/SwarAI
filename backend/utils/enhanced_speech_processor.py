@@ -172,6 +172,16 @@ class EnhancedSpeechProcessor:
             self.audio_systems['pygame'] = False
             
         return False
+
+    def _get_recognition_languages(self) -> List[str]:
+        """Get ordered recognition languages from config with safe defaults."""
+        configured = getattr(config, "SPEECH_RECOGNITION_LANGUAGES", "")
+        languages = [lang.strip() for lang in configured.split(",") if lang.strip()]
+
+        if languages:
+            return languages
+
+        return ["en-US", "en-IN", "en-GB", "en-AU", "hi-IN", "mr-IN"]
     
     def listen_for_speech_enhanced(self, timeout: int = 10, phrase_time_limit: int = 20) -> Tuple[bool, str]:
         """Enhanced speech recognition with multi-engine support and increased listening time"""
@@ -209,8 +219,8 @@ class EnhancedSpeechProcessor:
         if self.recognition_engines.get('google'):
             try:
                 st.info("🔄 Processing with Google Speech Recognition...")
-                # Try multiple languages as per memory specifications
-                for language in ["en-US", "en-IN", "en-GB", "en-AU"]:
+                # Try configured languages including Hindi/Marathi support
+                for language in self._get_recognition_languages():
                     try:
                         text = self.recognizer.recognize_google(audio, language=language)
                         if text.strip():
